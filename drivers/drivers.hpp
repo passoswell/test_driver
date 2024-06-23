@@ -19,11 +19,15 @@
 #endif
 
 #if defined(USE_STM32)
-#include "src/stm32/stm32_drivers.hpp"
+#include "drivers/stm32/stm32_drivers.hpp"
 #endif
 
 #if defined(USE_ESP32)
-#include "src/esp/esp32_drivers.hpp"
+#include "drivers/esp/esp32_drivers.hpp"
+#endif
+
+#if defined(USE_LINUX)
+#include "drivers/linux/linux_drivers.hpp"
 #endif
 
 

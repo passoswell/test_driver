@@ -12,16 +12,16 @@
 #define SILABS_DRIVERS_HPP_
 
 
-#if __has_include("uart/drv_uart.hpp")
-#include "uart/drv_uart.hpp"
+#if __has_include("drivers/silabs/uart/drv_uart.hpp")
+#include "drivers/silabs/uart/drv_uart.hpp"
 #endif
 
-#if __has_include("i2c/drv_i2c.hpp")
-#include "i2c/drv_i2c.hpp"
+#if __has_include("drivers/silabs/i2c/drv_i2c.hpp")
+#include "drivers/silabs/i2c/drv_i2c.hpp"
 #endif
 
-#if __has_include("pit/drv_pit.hpp")
-#include "pit/drv_pit.hpp"
+#if __has_include("drivers/silabs/pit/drv_pit.hpp")
+#include "drivers/silabs/pit/drv_pit.hpp"
 #endif
 
 

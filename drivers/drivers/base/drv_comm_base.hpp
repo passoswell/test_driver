@@ -45,7 +45,7 @@ public:
   virtual uint32_t bytesRead();
   virtual Status_t readAsyncDoneCallback(Status_t error, uint8_t *buffer, uint32_t size, void *arg = nullptr);
 
-  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *argr = nullptr);
+  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortWriteAsync();
   virtual bool isWriteAsyncDone();
   virtual uint32_t bytesWritten();
