@@ -17,5 +17,21 @@
 #include "drivers/linux/std_in_out/drv_std_in_out.hpp"
 #endif
 
+#if __has_include("drivers/linux/uart/drv_uart.hpp")
+#include "drivers/linux/uart/drv_uart.hpp"
+#endif
+
+#if __has_include("drivers/linux/i2c/drv_i2c.hpp")
+#include "drivers/linux/i2c/drv_i2c.hpp"
+#endif
+
+#if __has_include("drivers/linux/spi/drv_spi.hpp")
+#include "drivers/linux/spi/drv_spi.hpp"
+#endif
+
+#if __has_include("drivers/linux/gpio/drv_gpio.hpp")
+#include "drivers/linux/gpio/drv_gpio.hpp"
+#endif
+
 
 #endif /* LINUX_DRIVERS_HPP_ */

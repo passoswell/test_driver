@@ -25,6 +25,7 @@ public:
   bool m_is_operation_done;
   InOutStreamMutex_t m_mutex;
   bool m_is_initialized;
+  uint32_t m_bytes_read;
 
   DrvCommBase();
 

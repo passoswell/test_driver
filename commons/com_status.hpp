@@ -103,6 +103,11 @@ typedef enum
 
 } StatusCode_t;
 
+#define SET_STATUS(var, success, source, status, message) \
+{ \
+  var = {success, source, status, message}; \
+}
+
 constexpr Status_t STATUS_DRV_SUCCESS = {true, SRC_DRIVER, OPERATION_OK, (char *)"Request processed successfully.\r\n"};
 constexpr Status_t STATUS_DRV_IDLE = {true, SRC_DRIVER, OPERATION_IDLE, (char *)"No operation is being processed.\r\n"};
 constexpr Status_t STATUS_DRV_RUNNING = {true, SRC_DRIVER, OPERATION_RUNNING, (char *)"The requested operation is on-going, keep calling this method to update the status.\r\n"};

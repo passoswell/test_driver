@@ -35,6 +35,8 @@
 
 # Common build directories
 /build*/
+/bin*/
+/external*/
 
 # CI jobs that run in symlinked trees produce these artifacts.
 /real_work/

@@ -24,6 +24,7 @@ DrvCommBase::DrvCommBase()
   m_is_read_done = true;
   m_is_write_done = true;
   m_is_operation_done = true;
+  m_bytes_read = 0;
 }
 
 /**

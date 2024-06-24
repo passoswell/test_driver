@@ -26,7 +26,7 @@ enum
   TESTUART_BAUD,
 };
 
-class DrvStdInOut : public DrvCommBase
+class DrvStdInOut final : public DrvCommBase
 {
 public:
   DrvStdInOut();
