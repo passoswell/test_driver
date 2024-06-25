@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.0.0)
 project(TEST_DRIVER VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 11)
 
+include(cmake/GitUtils.cmake)
+
 message("\r\nAdding linux drivers by adding -DUSE_LINUX definition on the main CMakeLists.txt file as a temporary action\r\n")
 add_definitions(-DUSE_LINUX=1) #temporary solution
 set(USE_LINUX TRUE)
