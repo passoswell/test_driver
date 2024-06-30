@@ -8,6 +8,8 @@
  *
  */
 
+#if __has_include("termios.h")
+
 
 #ifndef DRV_UART_HPP_
 #define DRV_UART_HPP_
@@ -43,3 +45,6 @@ private:
 
 
 #endif /* DRV_UART_HPP_ */
+
+
+#endif

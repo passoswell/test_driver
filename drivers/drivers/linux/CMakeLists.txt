@@ -2,7 +2,9 @@ add_library(drv_linux STATIC
 std_in_out/drv_std_in_out.cpp
 std_in_out/drv_std_in_out.hpp
 uart/drv_uart.cpp
-uart/drv_uart.hpp)
+uart/drv_uart.hpp
+i2c/drv_i2c.cpp
+i2c/drv_i2c.hpp)
 
 # include(ExternalProject)
 # Define the directory where you want to clone the repository

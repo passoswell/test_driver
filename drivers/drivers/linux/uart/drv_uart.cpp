@@ -9,6 +9,8 @@
  *
  */
 
+#if __has_include("termios.h")
+
 #include "drivers/linux/uart/drv_uart.hpp"
 
 #include <termios.h>
@@ -17,9 +19,9 @@
 #include <sys/ioctl.h>
 
 
-int readSerial(int fd, void* buf, size_t cnt);
+static int readSerial(int fd, void* buf, size_t cnt);
 
-int writeSerial(int fd, void* buf, size_t cnt);
+static int writeSerial(int fd, void* buf, size_t cnt);
 
 /**
  * @brief Constructor
@@ -161,3 +163,5 @@ int writeSerial(int fd, void* buf, size_t cnt)
 {
   return write(fd, buf, cnt);
 }
+
+#endif
