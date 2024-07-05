@@ -1,4 +1,7 @@
 add_library(drv_linux STATIC
+utils/linux_types.hpp
+utils/linux_io.hpp
+utils/linux_io.cpp
 std_in_out/drv_std_in_out.cpp
 std_in_out/drv_std_in_out.hpp
 uart/drv_uart.cpp

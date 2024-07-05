@@ -97,6 +97,7 @@ Status_t DrvCommBase::unlock(uint8_t key)
  * @brief Template for a method to read data synchronously
  * @param buffer Buffer to store the data
  * @param size Number of bytes to read
+ * @param key A parameter with different uses depending on the implementation
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
@@ -113,6 +114,7 @@ Status_t DrvCommBase::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t
  * @brief Template for a method to write data synchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
+ * @param key A parameter with different uses depending on the implementation
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
@@ -129,6 +131,9 @@ Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_
  * @brief Template for a method to read data asynchronously
  * @param buffer Buffer to store the data
  * @param size Number of bytes to read
+ * @param key A parameter with different uses depending on the implementation
+ * @param func Pointer to a function to call at the end of operation
+ * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
 Status_t DrvCommBase::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
@@ -170,7 +175,7 @@ uint32_t DrvCommBase::bytesRead()
 /**
  * @brief Template method for asynchronous reception callback
  * @param buffer Buffer where data is stored
- * @param size Number of bytes to write
+ * @param size Number of bytes read
  * @param arg User-defined parameter
  * @return Status_t
  */
@@ -189,6 +194,9 @@ Status_t DrvCommBase::readAsyncDoneCallback(Status_t error, uint8_t *buffer, uin
  * @brief Template for a method to write data asynchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
+ * @param key A parameter with different uses depending on the implementation
+ * @param func Pointer to a function to call at the end of operation
+ * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
 Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)

@@ -15,10 +15,11 @@
 #define DRV_UART_HPP_
 
 
-#include "drivers/base/drv_comm_base.hpp"
-
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
+
+#include "drivers/base/drv_comm_base.hpp"
+#include "drivers/linux/utils/linux_types.hpp"
 
 
 /**
@@ -37,10 +38,19 @@ public:
 
   Status_t write(uint8_t *buffer, uint32_t size, uint8_t key = 0, uint32_t timeout = 0xFFFFFFFF);
 
+  Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+
+  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+
   uint32_t bytesRead();
 
 private:
   int m_linux_handle;
+  UtilsInOutSync_t m_sync_rx, m_sync_tx;
+
+  void readAsyncThread(void);
+
+  void writeAsyncThread(void);
 };
 
 

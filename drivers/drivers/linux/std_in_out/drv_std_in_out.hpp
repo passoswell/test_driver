@@ -19,6 +19,9 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "drivers/linux/utils/linux_types.hpp"
+
+
 enum
 {
   TESTUART_FILE = 0,
@@ -37,10 +40,19 @@ public:
 
   Status_t write(uint8_t *buffer, uint32_t size, uint8_t key = 0, uint32_t timeout = UINT32_MAX);
 
+  Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+
+  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+
   uint32_t bytesRead();
 
 private:
   FILE *m_in_file, *m_out_file;
+  UtilsInOutSync_t m_sync_rx, m_sync_tx;
+
+  void readAsyncThread(void);
+
+  void writeAsyncThread(void);
 };
 
 #endif
