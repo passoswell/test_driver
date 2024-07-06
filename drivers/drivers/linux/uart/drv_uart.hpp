@@ -42,8 +42,6 @@ public:
 
   Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
 
-  uint32_t bytesRead();
-
 private:
   int m_linux_handle;
   UtilsInOutSync_t m_sync_rx, m_sync_tx;

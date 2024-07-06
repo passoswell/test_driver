@@ -169,7 +169,7 @@ bool DrvCommBase::isReadAsyncDone()
  */
 uint32_t DrvCommBase::bytesRead()
 {
-  return 0;
+  return m_bytes_read;
 }
 
 /**

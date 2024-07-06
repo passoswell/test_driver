@@ -20,7 +20,7 @@
 
 #include "drivers/linux/utils/linux_io.hpp"
 
-Status_t convertErrorCode(int code);
+static Status_t convertErrorCode(int code);
 
 /**
  * @brief Constructor
@@ -187,7 +187,7 @@ Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t ti
 Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
-  (void) key;
+
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync_rx.run) { return STATUS_DRV_ERR_BUSY;}
@@ -209,15 +209,6 @@ Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutSt
 }
 
 /**
- * @brief Return the number of bytes read in the last read operation
- * @return uint32_t
- */
-uint32_t DrvUART::bytesRead()
-{
-  return m_bytes_read;
-}
-
-/**
  * @brief Write data asynchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
@@ -229,7 +220,6 @@ uint32_t DrvUART::bytesRead()
 Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
-  (void) key;
 
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
@@ -280,6 +270,7 @@ void DrvUART::readAsyncThread(void)
     m_is_read_done = true;
     m_is_operation_done = true;
     m_sync_rx.run = false;
+    locker1.unlock();
   }
 }
 
@@ -313,6 +304,7 @@ void DrvUART::writeAsyncThread(void)
     m_is_write_done = true;
     m_is_operation_done = true;
     m_sync_tx.run = false;
+    locker1.unlock();
   }
 }
 
