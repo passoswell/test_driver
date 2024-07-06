@@ -375,4 +375,10 @@ bool SSD1306::writeData(uint8_t data)
   buffer[0] = SD1306_DATA;
   buffer[1] = data;
   return m_driver->write(buffer, 2, m_address).success;
+  if(!m_driver->writeAsync(buffer, 2, m_address).success)
+  {
+    return false;
+  }
+  while(!m_driver->isWriteAsyncDone()){}
+  return true;
 }

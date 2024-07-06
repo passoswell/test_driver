@@ -86,6 +86,7 @@ DrvI2C::~DrvI2C()
 
   locker1.lock();
   m_terminate = true;
+  m_sync.run = true;
   locker1.unlock();
 
   m_sync.condition.notify_one();
@@ -165,7 +166,7 @@ Status_t DrvI2C::write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, ui
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
   int byte_count;
-  Status_t status;
+  Status_t status = STATUS_DRV_SUCCESS;
   (void) timeout;
 
   if(m_handle == nullptr || buffer == nullptr){return STATUS_DRV_NULL_POINTER;}
@@ -185,7 +186,6 @@ Status_t DrvI2C::write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, ui
       byte_count = writeSyscall(m_linux_handle, (char *)buffer, size);
       if (byte_count != size)
       {
-        m_bytes_read = byte_count;
         SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");
       }
 
@@ -281,7 +281,7 @@ void DrvI2C::asyncThread(void)
 
   while(true)
   {
-    m_sync.condition.wait(locker1, [this]{ return this->m_sync.run | this->m_terminate; });
+    m_sync.condition.wait(locker1, [this]{ return this->m_sync.run; });
     if(m_terminate) { break;}
 
     if(m_is_reading)
