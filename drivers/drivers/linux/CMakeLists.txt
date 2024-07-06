@@ -7,7 +7,15 @@ std_in_out/drv_std_in_out.hpp
 uart/drv_uart.cpp
 uart/drv_uart.hpp
 i2c/drv_i2c.cpp
-i2c/drv_i2c.hpp)
+i2c/drv_i2c.hpp
+i2c/glcdfont.h
+i2c/gfxfont.h
+i2c/basic_graphics.h
+i2c/basic_graphics.c
+i2c/dev_ssd1306.hpp
+i2c/drv_ssd1306.cpp
+i2c/dev_ssd1306_fonts.hpp
+i2c/dev_ssd1306_types.hpp)
 
 # include(ExternalProject)
 # Define the directory where you want to clone the repository
