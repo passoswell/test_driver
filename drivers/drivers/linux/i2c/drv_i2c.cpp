@@ -67,6 +67,7 @@ DrvI2C::DrvI2C(void *port_handle)
   m_linux_handle = -1;
   m_is_reading = false;
   m_is_writing = false;
+  m_terminate = false;
 
   m_sync.run = false;
   m_sync.buffer = nullptr;
@@ -81,6 +82,16 @@ DrvI2C::DrvI2C(void *port_handle)
  */
 DrvI2C::~DrvI2C()
 {
+  std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
+
+  locker1.lock();
+  m_terminate = true;
+  locker1.unlock();
+
+  m_sync.condition.notify_one();
+
+  m_sync.thread->join();
+
   if(m_linux_handle >= 0)
   {
     close(m_linux_handle);
@@ -270,7 +281,8 @@ void DrvI2C::asyncThread(void)
 
   while(true)
   {
-    m_sync.condition.wait(locker1, [this]{ return this->m_sync.run; });
+    m_sync.condition.wait(locker1, [this]{ return this->m_sync.run | this->m_terminate; });
+    if(m_terminate) { break;}
 
     if(m_is_reading)
     {

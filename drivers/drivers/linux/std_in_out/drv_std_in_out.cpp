@@ -18,6 +18,8 @@
  */
 DrvStdInOut::DrvStdInOut()
 {
+  m_terminate = false;
+
   m_in_file = fopen("/dev/fd/0", "r+");
   m_sync_rx.run = false;
   m_sync_rx.buffer = nullptr;
@@ -25,6 +27,7 @@ DrvStdInOut::DrvStdInOut()
   m_sync_rx.func = nullptr;
   m_sync_rx.arg = nullptr;
   m_sync_rx.thread = new std::thread(&DrvStdInOut::readAsyncThread, this);
+
   m_out_file = fopen("/dev/fd/1", "w");
   m_sync_tx.run = false;
   m_sync_tx.buffer = nullptr;
@@ -39,6 +42,21 @@ DrvStdInOut::DrvStdInOut()
  */
 DrvStdInOut::~DrvStdInOut()
 {
+  std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
+  std::unique_lock<std::mutex> locker2(m_sync_tx.mutex,  std::defer_lock);
+
+  locker1.lock();
+  locker2.lock();
+  m_terminate = true;
+  locker1.unlock();
+  locker2.unlock();
+
+  m_sync_rx.condition.notify_one();
+  m_sync_tx.condition.notify_one();
+
+  m_sync_rx.thread->join();
+  m_sync_tx.thread->join();
+
   if (m_in_file != nullptr)
   {
     fclose(m_in_file);
@@ -245,7 +263,12 @@ void DrvStdInOut::readAsyncThread(void)
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex);
   while(true)
   {
-    m_sync_rx.condition.wait(locker1, [this]{ return this->m_sync_rx.run; });
+    m_sync_rx.condition.wait(locker1, [this]{ return this->m_sync_rx.run | this->m_terminate; });
+    if(m_terminate)
+    {
+      std::cout << "Terminating readAsyncThread thread" << std::endl;
+      break;
+    }
     while (bytes_available < m_sync_rx.size)
     {
       prev = ftell(m_in_file);
@@ -273,7 +296,12 @@ void DrvStdInOut::writeAsyncThread(void)
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex);
   while(true)
   {
-    m_sync_tx.condition.wait(locker1, [this]{ return this->m_sync_tx.run; });
+    m_sync_tx.condition.wait(locker1, [this]{ return this->m_sync_tx.run | this->m_terminate; });
+    if(m_terminate)
+    {
+      std::cout << "Terminating writeAsyncThread thread" << std::endl;
+      break;
+    }
     fwrite(m_sync_tx.buffer, 1, m_sync_tx.size, m_out_file);
     fwrite("\r\n", 1, 2, m_out_file);
     fflush(m_out_file);

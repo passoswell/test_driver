@@ -45,6 +45,7 @@ public:
 private:
   int m_linux_handle;
   UtilsInOutSync_t m_sync_rx, m_sync_tx;
+  bool m_terminate;
 
   void readAsyncThread(void);
 

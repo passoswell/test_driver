@@ -49,6 +49,7 @@ public:
 private:
   FILE *m_in_file, *m_out_file;
   UtilsInOutSync_t m_sync_rx, m_sync_tx;
+  bool m_terminate;
 
   void readAsyncThread(void);
 

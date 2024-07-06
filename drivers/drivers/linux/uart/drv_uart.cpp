@@ -30,6 +30,7 @@ DrvUART::DrvUART(void *port_handle)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
+  m_terminate = false;
 
   m_sync_rx.run = false;
   m_sync_rx.buffer = nullptr;
@@ -51,6 +52,21 @@ DrvUART::DrvUART(void *port_handle)
  */
 DrvUART::~DrvUART()
 {
+  std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
+  std::unique_lock<std::mutex> locker2(m_sync_tx.mutex,  std::defer_lock);
+
+  locker1.lock();
+  locker2.lock();
+  m_terminate = true;
+  locker1.unlock();
+  locker2.unlock();
+
+  m_sync_rx.condition.notify_one();
+  m_sync_tx.condition.notify_one();
+
+  m_sync_rx.thread->join();
+  m_sync_tx.thread->join();
+
   if(m_linux_handle >= 0)
   {
     (void) close(m_linux_handle);
@@ -248,7 +264,8 @@ void DrvUART::readAsyncThread(void)
 
   while(true)
   {
-    m_sync_rx.condition.wait(locker1, [this]{ return this->m_sync_rx.run; });
+    m_sync_rx.condition.wait(locker1, [this]{ return this->m_sync_rx.run | this->m_terminate; });
+    if(m_terminate) { break;}
     byte_count = readSyscall(m_linux_handle, m_sync_rx.buffer, m_sync_rx.size);
     if(byte_count > 0)
     {
@@ -282,7 +299,8 @@ void DrvUART::writeAsyncThread(void)
 
   while(true)
   {
-    m_sync_tx.condition.wait(locker1, [this]{ return this->m_sync_tx.run; });
+    m_sync_tx.condition.wait(locker1, [this]{ return this->m_sync_tx.run | this->m_terminate; });
+    if(m_terminate) { break;}
     byte_count = writeSyscall(m_linux_handle, m_sync_tx.buffer, m_sync_tx.size);
     if(byte_count == m_sync_tx.size)
     {

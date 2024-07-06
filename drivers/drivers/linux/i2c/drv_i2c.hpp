@@ -43,7 +43,7 @@ public:
 private:
   uint8_t m_address; //8 bits address
   int m_linux_handle;
-  bool m_is_reading, m_is_writing;
+  bool m_is_reading, m_is_writing, m_terminate;
   UtilsInOutSync_t m_sync;
 
   void asyncThread(void);
