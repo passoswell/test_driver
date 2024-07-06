@@ -14,10 +14,15 @@
 #define LINUX_IO_HPP
 
 #include <stdlib.h>
+#include <stdint.h>
 
 int readSyscall(int fd, void* buf, size_t cnt);
 
 int writeSyscall(int fd, void* buf, size_t cnt);
+
+int bytesAvailableSyscall(int fd);
+
+int waitOnReceptionTimeoutSyscall(int fd, uint32_t size, uint32_t wait_time);
 
 
 #endif /* LINUX_IO_HPP */

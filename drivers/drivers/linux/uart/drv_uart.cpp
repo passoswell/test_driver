@@ -87,7 +87,7 @@ Status_t DrvUART::configure(const InOutStreamConfigure_t *list, uint8_t list_siz
     cfsetispeed(&termios_structure, B1152000);
     cfsetospeed(&termios_structure, B1152000);
     termios_structure.c_cc[VMIN] = 1;
-    termios_structure.c_cc[VTIME] = 0;
+    termios_structure.c_cc[VTIME] = 1;
     tcflush(m_linux_handle, TCIFLUSH);
     tcflush(m_linux_handle, TCIFLUSH);
     tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
@@ -106,7 +106,9 @@ Status_t DrvUART::configure(const InOutStreamConfigure_t *list, uint8_t list_siz
 Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
-  int byte_count;
+  int byte_count = 0;
+  (void) key;
+
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -116,7 +118,13 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t tim
   m_is_operation_done = false;
   m_sync_rx.run = true;
 
-  byte_count = readSyscall(m_linux_handle, buffer, size);
+  byte_count = waitOnReceptionTimeoutSyscall(m_linux_handle, size, timeout);
+
+  if(byte_count > size)
+  {
+    byte_count = size;
+  }
+  byte_count = readSyscall(m_linux_handle, buffer, byte_count);
 
   m_is_read_done = true;
   m_is_operation_done = true;
@@ -143,6 +151,9 @@ Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t ti
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   int byte_count;
+  (void) key;
+  (void) timeout;
+
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -219,6 +230,7 @@ Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutS
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   (void) key;
+
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync_tx.run) { return STATUS_DRV_ERR_BUSY;}
@@ -243,6 +255,7 @@ void DrvUART::readAsyncThread(void)
   Status_t success;
   uint32_t byte_count;
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex);
+
   while(true)
   {
     m_sync_rx.condition.wait(locker1, [this]{ return this->m_sync_rx.run; });
@@ -275,6 +288,7 @@ void DrvUART::writeAsyncThread(void)
   Status_t success;
   uint32_t byte_count;
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex);
+
   while(true)
   {
     m_sync_tx.condition.wait(locker1, [this]{ return this->m_sync_tx.run; });
