@@ -46,6 +46,10 @@ private:
   bool m_is_reading, m_is_writing, m_terminate;
   UtilsInOutSync_t m_sync;
 
+  Status_t i2cRead(uint8_t *buffer, uint32_t size, uint8_t address_8bits);
+
+  Status_t i2cWrite(uint8_t *buffer, uint32_t size, uint8_t address_8bits);
+
   void asyncThread(void);
 };
 
