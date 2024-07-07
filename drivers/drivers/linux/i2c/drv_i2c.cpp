@@ -67,6 +67,7 @@ DrvI2C::DrvI2C(void *port_handle)
   m_linux_handle = -1;
   m_is_reading = false;
   m_is_writing = false;
+  m_terminate = false;
 
   m_sync.run = false;
   m_sync.buffer = nullptr;
@@ -81,6 +82,17 @@ DrvI2C::DrvI2C(void *port_handle)
  */
 DrvI2C::~DrvI2C()
 {
+  std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
+
+  locker1.lock();
+  m_terminate = true;
+  m_sync.run = true;
+  locker1.unlock();
+
+  m_sync.condition.notify_one();
+
+  m_sync.thread->join();
+
   if(m_linux_handle >= 0)
   {
     close(m_linux_handle);
@@ -107,33 +119,11 @@ Status_t DrvI2C::read(uint8_t *buffer, uint32_t size, uint8_t address_8bits, uin
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
 
-  m_bytes_read = 0;
   m_is_read_done = false;
   m_is_operation_done = false;
-  m_sync.run = true;
+  m_sync.run = false;
 
-  // TODO: read errno for all syscall failures
-  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
-  {
-    if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
-    {
-
-      byte_count = readSyscall(m_linux_handle, (char *)buffer, size);
-      m_bytes_read = byte_count > 0 ? byte_count : 0;
-      if (byte_count != size)
-      {
-        SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes transmitted through i2c is smaller than the requested.");
-      }
-
-    }else
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
-    }
-    (void) close(m_linux_handle);
-  }else
-  {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
-  }
+  status = i2cRead(buffer, size, address_8bits);
 
   m_is_read_done = true;
   m_is_operation_done = true;
@@ -154,7 +144,7 @@ Status_t DrvI2C::write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, ui
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
   int byte_count;
-  Status_t status;
+  Status_t status = STATUS_DRV_SUCCESS;
   (void) timeout;
 
   if(m_handle == nullptr || buffer == nullptr){return STATUS_DRV_NULL_POINTER;}
@@ -163,30 +153,9 @@ Status_t DrvI2C::write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, ui
 
   m_is_write_done = false;
   m_is_operation_done = false;
-  m_sync.run = true;
+  m_sync.run = false;
 
-  // TODO: read errno for all syscall failures
-  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
-  {
-    if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
-    {
-
-      byte_count = writeSyscall(m_linux_handle, (char *)buffer, size);
-      if (byte_count != size)
-      {
-        m_bytes_read = byte_count;
-        SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");
-      }
-
-    }else
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
-    }
-    close(m_linux_handle);
-  }else
-  {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
-  }
+  status = i2cWrite(buffer, size, address_8bits);
 
   m_is_write_done = true;
   m_is_operation_done = true;
@@ -208,7 +177,7 @@ Status_t DrvI2C::readAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bits
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
 
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync.run) { return STATUS_DRV_ERR_BUSY;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -230,6 +199,20 @@ Status_t DrvI2C::readAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bits
 }
 
 /**
+ * @brief Asynchronous read operation status
+ * @return true if operation done, false otherwise
+ */
+bool DrvI2C::isReadAsyncDone()
+{
+  bool status;
+  std::unique_lock<std::mutex> locker1(m_sync.mutex, std::defer_lock);
+  if(!locker1.try_lock()) { return false;}
+  status = m_is_read_done;
+  locker1.unlock();
+  return status;
+}
+
+/**
  * @brief Write data asynchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
@@ -242,7 +225,7 @@ Status_t DrvI2C::writeAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bit
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
 
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync.run) { return STATUS_DRV_ERR_BUSY;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -262,36 +245,121 @@ Status_t DrvI2C::writeAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bit
   return STATUS_DRV_SUCCESS;
 }
 
+/**
+ * @brief Asynchronous write operation status
+ * @return true if operation done, false otherwise
+ */
+bool DrvI2C::isWriteAsyncDone()
+{
+  bool status;
+  std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
+  if(!locker1.try_lock()) { return false;}
+  status = m_is_write_done;
+  locker1.unlock();
+  return status;
+}
+
+/**
+ * @brief Read data synchronously
+ *
+ * @param buffer Buffer to store the data
+ * @param size Number of bytes to read
+ * @param address_8bits The 8 bits address of the device
+ * @return Status_t
+ */
+Status_t DrvI2C::i2cRead(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
+{
+  Status_t status = STATUS_DRV_SUCCESS;
+  int byte_count;
+
+  // TODO: read errno for all syscall failures
+  m_bytes_read = 0;
+  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
+  {
+    if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
+    {
+
+      byte_count = readSyscall(m_linux_handle, (char *)buffer, size);
+      m_bytes_read = byte_count > 0 ? byte_count : 0;
+      if (byte_count != size)
+      {
+        SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes transmitted through i2c is smaller than the requested.");
+      }
+    }
+    else
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+    }
+    (void)close(m_linux_handle);
+  }
+  else
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+  }
+  return status;
+}
+
+/**
+ * @brief Write data synchronously
+ * @param buffer Buffer where data is stored
+ * @param size Number of bytes to write
+ * @param address_8bits The 8 bits address of the device
+ * @return Status_t
+ */
+Status_t DrvI2C::i2cWrite(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
+{
+  Status_t status = STATUS_DRV_SUCCESS;
+  int byte_count;
+
+  // TODO: read errno for all syscall failures
+  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
+  {
+    if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
+    {
+
+      byte_count = writeSyscall(m_linux_handle, (char *)buffer, size);
+      if (byte_count != size)
+      {
+        SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");
+      }
+
+    }else
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+    }
+    close(m_linux_handle);
+  }else
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+  }
+  return status;
+}
+
+/**
+ * @brief Thread to read or write data asynchronously
+ *
+ */
 void DrvI2C::asyncThread(void)
 {
-  Status_t success;
+  Status_t status;
   uint32_t byte_count;
   std::unique_lock<std::mutex> locker1(m_sync.mutex);
 
   while(true)
   {
     m_sync.condition.wait(locker1, [this]{ return this->m_sync.run; });
+    if(m_terminate) { break;}
 
-    if(m_is_reading)
+    if (m_is_reading)
     {
-      byte_count = readSyscall(m_linux_handle, m_sync.buffer, m_sync.size);
-      if (byte_count > 0)
-      {
-        m_bytes_read = byte_count;
-        success = STATUS_DRV_SUCCESS;
-      }
-      else
-      {
-        m_bytes_read = 0;
-        success = convertErrorCode(errno);
-      }
+      status = i2cRead(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
-        m_sync.func(success, m_sync.buffer, m_bytes_read, m_sync.arg);
+        m_sync.func(status, m_sync.buffer, m_bytes_read, m_sync.arg);
       }
       else
       {
-        readAsyncDoneCallback(success, m_sync.buffer, m_bytes_read);
+        readAsyncDoneCallback(status, m_sync.buffer, m_bytes_read);
       }
       m_is_read_done = true;
       m_is_operation_done = true;
@@ -301,36 +369,20 @@ void DrvI2C::asyncThread(void)
 
     if(m_is_writing)
     {
-      byte_count = writeSyscall(m_linux_handle, m_sync.buffer, m_sync.size);
-      if (byte_count == m_sync.size)
-      {
-        m_bytes_read = byte_count;
-        success = STATUS_DRV_SUCCESS;
-      }
-      else
-      {
-        m_bytes_read = 0;
-        if (byte_count > 0)
-        {
-          m_bytes_read = byte_count;
-        }
-        success = convertErrorCode(errno);
-      }
+      status = i2cWrite(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
-        m_sync.func(success, m_sync.buffer, m_sync.size, m_sync.arg);
+        m_sync.func(status, m_sync.buffer, m_sync.size, m_sync.arg);
       }
       else
       {
-        writeAsyncDoneCallback(success, m_sync.buffer, m_sync.size);
+        writeAsyncDoneCallback(status, m_sync.buffer, m_sync.size);
       }
       m_is_write_done = true;
       m_is_operation_done = true;
       m_is_writing = false;
       m_sync.run = false;
     }
-
-    locker1.unlock();
   }
 }
 

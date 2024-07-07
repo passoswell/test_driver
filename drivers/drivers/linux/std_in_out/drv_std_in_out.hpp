@@ -40,15 +40,18 @@ public:
 
   Status_t write(uint8_t *buffer, uint32_t size, uint8_t key = 0, uint32_t timeout = UINT32_MAX);
 
-  Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t key = 0, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  bool isReadAsyncDone();
 
-  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key = 0, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  bool isWriteAsyncDone();
 
   uint32_t bytesRead();
 
 private:
   FILE *m_in_file, *m_out_file;
   UtilsInOutSync_t m_sync_rx, m_sync_tx;
+  bool m_terminate;
 
   void readAsyncThread(void);
 

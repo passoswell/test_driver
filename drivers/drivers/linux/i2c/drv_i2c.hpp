@@ -37,14 +37,20 @@ public:
   Status_t write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, uint32_t timeout = 0xFFFFFFFF);
 
   Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bits, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  bool isReadAsyncDone();
 
   Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bits, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  bool isWriteAsyncDone();
 
 private:
   uint8_t m_address; //8 bits address
   int m_linux_handle;
-  bool m_is_reading, m_is_writing;
+  bool m_is_reading, m_is_writing, m_terminate;
   UtilsInOutSync_t m_sync;
+
+  Status_t i2cRead(uint8_t *buffer, uint32_t size, uint8_t address_8bits);
+
+  Status_t i2cWrite(uint8_t *buffer, uint32_t size, uint8_t address_8bits);
 
   void asyncThread(void);
 };
