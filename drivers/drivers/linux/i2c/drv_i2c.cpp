@@ -241,7 +241,7 @@ Status_t DrvI2C::writeAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bit
  */
 Status_t DrvI2C::i2cRead(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
 {
-  Status_t status;
+  Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
   // TODO: read errno for all syscall failures
@@ -280,7 +280,7 @@ Status_t DrvI2C::i2cRead(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
  */
 Status_t DrvI2C::i2cWrite(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
 {
-  Status_t status;
+  Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
   // TODO: read errno for all syscall failures
