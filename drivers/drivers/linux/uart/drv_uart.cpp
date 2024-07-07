@@ -125,7 +125,7 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t tim
   int byte_count = 0;
   (void) key;
 
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
 
@@ -170,7 +170,7 @@ Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t ti
   (void) key;
   (void) timeout;
 
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
 
@@ -204,7 +204,7 @@ Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutSt
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
 
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync_rx.run) { return STATUS_DRV_ERR_BUSY;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -225,6 +225,20 @@ Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutSt
 }
 
 /**
+ * @brief Asynchronous read operation status
+ * @return true if operation done, false otherwise
+ */
+bool DrvUART::isReadAsyncDone()
+{
+  bool status;
+  std::unique_lock<std::mutex> locker1(m_sync_rx.mutex, std::defer_lock);
+  if(!locker1.try_lock()) { return false;}
+  status = m_is_read_done;
+  locker1.unlock();
+  return status;
+}
+
+/**
  * @brief Write data asynchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
@@ -237,7 +251,7 @@ Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutS
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
 
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync_tx.run) { return STATUS_DRV_ERR_BUSY;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -254,6 +268,20 @@ Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutS
   m_sync_tx.condition.notify_one();
 
   return STATUS_DRV_SUCCESS;
+}
+
+/**
+ * @brief Asynchronous write operation status
+ * @return true if operation done, false otherwise
+ */
+bool DrvUART::isWriteAsyncDone()
+{
+  bool status;
+  std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
+  if(!locker1.try_lock()) { return false;}
+  status = m_is_write_done;
+  locker1.unlock();
+  return status;
 }
 
 void DrvUART::readAsyncThread(void)
@@ -287,7 +315,6 @@ void DrvUART::readAsyncThread(void)
     m_is_read_done = true;
     m_is_operation_done = true;
     m_sync_rx.run = false;
-    locker1.unlock();
   }
 }
 
@@ -322,7 +349,6 @@ void DrvUART::writeAsyncThread(void)
     m_is_write_done = true;
     m_is_operation_done = true;
     m_sync_tx.run = false;
-    locker1.unlock();
   }
 }
 

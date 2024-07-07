@@ -85,7 +85,7 @@ Status_t DrvStdInOut::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t
   (void) key;
   (void) timeout;
 
-  if (buffer == nullptr || m_in_file == nullptr)
+  if (buffer == nullptr || m_in_file == nullptr || buffer == nullptr)
   {
     return STATUS_DRV_NULL_POINTER;
   }
@@ -128,7 +128,7 @@ Status_t DrvStdInOut::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_
   (void) key;
   (void) timeout;
 
-  if(buffer == nullptr || m_out_file == nullptr)
+  if(buffer == nullptr || m_out_file == nullptr || buffer == nullptr)
   {
     return STATUS_DRV_NULL_POINTER;
   }
@@ -169,7 +169,7 @@ Status_t DrvStdInOut::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InO
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
   (void) key;
-  if (buffer == nullptr || m_in_file == nullptr)
+  if (buffer == nullptr || m_in_file == nullptr || buffer == nullptr)
   {
     return STATUS_DRV_NULL_POINTER;
   }
@@ -201,6 +201,20 @@ Status_t DrvStdInOut::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InO
 }
 
 /**
+ * @brief Asynchronous read operation status
+ * @return true if operation done, false otherwise
+ */
+bool DrvStdInOut::isReadAsyncDone()
+{
+  bool status;
+  std::unique_lock<std::mutex> locker1(m_sync_rx.mutex, std::defer_lock);
+  if(!locker1.try_lock()) { return false;}
+  status = m_is_read_done;
+  locker1.unlock();
+  return status;
+}
+
+/**
  * @brief Return the number of bytes read in the last readAsync operation
  * @return uint32_t
  */
@@ -226,7 +240,7 @@ Status_t DrvStdInOut::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, In
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   (void) key;
-  if (buffer == nullptr || m_in_file == nullptr)
+  if (buffer == nullptr || m_in_file == nullptr || buffer == nullptr)
   {
     return STATUS_DRV_NULL_POINTER;
   }
@@ -255,6 +269,20 @@ Status_t DrvStdInOut::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, In
   m_sync_tx.condition.notify_one();
 
   return STATUS_DRV_SUCCESS;
+}
+
+/**
+ * @brief Asynchronous write operation status
+ * @return true if operation done, false otherwise
+ */
+bool DrvStdInOut::isWriteAsyncDone()
+{
+  bool status;
+  std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
+  if(!locker1.try_lock()) { return false;}
+  status = m_is_write_done;
+  locker1.unlock();
+  return status;
 }
 
 void DrvStdInOut::readAsyncThread(void)
