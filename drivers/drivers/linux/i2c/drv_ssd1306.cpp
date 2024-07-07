@@ -341,14 +341,13 @@ Status_t SSD1306::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutS
 Status_t SSD1306::writePixels(uint8_t *buffer, uint32_t size)
 {
   Status_t status;
-  uint8_t internal_buffer[2];
+  static uint8_t internal_buffer[128*8 + 1];
+  if(size > 128*8) { return STATUS_DRV_ERR_PARAM_SIZE;}
+  if(!m_driver->isWriteAsyncDone()) { return STATUS_DRV_ERR_BUSY;}
   internal_buffer[0] = SD1306_DATA;
-  for(uint32_t i = 0; i < size; i++)
-  {
-    internal_buffer[1] = buffer[i];
-    status = m_driver->write(internal_buffer, 2, m_address);
-  }
-  return status;
+  memcpy(&internal_buffer[1], buffer, size);
+  // return m_driver->write(internal_buffer, size + 1, m_address);
+  return m_driver->writeAsync(internal_buffer, size + 1, m_address);
 }
 
 /**
@@ -375,10 +374,4 @@ bool SSD1306::writeData(uint8_t data)
   buffer[0] = SD1306_DATA;
   buffer[1] = data;
   return m_driver->write(buffer, 2, m_address).success;
-  if(!m_driver->writeAsync(buffer, 2, m_address).success)
-  {
-    return false;
-  }
-  while(!m_driver->isWriteAsyncDone()){}
-  return true;
 }

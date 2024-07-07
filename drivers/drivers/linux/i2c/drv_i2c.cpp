@@ -352,7 +352,7 @@ void DrvI2C::asyncThread(void)
 
     if (m_is_reading)
     {
-      status = i2cRead(m_sync.buffer, m_bytes_read, m_sync.key);
+      status = i2cRead(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
         m_sync.func(status, m_sync.buffer, m_bytes_read, m_sync.arg);
@@ -369,7 +369,7 @@ void DrvI2C::asyncThread(void)
 
     if(m_is_writing)
     {
-      status = i2cWrite(m_sync.buffer, m_bytes_read, m_sync.key);
+      status = i2cWrite(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
         m_sync.func(status, m_sync.buffer, m_sync.size, m_sync.arg);

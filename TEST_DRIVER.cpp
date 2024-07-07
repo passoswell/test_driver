@@ -14,7 +14,7 @@ uint8_t message1[] = "Hello world!!!";
 uint8_t message2[] = "Hello1!!!";
 uint8_t message3[] = "This is a new adventure!!!";
 uint8_t message4[] = "If you can read this message, blocking mode UART is working!!!";
-DrvUART serial((void *)"/dev/ttyUSB0");
+// DrvUART serial((void *)"/dev/ttyUSB0");
 // DrvUART serial((void *)"/dev/ttyACM0");
 DrvI2C two_wire((void *)"/dev/i2c-0");
 SSD1306 display(&two_wire);
@@ -141,7 +141,7 @@ void Delay(void)
 {
   /* Change for your system's delay */
   //for(int i = 0; i < 5000000; i++);
-  std::this_thread::sleep_for(std::chrono::seconds(3));
+  std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 }
 
 
@@ -165,11 +165,31 @@ int main(void)
   BGFX_1.DrawPixel   = NULL;
   BGFX_1.GfxFont     = NULL;
 
-  console.write((uint8_t *)"Initializing the display", sizeof((uint8_t *)"Initializing the display"));
-  display.initialize();
-  console.write((uint8_t *)"Setting cursor to (0, 0)", sizeof((uint8_t *)"Setting cursor to (0, 0)"));
+  console.write(message0, strlen((char *)message0));
+  console.write((uint8_t *)"Initializing the display", strlen((char *)"Initializing the display"));
+
+  if(display.initialize())
+  {
+    std::cout << "Display initialization was successful" << std::endl;
+  }else
+  {
+    std::cout << "Display initialization was not successful, exiting..." << std::endl;
+    return 0;
+  }
+
+  console.write((uint8_t *)"Setting cursor to (0, 0)", strlen((char *)"Setting cursor to (0, 0)"));
+  bool flag_result =  display.clearScreen(1);
+  flag_result |= display.write((uint8_t *)"Hello?", 6, 0, 0, 0);
+  if(flag_result)
+  {
+    std::cout << "Success during write" << std::endl;
+  }else
+  {
+    std::cout << "Error during write" << std::endl;
+  }
   display.setCursor(0,0);
-  console.write((uint8_t *)"Running demo", sizeof((uint8_t *)"Running demo"));
+  console.write((uint8_t *)"Running demo", strlen((char *)"Running demo"));
+
 
   /* Setting rotation to zero */
   BGFX_SetRotation(0, &BGFX_1);
@@ -265,6 +285,7 @@ int main(void)
 
   Delay();
 
+  return 0;
 
   /* Plotting a sine wave */
   /* Cleaning the space where the plot will be positioned */
