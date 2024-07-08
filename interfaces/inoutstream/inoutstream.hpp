@@ -36,7 +36,7 @@ typedef Status_t (*InOutStreamCallback_t)(Status_t error, uint8_t *buffer, uint3
 typedef struct
 {
   uint8_t parameter;
-  const void *p_value;
+  uint32_t value;
 }InOutStreamConfigure_t;
 
 /**
@@ -74,7 +74,7 @@ public:
 
   virtual ~InOutStream(){};
 
-  virtual Status_t configure(uint8_t parameter, const void *p_value) = 0;
+  virtual Status_t configure(uint8_t parameter, uint32_t value) = 0;
   virtual Status_t configure(const InOutStreamConfigure_t *list, uint8_t list_size) = 0;
 
   virtual Status_t lock(uint8_t key) = 0;

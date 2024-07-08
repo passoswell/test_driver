@@ -15,6 +15,30 @@
 #include "inoutstream/inoutstream.hpp"
 
 
+/**
+ * @brief List of valid parameters to use with configure method
+ * @note Not all options have an effect on a given driver
+ */
+typedef enum
+{
+  DRV_PARAM_BAUD,
+  DRV_PARAM_CLOCK_SPEED,
+  DRV_PARAM_TX_GPIO,
+  DRV_PARAM_RX_GPIO,
+  DRV_PARAM_CK_GPIO,
+  DRV_PARAM_CS_PARAM,
+  DRV_PARAM_CTS_GPIO,
+  DRV_PARAM_RTS_GPIO,
+  DRV_PARAM_STOP_BITS,
+  DRV_PARAM_LINE_MODE,
+  DRV_USE_HW_PARITY,
+  DRV_USE_HW_FLOW_CTRL,
+  DRV_USE_HW_CRC,
+  DRV_USE_HW_CKSUM,
+  DRV_USE_PULL_UP,
+}DrvCommBaseParameters_t;
+
+
 class DrvCommBase : public InOutStream
 {
 public:
@@ -31,7 +55,7 @@ public:
 
   virtual ~DrvCommBase();
 
-  virtual Status_t configure(uint8_t parameter, const void *p_value);
+  virtual Status_t configure(uint8_t parameter, uint32_t value);
   virtual Status_t configure(const InOutStreamConfigure_t *list, uint8_t list_size);
 
   Status_t lock(uint8_t key);

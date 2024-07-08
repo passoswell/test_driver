@@ -37,20 +37,20 @@ DrvCommBase::~DrvCommBase()
 
 /**
  * @brief Template for a method to configure a parameter
- * @param parameter
- * @param p_value
+ * @param parameter An item from DrvCommBaseParameters_t list
+ * @param value The corresponding value for the parameter
  * @return Status_t
  */
-Status_t DrvCommBase::configure(uint8_t parameter, const void *p_value)
+Status_t DrvCommBase::configure(uint8_t parameter, uint32_t value)
 {
   (void) parameter;
-  (void) p_value;
+  (void) value;
   return STATUS_DRV_NOT_IMPLEMENTED;
 }
 
 /**
  * @brief Template for a method to configure a list of parameters
- * @param list List of parameters
+ * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
  * @return Status_t
  */

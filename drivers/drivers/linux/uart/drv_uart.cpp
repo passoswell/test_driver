@@ -22,6 +22,8 @@
 
 static Status_t convertErrorCode(int code);
 
+static speed_t convertSpeed(uint32_t speed);
+
 /**
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
@@ -77,7 +79,7 @@ DrvUART::~DrvUART()
 
 /**
  * @brief Configure a list of parameters
- * @param list List of parameters
+ * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
@@ -85,29 +87,88 @@ Status_t DrvUART::configure(const InOutStreamConfigure_t *list, uint8_t list_siz
 {
   Status_t status;
   struct termios termios_structure;
-  if(m_handle == nullptr)
+  speed_t speed = B1152000;
+  uint32_t stop_bits_count = 1;
+  bool use_parity = false, use_hw_flow_ctrl = false;
+
+  if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
+
+  if(list != nullptr && list_size != 0)
   {
-    return STATUS_DRV_NULL_POINTER;
-  }
-  if(list == nullptr || list_size == 0)
-  {
-    // m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
-    m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY);
-    if (m_linux_handle < 0)
+    for(uint8_t i = 0; i < list_size; i++)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file.\r\n");
-      return status;
+      switch(list[i].parameter)
+      {
+        case DRV_PARAM_STOP_BITS:
+          if(list[i].value == 2) { stop_bits_count = 2;}
+          break;
+        case DRV_USE_HW_PARITY:
+          use_parity = true;
+          break;
+        case DRV_USE_HW_FLOW_CTRL:
+          use_hw_flow_ctrl = true;
+          break;
+        case DRV_PARAM_BAUD:
+          speed = convertSpeed(list[i].value);
+          break;
+        case DRV_PARAM_CLOCK_SPEED:
+          speed = convertSpeed(list[i].value);
+          break;
+        case DRV_PARAM_LINE_MODE:
+          if(list[i].value == 0) { use_parity = false; stop_bits_count = 1; use_hw_flow_ctrl = false;}
+          if(list[i].value == 1) { use_parity = true; stop_bits_count = 1; use_hw_flow_ctrl = false;}
+          if(list[i].value == 2) { use_parity = false; stop_bits_count = 2; use_hw_flow_ctrl = false;}
+          if(list[i].value == 3) { use_parity = true; stop_bits_count = 2; use_hw_flow_ctrl = false;}
+          if(list[i].value == 4) { use_parity = false; stop_bits_count = 1; use_hw_flow_ctrl = true;}
+          if(list[i].value == 5) { use_parity = true; stop_bits_count = 1; use_hw_flow_ctrl = true;}
+          if(list[i].value == 6) { use_parity = false; stop_bits_count = 2; use_hw_flow_ctrl = true;}
+          if(list[i].value == 7) { use_parity = true; stop_bits_count = 2; use_hw_flow_ctrl = true;}
+          break;
+        default:
+          break;
+      }
     }
-    tcgetattr(m_linux_handle, &termios_structure);
-    cfmakeraw(&termios_structure);
-    cfsetispeed(&termios_structure, B1152000);
-    cfsetospeed(&termios_structure, B1152000);
-    termios_structure.c_cc[VMIN] = 1;
-    termios_structure.c_cc[VTIME] = 1;
-    tcflush(m_linux_handle, TCIFLUSH);
-    tcflush(m_linux_handle, TCIFLUSH);
-    tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
   }
+
+  // m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+  m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY);
+  if (m_linux_handle < 0)
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file.\r\n");
+    return status;
+  }
+  tcgetattr(m_linux_handle, &termios_structure);
+  cfmakeraw(&termios_structure);
+  cfsetispeed(&termios_structure, speed);
+  cfsetospeed(&termios_structure, speed);
+  if(use_parity)
+  {
+    termios_structure.c_cflag |= PARENB;
+  }else
+  {
+    termios_structure.c_cflag &= ~PARENB;
+  }
+  if(use_hw_flow_ctrl)
+  {
+    termios_structure.c_cflag |= CRTSCTS;
+  }else
+  {
+    termios_structure.c_cflag &= ~CRTSCTS;
+  }
+  if(stop_bits_count == 1)
+  {
+    termios_structure.c_cflag &= ~CSTOPB;
+  }else
+  {
+    termios_structure.c_cflag |= CSTOPB;
+  }
+  termios_structure.c_cc[VMIN] = 1;
+  termios_structure.c_cc[VTIME] = 1;
+  tcflush(m_linux_handle, TCIFLUSH);
+  tcflush(m_linux_handle, TCIFLUSH);
+  tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
+
+  m_is_initialized = true;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -125,6 +186,7 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t tim
   int byte_count = 0;
   (void) key;
 
+  if(!m_is_initialized && !configure(nullptr, 0).success) { return STATUS_DRV_NULL_POINTER;}
   if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -170,6 +232,7 @@ Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t ti
   (void) key;
   (void) timeout;
 
+  if(!m_is_initialized && !configure(nullptr, 0).success) { return STATUS_DRV_NULL_POINTER;}
   if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(!locker1.try_lock()) { return STATUS_DRV_ERR_BUSY;}
@@ -204,6 +267,7 @@ Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutSt
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
 
+  if(!m_is_initialized && !configure(nullptr, 0).success) { return STATUS_DRV_NULL_POINTER;}
   if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync_rx.run) { return STATUS_DRV_ERR_BUSY;}
@@ -251,6 +315,7 @@ Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutS
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
 
+  if(!m_is_initialized && !configure(nullptr, 0).success) { return STATUS_DRV_NULL_POINTER;}
   if(m_handle == nullptr || m_linux_handle < 0 || buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   if(m_sync_tx.run) { return STATUS_DRV_ERR_BUSY;}
@@ -365,6 +430,51 @@ Status_t convertErrorCode(int code)
       break;
   }
   return status;
+}
+
+speed_t convertSpeed(uint32_t speed)
+{
+  speed_t output;
+
+  switch(speed)
+  {
+    // POSIX compliant options
+    case 0: output = B0; break;
+    case 50: output = B50; break;
+    case 75: output = B75; break;
+    case 110: output = B110; break;
+    case 134: output = B134; break;
+    case 150: output = B150; break;
+    case 200: output = B200; break;
+    case 300: output = B300; break;
+    case 600: output = B600; break;
+    case 1200: output = B1200; break;
+    case 1800: output = B1800; break;
+    case 2400: output = B2400; break;
+    case 4800: output = B4800; break;
+    case 9600: output = B9600; break;
+    case 19200: output = B19200; break;
+    case 38400: output = B38400; break;
+    case 57600: output = B57600; break;
+    case 115200: output = B115200; break;
+    case 230400: output = B230400; break;
+    case 460800: output = B460800; break;
+
+    // Extra output baud rates (not in POSIX)
+    case 500000: output = B500000; break;
+    case 576000: output = B576000; break;
+    case 921600: output = B921600; break;
+    case 1000000: output = B1000000; break;
+    case 1152000: output = B1152000; break;
+    case 1500000: output = B1500000; break;
+    case 2000000: output = B2000000; break;
+    case 2500000: output = B2500000; break;
+    case 3000000: output = B3000000; break;
+    case 3500000: output = B3500000; break;
+    case 4000000: output = B4000000; break;
+    default: output = B115200; break;
+  }
+  return output;
 }
 
 #endif
