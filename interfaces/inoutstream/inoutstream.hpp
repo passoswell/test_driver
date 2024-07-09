@@ -51,7 +51,7 @@ typedef struct
 /**
  * @brief Macro to make it easy to add configuration parameters to a list
  */
-#define ADD_PARAMETER(parameter, value) {parameter, value},
+#define ADD_PARAMETER(parameter, value) {parameter, value}
 
 /**
  * @brief List of possible events

@@ -4,6 +4,8 @@ set(CMAKE_CXX_STANDARD 11)
 
 include(cmake/GitUtils.cmake)
 
+set(RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
 message("\r\nAdding linux drivers by adding -DUSE_LINUX definition on the main CMakeLists.txt file as a temporary action\r\n")
 add_definitions(-DUSE_LINUX=1) #temporary solution
 set(USE_LINUX TRUE)
