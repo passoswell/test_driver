@@ -6,7 +6,11 @@ drivers/base/drv_comm_base.cpp)
 
 target_link_libraries(drivers interfaces)
 
-if(DEFINED USE_LINUX)
+if(DEFINED USE_PIPICO)
+  add_subdirectory(drivers/pipico)
+  target_link_libraries(drivers drv_pipico)
+  message("\r\nLinking pipico drivers because USE_PIPICO is defined\r\n")
+ELSEif(DEFINED USE_LINUX)
   add_subdirectory(drivers/linux)
   target_link_libraries(drivers drv_linux)
   message("\r\nLinking linux drivers because USE_LINUX is defined\r\n")

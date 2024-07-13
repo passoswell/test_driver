@@ -1,3 +1,6 @@
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
+
 add_library(drv_linux STATIC
 utils/linux_types.hpp
 utils/linux_io.hpp
@@ -8,10 +11,6 @@ uart/drv_uart.cpp
 uart/drv_uart.hpp
 i2c/drv_i2c.cpp
 i2c/drv_i2c.hpp)
-
-# include(ExternalProject)
-# Define the directory where you want to clone the repository
-set(REPO_DIR "${CMAKE_SOURCE_DIR}/external")
 
 git_clone(
   PROJECT_NAME                    lg
@@ -28,4 +27,4 @@ file(GLOB helloworld_SRC CONFIGURE_DEPENDS "${lgpio_src_dir}/*.h" "${lgpio_src_d
 # message(" ${helloworld_SRC}")
 add_library(lgpio_lib STATIC ${helloworld_SRC})
 
-target_link_libraries(drv_linux drivers lgpio_lib)
+target_link_libraries(drv_linux drivers Threads::Threads lgpio_lib)

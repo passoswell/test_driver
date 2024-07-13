@@ -18,6 +18,8 @@
 #if defined(USE_LINUX)
 #include <iostream>
 void *handle = (void *) "/dev/ttyUSB0";
+#else
+void *handle = nullptr;
 #endif
 
 
@@ -53,7 +55,7 @@ int main(void)
 
   while(true)
   {
-    status = serial.write(message, strlen((char *)message));
+    status = serial.write(message, strlen((char *)message), 0);
     if(!status.success)
     {
       printErrorMessage(status);

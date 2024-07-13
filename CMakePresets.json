@@ -1,15 +1,43 @@
 {
-  "version": 8,
+  "version": 5,
   "configurePresets": [
     {
-      "name": "GCC 12.3.0 x86_64-linux-gnu",
-      "displayName": "GCC 12.3.0 x86_64-linux-gnu",
+      "name": "gcc_linux",
+      "displayName": "GCC linux-gnu configuration",
       "description": "Using compilers: C = /usr/bin/gcc",
-      "binaryDir": "${sourceDir}/build/bin",
+      "binaryDir": "${sourceDir}/build/gcc_linux",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_C_COMPILER": "/usr/bin/gcc",
-        "CMAKE_BUILD_TYPE": "Debug"
+        "CMAKE_BUILD_TYPE": "Debug",
+        "USE_LINUX": "1"
+      }
+    },
+    {
+      "name": "gcc_linux_release",
+      "inherits": "gcc_linux",
+      "description": "Using compilers: C = /usr/bin/gcc and release option",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "release"
+      }
+    },
+    {
+      "name": "pipico",
+      "displayName": "pipico config",
+      "description": "Using compilers: C = /usr/bin/arm-none-eabi-gcc",
+      "binaryDir": "${sourceDir}/build/pipico",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_C_COMPILER": "/usr/bin/arm-none-eabi-gcc",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "USE_PIPICO": "1"
+      }
+    },
+    {
+      "name": "pipico_release",
+      "inherits": "pipico",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "release"
       }
     }
   ]

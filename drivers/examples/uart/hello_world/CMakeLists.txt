@@ -9,8 +9,7 @@ if((DEFINED BUILD_HELLO_WORLD) OR ((DEFINED BUILD_ALL_EXAMPLES) AND (BUILD_ALL_E
   # pull in common dependencies
   target_link_libraries(hello_world drivers)
 
-  set_target_properties(hello_world
-  PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY_DEBUG ${RUNTIME_OUTPUT_DIRECTORY})
+
+  _postbuild_task(hello_world)
 
 endif()

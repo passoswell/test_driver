@@ -26,6 +26,10 @@
 #include "drivers/esp/esp32_drivers.hpp"
 #endif
 
+#if defined(USE_PIPICO)
+#include "drivers/pipico/pipico_drivers.hpp"
+#endif
+
 #if defined(USE_LINUX)
 #include "drivers/linux/linux_drivers.hpp"
 #endif
