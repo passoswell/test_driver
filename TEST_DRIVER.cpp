@@ -14,7 +14,7 @@ uint8_t message4[] = "If you can read this message, blocking mode UART is workin
 DrvUART serial((void *)"/dev/ttyUSB0");
 //DrvUART serial((void *)"/dev/ttyACM0");
 
-int main(void)
+int run_test(void)
 {
   Status_t status;
   uint8_t buffer[100];
@@ -53,3 +53,15 @@ int main(void)
 
   return 0;
 }
+
+#if defined(USE_ESP32)
+extern "C" void app_main(void)
+{
+  run_test();
+}
+#else
+int main(void)
+{
+  return run_test();
+}
+#endif

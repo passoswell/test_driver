@@ -41,7 +41,11 @@ const uint32_t g_uart_config_list_size = sizeof(g_uart_config_list) / sizeof(InO
  *
  * @return int
  */
+#if defined(USE_ESP32)
+extern "C" void app_main(void)
+#else
 int main(void)
+#endif
 {
   uint8_t message[] = "Hello world!!!\r\n";
   Status_t status;

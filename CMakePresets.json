@@ -39,6 +39,20 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "release"
       }
+    },
+    {
+      "name": "esp32",
+      "generator": "Ninja",
+      "displayName": "esp32 config",
+      "description": "Using compilers: not sure yet",
+      "binaryDir": "${sourceDir}/build/esp32",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ESP_PLATFORM": "1",
+        "CCACHE_ENABLE": "0",
+        "USE_ESP32": "1"
+      }
     }
   ]
 }
