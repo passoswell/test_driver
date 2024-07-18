@@ -30,6 +30,8 @@
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_C_COMPILER": "/usr/bin/arm-none-eabi-gcc",
         "CMAKE_BUILD_TYPE": "Debug",
+        "PICO_SDK_FETCH_FROM_GIT": "ON",
+        "PICO_SDK_FETCH_FROM_GIT_PATH": "${sourceDir}/external/pipico",
         "USE_PIPICO": "1"
       }
     },
