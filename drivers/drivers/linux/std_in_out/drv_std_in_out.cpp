@@ -105,7 +105,7 @@ Status_t DrvStdInOut::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t
   while (bytesRead() < size)
   {
   }
-  fread(buffer, 1, size, m_in_file);
+  m_bytes_read = fread(buffer, 1, size, m_in_file);
 
   m_is_read_done = true;
   m_is_operation_done = true;
@@ -304,7 +304,7 @@ void DrvStdInOut::readAsyncThread(void)
       bytes_available = ftell(m_in_file);
       fseek(m_in_file, prev, SEEK_SET); // go back to where we were
     }
-    fread(m_sync_rx.buffer, 1, m_sync_rx.size, m_in_file);
+    m_bytes_read = fread(m_sync_rx.buffer, 1, m_sync_rx.size, m_in_file);
     if (m_sync_rx.func != nullptr)
     {
       m_sync_rx.func(STATUS_DRV_SUCCESS, m_sync_rx.buffer, bytes_available, m_sync_rx.arg);

@@ -196,12 +196,16 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t tim
   m_is_operation_done = false;
   m_sync_rx.run = true;
 
-  byte_count = waitOnReceptionTimeoutSyscall(m_linux_handle, size, timeout);
-
-  if(byte_count > size)
+  auto start = std::chrono::steady_clock::now();
+  auto end = start;
+  std::chrono::duration<double> elapsed_time;
+  do
   {
-    byte_count = size;
-  }
+    byte_count += readSyscall(m_linux_handle, buffer + byte_count, size - byte_count);
+    end = std::chrono::steady_clock::now();
+    elapsed_time = end - start;
+  } while ((byte_count < size) || ((elapsed_time.count() * 1000) < timeout));
+
   byte_count = readSyscall(m_linux_handle, buffer, byte_count);
 
   m_is_read_done = true;
