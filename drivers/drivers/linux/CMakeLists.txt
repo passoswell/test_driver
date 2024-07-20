@@ -1,4 +1,3 @@
-set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 add_library(drv_linux STATIC
@@ -27,4 +26,4 @@ file(GLOB helloworld_SRC CONFIGURE_DEPENDS "${lgpio_src_dir}/*.h" "${lgpio_src_d
 # message(" ${helloworld_SRC}")
 add_library(lgpio_lib STATIC ${helloworld_SRC})
 
-target_link_libraries(drv_linux drivers Threads::Threads lgpio_lib)
+target_link_libraries(drv_linux drivers ${CMAKE_THREAD_LIBS_INIT} lgpio_lib)

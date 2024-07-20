@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 include(cmake/preproject_configuration.cmake)
 include(cmake/postproject_configuration.cmake)
@@ -9,10 +9,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Define the directory where external repositories should be cloned
 set(REPO_DIR "${CMAKE_SOURCE_DIR}/external")
-
-#define the directory where the binaries should be created
-set(BIN_DIR "${CMAKE_BINARY_DIR}/bin")
-file(MAKE_DIRECTORY "${BIN_DIR}")
 
 include(cmake/GitUtils.cmake)
 

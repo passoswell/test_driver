@@ -1,4 +1,13 @@
-IF(DEFINED USE_PIPICO)
+
+
+IF(DEFINED USE_ESP32)
+
+  message("Using ESP32")
+  include(cmake/esp32_sdk_import.cmake)
+  add_definitions(-DUSE_ESP32=1)
+  set(USE_ESP32 TRUE)
+
+ELSEIF(DEFINED USE_PIPICO)
 
   message("Using PIPICO")
   # Pull in SDK (must be before project)

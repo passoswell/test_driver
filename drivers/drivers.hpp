@@ -23,7 +23,7 @@
 #endif
 
 #if defined(USE_ESP32)
-#include "drivers/esp/esp32_drivers.hpp"
+#include "drivers/esp32/esp32_drivers.hpp"
 #endif
 
 #if defined(USE_PIPICO)

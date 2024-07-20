@@ -1,11 +1,18 @@
 # Run some postproject task
-function (_postbuild_task TARGET)
-
+function (_postbuild_task A_TARGET)
+    #get_target_property(FOO_NAME ${A_TARGET} NAME)
     # Set the folder where the binaries should be generated
-    set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${BIN_DIR})
-    set_target_properties(${TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${BIN_DIR})
+    set_target_properties(${A_TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/bin)
+    set_target_properties(${A_TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
-    if(DEFINED USE_PIPICO)
+    IF(DEFINED USE_ESP32)
+
+        idf_build_executable(${A_TARGET})
+        add_custom_command(TARGET ${A_TARGET} POST_BUILD
+            COMMAND cp ${CMAKE_BINARY_DIR}/bin/${A_TARGET} ${CMAKE_BINARY_DIR}/bin/${A_TARGET}.elf
+            VERBATIM)
+
+    ELSEIF(DEFINED USE_PIPICO)
 
         if (NOT ELF2UF2_FOUND)
             find_package(pico-sdk-tools "${PICO_SDK_VERSION_MAJOR}.${PICO_SDK_VERSION_MINOR}.${PICO_SDK_VERSION_REVISION}" QUIET CONFIG CMAKE_FIND_ROOT_PATH_BOTH)
@@ -15,11 +22,11 @@ function (_postbuild_task TARGET)
             endif()
         endif()
         if (ELF2UF2_FOUND)
-            add_custom_command(TARGET ${TARGET} POST_BUILD
-                COMMAND ELF2UF2 $<TARGET_FILE:${TARGET}> ${BIN_DIR}/${TARGET}.uf2
+            add_custom_command(TARGET ${A_TARGET} POST_BUILD
+                COMMAND ELF2UF2 $<TARGET_FILE:${A_TARGET}> ${CMAKE_BINARY_DIR}/bin/${A_TARGET}.uf2
                 VERBATIM)
         endif()
-    endif()
+    ENDIF()
 endfunction()
 
 

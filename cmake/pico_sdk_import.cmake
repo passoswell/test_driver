@@ -46,6 +46,8 @@ if (NOT PICO_SDK_PATH)
         endif ()
 
         if (NOT pico_sdk)
+            message(WARNING "PICO_SDK_PATH environment variable not found. If build fails, please refer to pipico documentation on how to setup correctly.")
+            message("Configure process will try to clone pico-sdk from the git repository on https://github.com/raspberrypi/pico-sdk.\r\n\r\n")
             message("Downloading Raspberry Pi Pico SDK")
             FetchContent_Populate(pico_sdk)
             set(PICO_SDK_PATH ${pico_sdk_SOURCE_DIR})
