@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 
 include(cmake/preproject_configuration.cmake)
 include(cmake/postproject_configuration.cmake)
