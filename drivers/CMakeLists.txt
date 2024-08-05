@@ -2,7 +2,10 @@
 add_library(drivers STATIC
 drivers.hpp
 drivers/base/drv_comm_base.hpp
-drivers/base/drv_comm_base.cpp)
+drivers/base/drv_comm_base.cpp
+drivers/base/drv_gpio_base.hpp
+drivers/base/drv_gpio_base.cpp
+)
 
 target_link_libraries(drivers interfaces)
 

@@ -12,7 +12,7 @@
 #define COMMONS_HPP_
 
 
-
+#include "com_status.hpp"
 
 
 #endif /* COMMONS_HPP_ */

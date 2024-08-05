@@ -32,6 +32,7 @@ typedef struct
   std::mutex mutex;
   std::condition_variable condition;
   bool run;
+  bool terminate;
   uint8_t *buffer;
   uint32_t size;
   uint8_t key;
