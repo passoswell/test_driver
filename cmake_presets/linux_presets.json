@@ -1,0 +1,25 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "gcc_linux",
+      "displayName": "GCC linux-gnu configuration",
+      "description": "Using compilers: C = /usr/bin/gcc",
+      "binaryDir": "${sourceDir}/build/gcc_linux",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_C_COMPILER": "/usr/bin/gcc",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "USE_LINUX": "1"
+      }
+    },
+    {
+      "name": "gcc_linux_release",
+      "inherits": "gcc_linux",
+      "description": "Using compilers: C = /usr/bin/gcc and release option",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "release"
+      }
+    }
+  ]
+}
