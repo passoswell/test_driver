@@ -26,16 +26,12 @@
     {
       "name": "linux",
       "configurePreset": "linux",
-      "environment": {
-        "CMAKE_BUILD_PARALLEL_LEVEL": "$env{nproc}"
-      }
+      "jobs": 20
     },
     {
       "name": "linux_release",
       "configurePreset": "linux_release",
-      "environment": {
-        "CMAKE_BUILD_PARALLEL_LEVEL": "$env{nproc}"
-      }
+      "jobs": 20
     }
   ]
 }
