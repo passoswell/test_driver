@@ -4,7 +4,7 @@
     {
       "name": "esp32",
       "generator": "Ninja",
-      "displayName": "esp32 config",
+      "displayName": "esp32 configuration",
       "description": "Using compilers: not sure yet",
       "binaryDir": "${sourceDir}/build/esp32",
       "cacheVariables": {
@@ -19,6 +19,7 @@
     {
       "name": "esp32_release",
       "inherits": "esp32",
+      "displayName": "esp32 release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "release"
       }
