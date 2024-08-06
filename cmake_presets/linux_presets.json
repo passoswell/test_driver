@@ -21,5 +21,21 @@
         "CMAKE_BUILD_TYPE": "release"
       }
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "linux",
+      "configurePreset": "linux",
+      "environment": {
+        "CMAKE_BUILD_PARALLEL_LEVEL": "$env{nproc}"
+      }
+    },
+    {
+      "name": "linux_release",
+      "configurePreset": "linux_release",
+      "environment": {
+        "CMAKE_BUILD_PARALLEL_LEVEL": "$env{nproc}"
+      }
+    }
   ]
 }
