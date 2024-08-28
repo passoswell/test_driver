@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
 
 include(cmake/preproject_configuration.cmake)
 include(cmake/postproject_configuration.cmake)
@@ -6,6 +6,7 @@ include(cmake/postproject_configuration.cmake)
 project(TEST_DRIVER VERSION 0.1.0 LANGUAGES C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast") # Optimize for speed on release configuration
 
 # Define the directory where external repositories should be cloned
 set(REPO_DIR "${CMAKE_SOURCE_DIR}/external")

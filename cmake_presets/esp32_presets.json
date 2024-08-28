@@ -1,0 +1,40 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "esp32",
+      "generator": "Ninja",
+      "displayName": "esp32 configuration",
+      "description": "Using compilers: not sure yet",
+      "binaryDir": "${sourceDir}/build/esp32",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "ESP_PLATFORM": "1",
+        "CCACHE_ENABLE": "0",
+        "ESP_IDF_FETCH_FROM_GIT_PATH": "${sourceDir}/external/esp-idf",
+        "USE_ESP32": "1"
+      }
+    },
+    {
+      "name": "esp32_release",
+      "inherits": "esp32",
+      "displayName": "esp32 release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "esp32",
+      "configurePreset": "esp32",
+      "jobs": 20
+    },
+    {
+      "name": "esp32_release",
+      "configurePreset": "esp32_release",
+      "jobs": 20
+    }
+  ]
+}

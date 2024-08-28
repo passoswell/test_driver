@@ -1,0 +1,39 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "pipico",
+      "displayName": "pipico configuration",
+      "description": "Using compilers: C = /usr/bin/arm-none-eabi-gcc",
+      "binaryDir": "${sourceDir}/build/pipico",
+      "cacheVariables": {
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+        "CMAKE_C_COMPILER": "/usr/bin/arm-none-eabi-gcc",
+        "CMAKE_BUILD_TYPE": "Debug",
+        "PICO_SDK_FETCH_FROM_GIT": "ON",
+        "PICO_SDK_FETCH_FROM_GIT_PATH": "${sourceDir}/external/pipico",
+        "USE_PIPICO": "1"
+      }
+    },
+    {
+      "name": "pipico_release",
+      "inherits": "pipico",
+      "displayName": "pipico release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "pipico",
+      "configurePreset": "pipico",
+      "jobs": 20
+    },
+    {
+      "name": "pipico_release",
+      "configurePreset": "pipico_release",
+      "jobs": 20
+    }
+  ]
+}
