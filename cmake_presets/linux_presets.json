@@ -5,6 +5,7 @@
       "name": "linux",
       "displayName": "linux configuration",
       "description": "Using compilers: C = /usr/bin/gcc",
+      "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build/linux",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
@@ -25,13 +26,11 @@
   "buildPresets": [
     {
       "name": "linux",
-      "configurePreset": "linux",
-      "jobs": 20
+      "configurePreset": "linux"
     },
     {
       "name": "linux_release",
-      "configurePreset": "linux_release",
-      "jobs": 20
+      "configurePreset": "linux_release"
     }
   ]
 }

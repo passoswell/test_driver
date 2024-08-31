@@ -5,6 +5,7 @@
       "name": "pipico",
       "displayName": "pipico configuration",
       "description": "Using compilers: C = /usr/bin/arm-none-eabi-gcc",
+      "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/build/pipico",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
@@ -27,13 +28,11 @@
   "buildPresets": [
     {
       "name": "pipico",
-      "configurePreset": "pipico",
-      "jobs": 20
+      "configurePreset": "pipico"
     },
     {
       "name": "pipico_release",
-      "configurePreset": "pipico_release",
-      "jobs": 20
+      "configurePreset": "pipico_release"
     }
   ]
 }
