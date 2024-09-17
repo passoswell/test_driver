@@ -29,5 +29,9 @@
 #include "drivers/pipico/gpio/drv_gpio.hpp"
 #endif
 
+#if __has_include("drivers/pipico/spt/drv_spt.hpp")
+#include "drivers/pipico/spt/drv_spt.hpp"
+#endif
+
 
 #endif /* PIPICO_DRIVERS_HPP_ */

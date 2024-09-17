@@ -33,5 +33,9 @@
 #include "drivers/linux/gpio/drv_gpio.hpp"
 #endif
 
+#if __has_include("drivers/linux/spt/drv_spt.hpp")
+#include "drivers/linux/spt/drv_spt.hpp"
+#endif
+
 
 #endif /* LINUX_DRIVERS_HPP_ */

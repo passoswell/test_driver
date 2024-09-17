@@ -29,5 +29,9 @@
 #include "drivers/esp32/gpio/drv_gpio.hpp"
 #endif
 
+#if __has_include("drivers/esp32/spt/drv_spt.hpp")
+#include "drivers/esp32/spt/drv_spt.hpp"
+#endif
+
 
 #endif /* ESP32_DRIVERS_HPP_ */

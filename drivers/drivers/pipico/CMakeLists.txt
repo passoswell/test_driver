@@ -6,6 +6,8 @@ uart/drv_uart.cpp
 uart/drv_uart.hpp
 gpio/drv_gpio.cpp
 gpio/drv_gpio.hpp
+spt/drv_spt.cpp
+spt/drv_spt.hpp
 )
 
 # pull in common dependencies

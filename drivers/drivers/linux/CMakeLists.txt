@@ -11,7 +11,10 @@ uart/drv_uart.hpp
 i2c/drv_i2c.cpp
 i2c/drv_i2c.hpp
 gpio/drv_gpio.cpp
-gpio/drv_gpio.hpp)
+gpio/drv_gpio.hpp
+spt/drv_spt.cpp
+spt/drv_spt.hpp
+)
 
 include(FetchContent)
 
