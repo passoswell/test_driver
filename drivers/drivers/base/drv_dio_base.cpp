@@ -1,7 +1,7 @@
 /**
- * @file drv_gpio_base.cpp
+ * @file drv_dio_base.cpp
  * @author your name (you@domain.com)
- * @brief
+ * @brief Base class for drivers on digital inputs and outputs
  * @version 0.1
  * @date 2024-07-24
  *
@@ -9,15 +9,15 @@
  *
  */
 
-#include "drv_gpio_base.hpp"
+#include "drv_dio_base.hpp"
 
 /**
  * @brief Template for a method to configure a parameter
- * @param parameter An item from DrvGpioConfigureList_t list
+ * @param parameter An item from DioConfigureList_t list
  * @param value The corresponding value for the parameter
  * @return Status_t
  */
-Status_t DrvGpioBase::configure(uint8_t parameter, uint32_t value)
+Status_t DrvDioBase::configure(uint8_t parameter, uint32_t value)
 {
   (void) parameter;
   (void) value;
@@ -30,7 +30,7 @@ Status_t DrvGpioBase::configure(uint8_t parameter, uint32_t value)
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvGpioBase::configure(const DrvGpioConfigureList_t *list, uint8_t list_size)
+Status_t DrvDioBase::configure(const DioConfigureList_t *list, uint8_t list_size)
 {
   (void) list;
   (void) list_size;
@@ -42,7 +42,7 @@ Status_t DrvGpioBase::configure(const DrvGpioConfigureList_t *list, uint8_t list
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DrvGpioBase::read(bool &state)
+Status_t DrvDioBase::read(bool &state)
 {
   (void) state;
   return STATUS_DRV_NOT_IMPLEMENTED;
@@ -50,12 +50,21 @@ Status_t DrvGpioBase::read(bool &state)
 
 /**
  * @brief Template method to write to a digital output pin
- * @param state The state to set in the gpio
+ * @param state The state to set in the dio
  * @return Status_t
  */
-Status_t DrvGpioBase::write(bool state)
+Status_t DrvDioBase::write(bool state)
 {
   (void) state;
+  return STATUS_DRV_NOT_IMPLEMENTED;
+}
+
+/**
+ * @brief Template method to toggle the state of a digital output
+ * @return Status_t
+ */
+Status_t DrvDioBase::toggle()
+{
   return STATUS_DRV_NOT_IMPLEMENTED;
 }
 
@@ -67,7 +76,7 @@ Status_t DrvGpioBase::write(bool state)
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DrvGpioBase::setCallback(DrvGpioEdge_t edge, DrvGpioCallback_t func, void *arg)
+Status_t DrvDioBase::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
 {
   (void) edge;
   (void) func;

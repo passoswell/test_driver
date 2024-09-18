@@ -25,8 +25,8 @@
 #include "drivers/pipico/spi/drv_spi.hpp"
 #endif
 
-#if __has_include("drivers/pipico/gpio/drv_gpio.hpp")
-#include "drivers/pipico/gpio/drv_gpio.hpp"
+#if __has_include("drivers/pipico/dio/drv_dio.hpp")
+#include "drivers/pipico/dio/drv_dio.hpp"
 #endif
 
 #if __has_include("drivers/pipico/spt/drv_spt.hpp")

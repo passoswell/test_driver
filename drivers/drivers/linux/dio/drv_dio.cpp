@@ -1,7 +1,7 @@
 /**
  * @file drv_gpio.cpp
  * @author your name (you@domain.com)
- * @brief
+ * @brief Give access to digital inputs and outputs on linux
  * @version 0.1
  * @date 2024-07-20
  *
@@ -10,7 +10,7 @@
  */
 
 
-#include "drivers/linux/gpio/drv_gpio.hpp"
+#include "drivers/linux/dio/drv_dio.hpp"
 
 #include <errno.h>
 #include <gpiod.h>
@@ -21,13 +21,14 @@
  * @param line_offset GPIO identifier
  * @param chip_number Path to the corresponding gpiochip device file.
  */
-DrvGPIO::DrvGPIO(uint8_t line_offset, uint8_t chip_number)
+DrvDIO::DrvDIO(uint8_t line_offset, uint8_t chip_number)
 {
-  m_gpio_chip_number = chip_number;
-  m_gpio_line_number = line_offset;
-  m_gpio_chip_handle = nullptr;
-  m_gpio_line_handle = nullptr;
+  m_dio_chip_number = chip_number;
+  m_dio_line_number = line_offset;
+  m_dio_chip_handle = nullptr;
+  m_dio_line_handle = nullptr;
   m_flags = 0;
+  m_value = false;
 
   m_func = nullptr;
   m_arg = nullptr;
@@ -43,7 +44,7 @@ DrvGPIO::DrvGPIO(uint8_t line_offset, uint8_t chip_number)
 /**
  * @brief Destructor
  */
-DrvGPIO::~DrvGPIO()
+DrvDIO::~DrvDIO()
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
 
@@ -57,13 +58,13 @@ DrvGPIO::~DrvGPIO()
     m_sync.thread->join();
   }
 
-  if(m_gpio_line_handle != nullptr)
+  if(m_dio_line_handle != nullptr)
   {
-    gpiod_line_release((struct gpiod_line *)m_gpio_line_handle);
+    gpiod_line_release((struct gpiod_line *)m_dio_line_handle);
   }
-  if(m_gpio_chip_handle != nullptr)
+  if(m_dio_chip_handle != nullptr)
   {
-    gpiod_chip_close((struct gpiod_chip *)m_gpio_chip_handle);
+    gpiod_chip_close((struct gpiod_chip *)m_dio_chip_handle);
   }
 }
 
@@ -73,7 +74,7 @@ DrvGPIO::~DrvGPIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvGPIO::configure(const DrvGpioConfigure_t *list, uint8_t list_size)
+Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
 {
   Status_t result;
   struct gpiod_line_request_config settings =
@@ -82,7 +83,6 @@ Status_t DrvGPIO::configure(const DrvGpioConfigure_t *list, uint8_t list_size)
     .request_type = GPIOD_LINE_REQUEST_DIRECTION_INPUT,
     .flags = GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE
   };
-  int val = 0;
   int ret;
 
   if(list != nullptr)
@@ -91,31 +91,24 @@ Status_t DrvGPIO::configure(const DrvGpioConfigure_t *list, uint8_t list_size)
     {
       switch (list[i].parameter)
       {
-        case DRV_GPIO_LINE_DIRECTION:
+        case DIO_LINE_DIRECTION:
           if(settings.request_type > GPIOD_LINE_REQUEST_DIRECTION_OUTPUT) { continue;}
-          if(list[i].value == DRV_GPIO_DIRECTION_OUTPUT){settings.request_type = GPIOD_LINE_REQUEST_DIRECTION_OUTPUT;}
+          if(list[i].value == DIO_DIRECTION_OUTPUT){settings.request_type = GPIOD_LINE_REQUEST_DIRECTION_OUTPUT;}
           break;
-        case DRV_GPIO_LINE_DRIVE:
-          if(list[i].value == DRV_GPIO_DRIVE_OPEN_DRAIN){settings.flags |= GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN;}
-          if(list[i].value == DRV_GPIO_DRIVE_OPEN_SOURCE){settings.flags |= GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE;}
+        case DIO_LINE_DRIVE:
+          if(list[i].value == DIO_DRIVE_OPEN_DRAIN){settings.flags |= GPIOD_LINE_REQUEST_FLAG_OPEN_DRAIN;}
+          if(list[i].value == DIO_DRIVE_OPEN_SOURCE){settings.flags |= GPIOD_LINE_REQUEST_FLAG_OPEN_SOURCE;}
           break;
-        case DRV_GPIO_LINE_BIAS:
+        case DIO_LINE_BIAS:
           settings.flags &= ~GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;
-          if(list[i].value == DRV_GPIO_BIAS_DISABLED){settings.flags |= GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;}
-          if(list[i].value == DRV_GPIO_BIAS_PULL_UP){settings.flags |= GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;}
-          if(list[i].value == DRV_GPIO_BIAS_PULL_DOWN){settings.flags |= GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;}
+          if(list[i].value == DIO_BIAS_DISABLED){settings.flags |= GPIOD_LINE_REQUEST_FLAG_BIAS_DISABLE;}
+          if(list[i].value == DIO_BIAS_PULL_UP){settings.flags |= GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP;}
+          if(list[i].value == DIO_BIAS_PULL_DOWN){settings.flags |= GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN;}
           break;
-        case DRV_GPIO_LINE_INITIAL_VALUE:
-          if(list[i].value == DRV_GPIO_STATE_LOW){val = 0;}
-          if(list[i].value == DRV_GPIO_STATE_HIGH){val = 1;}
+        case DIO_LINE_INITIAL_VALUE:
+          if(list[i].value == DIO_STATE_LOW){m_value = false;}
+          if(list[i].value == DIO_STATE_HIGH){m_value = true;}
           break;
-        // case DRV_GPIO_LINE_EDGE:
-        //   if(list[i].value == DRV_GPIO_EDGE_RISING){settings.request_type = GPIOD_LINE_REQUEST_EVENT_RISING_EDGE;}
-        //   if(list[i].value == DRV_GPIO_EDGE_FALLING){settings.request_type = GPIOD_LINE_REQUEST_EVENT_FALLING_EDGE;}
-        //   if(list[i].value == DRV_GPIO_EDGE_BOTH){settings.request_type = GPIOD_LINE_REQUEST_EVENT_BOTH_EDGES;}
-        //   break;
-        // case DRV_GPIO_LINE_ACTIVE_STATE:
-        //   if(list[i].value == DRV_GPIO_STATE_HIGH){active_state = DRV_GPIO_STATE_HIGH;}
         break;
       default:
         break;
@@ -124,27 +117,26 @@ Status_t DrvGPIO::configure(const DrvGpioConfigure_t *list, uint8_t list_size)
   }
 
   m_flags = settings.flags;
-  m_gpio_chip_handle = gpiod_chip_open_by_number(m_gpio_chip_number);
-  if (m_gpio_chip_handle != nullptr)
+  m_dio_chip_handle = gpiod_chip_open_by_number(m_dio_chip_number);
+  if (m_dio_chip_handle != nullptr)
   {
-    m_gpio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_gpio_chip_handle, m_gpio_line_number);
-    if (m_gpio_line_handle != nullptr)
+    m_dio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_dio_chip_handle, m_dio_line_number);
+    if (m_dio_line_handle != nullptr)
     {
-      ret = gpiod_line_request((struct gpiod_line *)m_gpio_line_handle, &settings, val);
-      // ret = gpiod_line_request_input((struct gpiod_line *)m_gpio_line_handle, "Consumer_me");
+      ret = gpiod_line_request((struct gpiod_line *)m_dio_line_handle, &settings, m_value);
       if (ret >= 0)
       {
         return STATUS_DRV_SUCCESS;
       }else
       {
         result = STATUS_DRV_UNKNOWN_ERROR;
-        gpiod_line_release((struct gpiod_line *)m_gpio_line_handle);
+        gpiod_line_release((struct gpiod_line *)m_dio_line_handle);
       }
     }else
     {
       result = STATUS_DRV_UNKNOWN_ERROR;
     }
-    gpiod_chip_close((struct gpiod_chip *)m_gpio_chip_handle);
+    gpiod_chip_close((struct gpiod_chip *)m_dio_chip_handle);
   }else
   {
     result = STATUS_DRV_UNKNOWN_ERROR;
@@ -158,9 +150,9 @@ Status_t DrvGPIO::configure(const DrvGpioConfigure_t *list, uint8_t list_size)
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DrvGPIO::read(bool &state)
+Status_t DrvDIO::read(bool &state)
 {
-  int val = gpiod_line_get_value((struct gpiod_line *)m_gpio_line_handle);
+  int val = gpiod_line_get_value((struct gpiod_line *)m_dio_line_handle);
   if(val < 0) {return STATUS_DRV_UNKNOWN_ERROR;}
   if(val == 0){state = false;}
   else {state = true;}
@@ -172,11 +164,22 @@ Status_t DrvGPIO::read(bool &state)
  * @param state The state to set in the gpio
  * @return Status_t
  */
-Status_t DrvGPIO::write(bool value)
+Status_t DrvDIO::write(bool value)
 {
-  int ret = gpiod_line_set_value((struct gpiod_line *)m_gpio_line_handle, (int) value);
+  int ret = gpiod_line_set_value((struct gpiod_line *)m_dio_line_handle, (int) value);
   if(ret < 0) {return STATUS_DRV_UNKNOWN_ERROR;}
+  m_value = value;
   return STATUS_DRV_SUCCESS;
+}
+
+/**
+ * @brief Toggle the state of a digital output
+ * @return Status_t
+ */
+Status_t DrvDIO::toggle()
+{
+  m_value = !m_value;
+  return write(m_value);
 }
 
 /**
@@ -187,7 +190,7 @@ Status_t DrvGPIO::write(bool value)
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DrvGPIO::setCallback(DrvGpioEdge_t edge, DrvGpioCallback_t func, void *arg)
+Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
   struct gpiod_line_request_config settings =
@@ -201,26 +204,26 @@ Status_t DrvGPIO::setCallback(DrvGpioEdge_t edge, DrvGpioCallback_t func, void *
 
   switch (edge)
   {
-    case DRV_GPIO_EDGE_RISING:
+    case DIO_EDGE_RISING:
       if(func == nullptr) return STATUS_DRV_NULL_POINTER;
-      gpiod_line_release((struct gpiod_line *)m_gpio_line_handle);
+      gpiod_line_release((struct gpiod_line *)m_dio_line_handle);
       settings.request_type = GPIOD_LINE_REQUEST_EVENT_RISING_EDGE;
-      m_gpio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_gpio_chip_handle, m_gpio_line_number);
-      ret = gpiod_line_request((struct gpiod_line *)m_gpio_line_handle, &settings, val);
+      m_dio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_dio_chip_handle, m_dio_line_number);
+      ret = gpiod_line_request((struct gpiod_line *)m_dio_line_handle, &settings, val);
       break;
-    case DRV_GPIO_EDGE_FALLING:
+    case DIO_EDGE_FALLING:
       if(func == nullptr) return STATUS_DRV_NULL_POINTER;
-      gpiod_line_release((struct gpiod_line *)m_gpio_line_handle);
+      gpiod_line_release((struct gpiod_line *)m_dio_line_handle);
       settings.request_type = GPIOD_LINE_REQUEST_EVENT_FALLING_EDGE;
-      m_gpio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_gpio_chip_handle, m_gpio_line_number);
-      ret = gpiod_line_request((struct gpiod_line *)m_gpio_line_handle, &settings, val);
+      m_dio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_dio_chip_handle, m_dio_line_number);
+      ret = gpiod_line_request((struct gpiod_line *)m_dio_line_handle, &settings, val);
       break;
-    case DRV_GPIO_EDGE_BOTH:
+    case DIO_EDGE_BOTH:
       if(func == nullptr) return STATUS_DRV_NULL_POINTER;
-      gpiod_line_release((struct gpiod_line *)m_gpio_line_handle);
+      gpiod_line_release((struct gpiod_line *)m_dio_line_handle);
       settings.request_type = GPIOD_LINE_REQUEST_EVENT_BOTH_EDGES;
-      m_gpio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_gpio_chip_handle, m_gpio_line_number);
-      ret = gpiod_line_request((struct gpiod_line *)m_gpio_line_handle, &settings, val);
+      m_dio_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_dio_chip_handle, m_dio_line_number);
+      ret = gpiod_line_request((struct gpiod_line *)m_dio_line_handle, &settings, val);
       break;
     default:
       if(m_func != nullptr)
@@ -239,7 +242,7 @@ Status_t DrvGPIO::setCallback(DrvGpioEdge_t edge, DrvGpioCallback_t func, void *
   if(ret < 0) { return STATUS_DRV_UNKNOWN_ERROR;}
   m_func = func;
   m_arg = arg;
-  m_sync.thread = new std::thread(&DrvGPIO::readAsyncThread, this);
+  m_sync.thread = new std::thread(&DrvDIO::readAsyncThread, this);
 
   return STATUS_DRV_SUCCESS;
 }
@@ -247,41 +250,41 @@ Status_t DrvGPIO::setCallback(DrvGpioEdge_t edge, DrvGpioCallback_t func, void *
 /**
  * @brief A thread that listens to gpio edge events
  */
-void DrvGPIO::readAsyncThread(void)
+void DrvDIO::readAsyncThread(void)
 {
   struct timespec ts = {0, 100000000};
-	struct gpiod_line_event event;
-  DrvGpioEdge_t edge;
+  struct gpiod_line_event event;
+  DioEdge_t edge;
   Status_t status;
   bool state;
   int ret;
 
   while(!m_sync.terminate)
   {
-    ret = gpiod_line_event_wait((struct gpiod_line *)m_gpio_line_handle, &ts);
+    ret = gpiod_line_event_wait((struct gpiod_line *)m_dio_line_handle, &ts);
     if (ret <= 0) { continue; }
-    ret = gpiod_line_event_read((struct gpiod_line *)m_gpio_line_handle, &event);
+    ret = gpiod_line_event_read((struct gpiod_line *)m_dio_line_handle, &event);
     if (ret < 0) { continue; }
     if(m_func == nullptr) { continue; }
     switch(event.event_type)
     {
       case GPIOD_LINE_EVENT_RISING_EDGE:
-        edge = DRV_GPIO_EDGE_RISING;
+        edge = DIO_EDGE_RISING;
         state = true;
         status = STATUS_DRV_SUCCESS;
         break;
       case GPIOD_LINE_EVENT_FALLING_EDGE:
-        edge = DRV_GPIO_EDGE_FALLING;
+        edge = DIO_EDGE_FALLING;
         state = false;
         status = STATUS_DRV_SUCCESS;
         break;
       default:
-        edge = DRV_GPIO_EDGE_NONE;
+        edge = DIO_EDGE_NONE;
         read(state);
         status = STATUS_DRV_UNKNOWN_ERROR;
         break;
     }
-    m_func(status, m_gpio_line_number, edge, state, m_sync.arg);
+    m_func(status, m_dio_line_number, edge, state, m_sync.arg);
   }
   m_sync.terminate = false;
   m_sync.run = false;

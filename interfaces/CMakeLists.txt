@@ -2,6 +2,7 @@ add_library(interfaces INTERFACE
 interfaces.hpp
 inoutstream/inoutstream.hpp
 software_timer/software_timer.hpp
+dio/dio_interface.hpp
 )
 
 target_link_libraries(interfaces INTERFACE commons)

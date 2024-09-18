@@ -10,8 +10,8 @@ uart/drv_uart.cpp
 uart/drv_uart.hpp
 i2c/drv_i2c.cpp
 i2c/drv_i2c.hpp
-gpio/drv_gpio.cpp
-gpio/drv_gpio.hpp
+dio/drv_dio.cpp
+dio/drv_dio.hpp
 spt/drv_spt.cpp
 spt/drv_spt.hpp
 )
