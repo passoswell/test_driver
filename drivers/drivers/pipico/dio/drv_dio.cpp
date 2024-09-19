@@ -26,9 +26,9 @@ void drvGpioCallback(uint gpio, uint32_t events);
  * @brief Constructor
  * @param line_offset GPIO number
  */
-DrvDIO::DrvDIO(uint8_t line_offset)
+DrvDIO::DrvDIO(uint32_t line_offset, uint32_t port)
 {
-  m_dio_line_number = line_offset;
+  m_line_number = line_offset;
   m_line_bias = DIO_BIAS_DISABLED;
 }
 
@@ -46,7 +46,7 @@ DrvDIO::~DrvDIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
+Status_t DrvDIO::configure(const DioSettings_t *list, uint8_t list_size)
 {
   Status_t success;
   DioDirection_t line_direction = DIO_DIRECTION_INPUT;
@@ -83,21 +83,21 @@ Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
     }
   }
 
-  gpio_init(m_dio_line_number);
+  gpio_init(m_line_number);
   if(line_direction == DIO_DIRECTION_INPUT)
   {
-    gpio_set_dir(m_dio_line_number, GPIO_IN);
+    gpio_set_dir(m_line_number, GPIO_IN);
   }else
   {
-    gpio_put(m_dio_line_number, val);
-    gpio_set_dir(m_dio_line_number, GPIO_OUT);
+    gpio_put(m_line_number, val);
+    gpio_set_dir(m_line_number, GPIO_OUT);
   }
   if(line_bias == DIO_BIAS_PULL_UP)
   {
-    gpio_pull_up(m_dio_line_number);
+    gpio_pull_up(m_line_number);
   }else if(line_bias == DIO_BIAS_PULL_DOWN)
   {
-    gpio_pull_down(m_dio_line_number);
+    gpio_pull_down(m_line_number);
   }
 
   m_line_bias = line_bias;
@@ -111,7 +111,7 @@ Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
  */
 Status_t DrvDIO::read(bool &state)
 {
-  state = gpio_get(m_dio_line_number) == 0 ? false : true;
+  state = gpio_get(m_line_number) == 0 ? false : true;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -122,7 +122,7 @@ Status_t DrvDIO::read(bool &state)
  */
 Status_t DrvDIO::write(bool value)
 {
-  gpio_put(m_dio_line_number, value);
+  gpio_put(m_line_number, value);
   return STATUS_DRV_SUCCESS;
 }
 
@@ -132,7 +132,7 @@ Status_t DrvDIO::write(bool value)
  */
 Status_t DrvDIO::toggle()
 {
-  gpio_xor_mask(1 << m_dio_line_number);
+  gpio_xor_mask(1 << m_line_number);
   return STATUS_DRV_SUCCESS;
 }
 
@@ -161,7 +161,7 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
       interruption_type = GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL;
       break;
     default:
-      gpio_set_irq_enabled(m_dio_line_number, GPIO_IRQ_LEVEL_LOW, false);
+      gpio_set_irq_enabled(m_line_number, GPIO_IRQ_LEVEL_LOW, false);
 
       for (auto it = g_gpio_ptr.begin(); it != g_gpio_ptr.end(); it++)
       {
@@ -169,7 +169,7 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
         obj = *it;
         // if the current index is needed:
         auto i = std::distance(g_gpio_ptr.begin(), it);
-        if (obj->m_dio_line_number == m_dio_line_number)
+        if (obj->m_line_number == m_line_number)
         {
           g_gpio_ptr.erase(it);
           break;
@@ -185,15 +185,15 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
   m_func = func;
   m_arg = arg;
   g_gpio_ptr.push_back(this);
-  gpio_set_irq_enabled_with_callback(m_dio_line_number, interruption_type, true, &drvGpioCallback);
+  gpio_set_irq_enabled_with_callback(m_line_number, interruption_type, true, &drvGpioCallback);
 
   // Setting bias here because pipico disables its configuration when setting interruption
   if(m_line_bias == DIO_BIAS_PULL_UP)
   {
-    gpio_pull_up(m_dio_line_number);
+    gpio_pull_up(m_line_number);
   }else if(m_line_bias == DIO_BIAS_PULL_DOWN)
   {
-    gpio_pull_down(m_dio_line_number);
+    gpio_pull_down(m_line_number);
   }
 
   return STATUS_DRV_SUCCESS;
@@ -216,7 +216,7 @@ void drvGpioCallback(uint gpio, uint32_t events)
     obj = *it;
     // if the current index is needed:
     auto i = std::distance(g_gpio_ptr.begin(), it);
-    if (obj->m_dio_line_number == gpio)
+    if (obj->m_line_number == gpio)
     {
       if(obj->m_func != nullptr)
       {

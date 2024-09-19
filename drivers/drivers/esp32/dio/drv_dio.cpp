@@ -17,9 +17,9 @@
  * @brief Constructor
  * @param line_offset GPIO number
  */
-DrvDIO::DrvDIO(uint8_t line_offset)
+DrvDIO::DrvDIO(uint32_t line_offset, uint32_t port)
 {
-  m_dio_line_number = line_offset;
+  m_line_number = line_offset;
   m_value = false;
 }
 
@@ -37,7 +37,7 @@ DrvDIO::~DrvDIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
+Status_t DrvDIO::configure(const DioSettings_t *list, uint8_t list_size)
 {
   Status_t success;
   gpio_config_t settings =
@@ -109,8 +109,8 @@ Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
     }
   }
 
-  settings.pin_bit_mask = 1 << m_dio_line_number;
-  esp_err = gpio_set_level((gpio_num_t) m_dio_line_number, m_value);
+  settings.pin_bit_mask = 1 << m_line_number;
+  esp_err = gpio_set_level((gpio_num_t) m_line_number, m_value);
   esp_err |= gpio_config(&settings);
   if(esp_err == ESP_OK)
   {
@@ -129,7 +129,7 @@ Status_t DrvDIO::configure(const DioConfigure_t *list, uint8_t list_size)
  */
 Status_t DrvDIO::read(bool &state)
 {
-  state = gpio_get_level((gpio_num_t) m_dio_line_number) == 0 ? false : true;
+  state = gpio_get_level((gpio_num_t) m_line_number) == 0 ? false : true;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -141,7 +141,7 @@ Status_t DrvDIO::read(bool &state)
 Status_t DrvDIO::write(bool value)
 {
   esp_err_t esp_err;
-  esp_err = gpio_set_level((gpio_num_t) m_dio_line_number, value);
+  esp_err = gpio_set_level((gpio_num_t) m_line_number, value);
   if(esp_err == ESP_OK)
   {
     m_value = value;
@@ -190,8 +190,8 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
       interruption_type = GPIO_INTR_ANYEDGE;
       break;
     default:
-      gpio_set_intr_type((gpio_num_t) m_dio_line_number, GPIO_INTR_DISABLE);
-      gpio_isr_handler_remove((gpio_num_t) m_dio_line_number);
+      gpio_set_intr_type((gpio_num_t) m_line_number, GPIO_INTR_DISABLE);
+      gpio_isr_handler_remove((gpio_num_t) m_line_number);
       m_func = nullptr;
       m_arg = nullptr;
       return STATUS_DRV_SUCCESS;
@@ -200,8 +200,8 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
 
   m_func = func;
   m_arg = arg;
-  gpio_set_intr_type((gpio_num_t)m_dio_line_number, interruption_type);
-  gpio_isr_handler_add((gpio_num_t)m_dio_line_number,
+  gpio_set_intr_type((gpio_num_t)m_line_number, interruption_type);
+  gpio_isr_handler_add((gpio_num_t)m_line_number,
                        [] (void *arg) -> void
                        {
                         DrvDIO *self = (DrvDIO *) arg;
@@ -223,6 +223,6 @@ void DrvDIO::callback(void)
   {
     read(state);
     if(state) { edge = DIO_EDGE_RISING;}
-    m_func(STATUS_DRV_SUCCESS, m_dio_line_number, edge, state, m_arg);
+    m_func(STATUS_DRV_SUCCESS, m_line_number, edge, state, m_arg);
   }
 }

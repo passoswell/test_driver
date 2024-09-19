@@ -25,13 +25,13 @@
 class DrvDioBase : public DioInterface
 {
 public:
-  uint8_t m_dio_line_number;
+  uint32_t m_line_number;
   DioCallback_t m_func;
   void *m_arg;
 
   Status_t configure(uint8_t parameter, uint32_t value);
 
-  Status_t configure(const DioConfigureList_t *list, uint8_t list_size);
+  Status_t configure(const DioSettings_t *list, uint8_t list_size);
 
   Status_t read(bool &state);
 

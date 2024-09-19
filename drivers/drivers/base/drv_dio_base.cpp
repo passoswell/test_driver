@@ -16,6 +16,9 @@
  * @param parameter An item from DioConfigureList_t list
  * @param value The corresponding value for the parameter
  * @return Status_t
+ * @note
+ *       If implemented, should perform the configuration while keeping
+ *       untouched other settings as much as possible
  */
 Status_t DrvDioBase::configure(uint8_t parameter, uint32_t value)
 {
@@ -29,8 +32,17 @@ Status_t DrvDioBase::configure(uint8_t parameter, uint32_t value)
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
  * @return Status_t
+ * @note
+ *       Return an error if list is null or if list_size is zero
+ *       Default configurations if some parameters are missing:
+ *       DIO_LINE_DIRECTION should default to DIO_DIRECTION_INPUT
+ *       DIO_LINE_DRIVE should default to DIO_DRIVE_PUSH_PULL
+ *       DIO_LINE_BIAS should default to DIO_BIAS_DISABLED
+ *       DIO_LINE_EDGE should be ignored
+ *       DIO_LINE_INITIAL_VALUE should default to false (0, zero, low)
+ *       DIO_LINE_ACTIVE_STATE should default to true (1, one, high)
  */
-Status_t DrvDioBase::configure(const DioConfigureList_t *list, uint8_t list_size)
+Status_t DrvDioBase::configure(const DioSettings_t *list, uint8_t list_size)
 {
   (void) list;
   (void) list_size;
@@ -70,11 +82,13 @@ Status_t DrvDioBase::toggle()
 
 /**
  * @brief Template function to install an event callback function
- *
  * @param edge The edge that will trigger the event
  * @param func The callback function
  * @param arg A user parameter
  * @return Status_t
+ * @note
+ *       The method must configure the dio interruption according to the edge
+ *       Return error if func is null
  */
 Status_t DrvDioBase::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
 {

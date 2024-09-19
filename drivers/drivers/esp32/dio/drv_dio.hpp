@@ -26,11 +26,11 @@ class DrvDIO : public  DrvDioBase
 {
 public:
 
-  DrvDIO(uint8_t line_offset);
+  DrvDIO(uint32_t line_offset, uint32_t port = 0);
   virtual ~DrvDIO();
 
   // Status_t configure(uint8_t parameter, uint32_t value);
-  Status_t configure(const DioConfigure_t *list, uint8_t list_size);
+  Status_t configure(const DioSettings_t *list, uint8_t list_size);
 
   Status_t read(bool &state);
   Status_t write(bool value);

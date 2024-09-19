@@ -27,11 +27,11 @@ class DrvDIO final : public DrvDioBase
 {
 public:
 
-  DrvDIO(uint8_t line_offset, uint8_t chip_number);
+  DrvDIO(uint32_t line_offset, uint32_t chip_number = 0);
   virtual ~DrvDIO();
 
   // Status_t configure(uint8_t parameter, uint32_t value);
-  Status_t configure(const DioConfigure_t *list, uint8_t list_size);
+  Status_t configure(const DioSettings_t *list, uint8_t list_size);
 
   Status_t read(bool &state);
   Status_t write(bool value);
@@ -40,9 +40,9 @@ public:
   Status_t setCallback(DioEdge_t edge, DioCallback_t func = nullptr, void *arg = nullptr);
 
 private:
-  uint8_t m_dio_chip_number;
-  void *m_dio_chip_handle;
-  void *m_dio_line_handle;
+  uint32_t m_chip_number;
+  void *m_chip_handle;
+  void *m_line_handle;
   UtilsInOutSync_t m_sync;
   int m_flags;
   bool m_value;
