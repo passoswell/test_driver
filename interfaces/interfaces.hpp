@@ -14,7 +14,7 @@
 
 #include "inoutstream/inoutstream.hpp"
 
-#include "software_timer/software_timer.hpp"
+#include "software_timer/software_timer_interface.hpp"
 
 
 #endif /* INTERFACES_HPP_ */

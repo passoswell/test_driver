@@ -1,7 +1,7 @@
 add_library(interfaces INTERFACE
 interfaces.hpp
 inoutstream/inoutstream.hpp
-software_timer/software_timer.hpp
+software_timer/software_timer_interface.hpp
 dio/dio_interface_types.hpp
 dio/dio_interface.hpp
 )

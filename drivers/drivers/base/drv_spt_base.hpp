@@ -11,7 +11,7 @@
 
 #include "interfaces.hpp"
 
-class DrvSptBase : public SoftwareTimer
+class DrvSptBase : public SoftwareTimerInterface
 {
 public:
   uint32_t m_start_time;     // Time at which the timer was started

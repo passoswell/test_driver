@@ -34,11 +34,11 @@ typedef enum
 /**
  * @brief Interface for software timers
  */
-class SoftwareTimer
+class SoftwareTimerInterface
 {
 public:
 
-  virtual ~SoftwareTimer(){};
+  virtual ~SoftwareTimerInterface(){};
 
   // Start the timer
   virtual void start(uint32_t duration, SoftwareTimerMode_t mode = SOFTWARE_TIMER_ONE_SHOT) = 0;
