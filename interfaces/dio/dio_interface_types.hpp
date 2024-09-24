@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "commons.hpp"
+
 /**
  * @brief List of possible dio directions
  */
@@ -94,6 +96,9 @@ typedef struct
   uint8_t parameter;
   uint32_t value;
 }DioSettings_t;
+
+constexpr uint32_t DIO_INVALID_LINE = UINT32_MAX;
+constexpr uint32_t DIO_INVALID_PORT = UINT32_MAX;
 
 
 #endif /* DIO_INTERFACE_TYPES_HPP */

@@ -357,10 +357,6 @@ void DrvI2C::asyncThread(void)
       {
         m_sync.func(status, m_sync.buffer, m_bytes_read, m_sync.arg);
       }
-      else
-      {
-        readAsyncDoneCallback(status, m_sync.buffer, m_bytes_read);
-      }
       m_is_read_done = true;
       m_is_operation_done = true;
       m_is_reading = false;
@@ -373,10 +369,6 @@ void DrvI2C::asyncThread(void)
       if (m_sync.func != nullptr)
       {
         m_sync.func(status, m_sync.buffer, m_sync.size, m_sync.arg);
-      }
-      else
-      {
-        writeAsyncDoneCallback(status, m_sync.buffer, m_sync.size);
       }
       m_is_write_done = true;
       m_is_operation_done = true;

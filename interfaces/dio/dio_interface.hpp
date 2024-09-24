@@ -13,7 +13,6 @@
 #define DIO_INTERFACE_HPP
 
 #include "dio_interface_types.hpp"
-#include "commons.hpp"
 
 /**
  * @brief Interface class for digital inputs and outputs
@@ -44,4 +43,4 @@ public:
   Status_t setCallback(DioEdge_t edge, DioCallback_t func = nullptr, void *arg = nullptr);
 };
 
-#endif
+#endif /* DIO_INTERFACE_HPP */

@@ -8,13 +8,14 @@
  *
  */
 
-#ifndef INTERFACES_HPP_
-#define INTERFACES_HPP_
+#ifndef INTERFACES_HPP
+#define INTERFACES_HPP
+
+// #include "dio/dio_interface.hpp"
+
+// #include "inoutstream/inoutstream_interface.hpp"
+
+// #include "software_timer/software_timer_interface.hpp"
 
 
-#include "inoutstream/inoutstream.hpp"
-
-#include "software_timer/software_timer_interface.hpp"
-
-
-#endif /* INTERFACES_HPP_ */
+#endif /* INTERFACES_HPP */

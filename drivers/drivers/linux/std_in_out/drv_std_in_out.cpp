@@ -77,7 +77,7 @@ DrvStdInOut::~DrvStdInOut()
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvStdInOut::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
+Status_t DrvStdInOut::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
   uint32_t counter = 0;
@@ -122,7 +122,7 @@ Status_t DrvStdInOut::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvStdInOut::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
+Status_t DrvStdInOut::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   (void) key;
@@ -165,7 +165,7 @@ Status_t DrvStdInOut::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvStdInOut::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvStdInOut::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
   (void) key;
@@ -236,7 +236,7 @@ uint32_t DrvStdInOut::bytesRead()
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvStdInOut::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvStdInOut::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   (void) key;
@@ -309,10 +309,6 @@ void DrvStdInOut::readAsyncThread(void)
     {
       m_sync_rx.func(STATUS_DRV_SUCCESS, m_sync_rx.buffer, bytes_available, m_sync_rx.arg);
     }
-    else
-    {
-      readAsyncDoneCallback(STATUS_DRV_SUCCESS, m_sync_rx.buffer, m_sync_rx.size);
-    }
     m_is_read_done = true;
     m_is_operation_done = true;
     m_sync_rx.run = false;
@@ -336,9 +332,6 @@ void DrvStdInOut::writeAsyncThread(void)
     if(m_sync_tx.func != nullptr)
     {
       m_sync_tx.func(STATUS_DRV_SUCCESS, m_sync_tx.buffer, m_sync_tx.size, m_sync_tx.arg);
-    }else
-    {
-      writeAsyncDoneCallback(STATUS_DRV_SUCCESS, m_sync_tx.buffer, m_sync_tx.size);
     }
     m_is_write_done = true;
     m_is_operation_done = true;

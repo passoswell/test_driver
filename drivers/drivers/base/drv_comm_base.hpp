@@ -8,11 +8,11 @@
  *
  */
 
-#ifndef DRV_COMM_BASE_HPP_
-#define DRV_COMM_BASE_HPP_
+#ifndef DRV_COMM_BASE_HPP
+#define DRV_COMM_BASE_HPP
 
 
-#include "inoutstream/inoutstream.hpp"
+#include "inoutstream/inoutstream_interface.hpp"
 
 
 /**
@@ -39,7 +39,7 @@ typedef enum
 }DrvCommBaseParameters_t;
 
 
-class DrvCommBase : public InOutStream
+class DrvCommBase : public InOutStreamInterface
 {
 public:
 
@@ -56,25 +56,24 @@ public:
   virtual ~DrvCommBase();
 
   virtual Status_t configure(uint8_t parameter, uint32_t value);
-  virtual Status_t configure(const InOutStreamConfigure_t *list, uint8_t list_size);
+  virtual Status_t configure(const InOutStreamSettings_t *list, uint8_t list_size);
 
-  Status_t lock(uint8_t key);
-  Status_t unlock(uint8_t key);
+  Status_t lock(uint32_t key);
+  Status_t unlock(uint32_t key);
 
-  virtual Status_t read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout = UINT32_MAX);
-  virtual Status_t write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout = UINT32_MAX);
+  virtual Status_t read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX);
 
-  virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX);
+
+  virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortReadAsync();
   virtual bool isReadAsyncDone();
   virtual uint32_t bytesRead();
-  virtual Status_t readAsyncDoneCallback(Status_t error, uint8_t *buffer, uint32_t size, void *arg = nullptr);
 
-  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortWriteAsync();
   virtual bool isWriteAsyncDone();
   virtual uint32_t bytesWritten();
-  virtual Status_t writeAsyncDoneCallback(Status_t error, uint8_t *buffer, uint32_t size, void *arg = nullptr);
 
   virtual bool isOperationDone();
 
@@ -82,4 +81,4 @@ public:
 };
 
 
-#endif /* DRV_COMM_BASE_HPP_ */
+#endif /* DRV_COMM_BASE_HPP */

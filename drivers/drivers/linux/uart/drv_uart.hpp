@@ -32,16 +32,16 @@ public:
 
   ~DrvUART();
 
-  Status_t configure(const InOutStreamConfigure_t *list, uint8_t list_size);
+  Status_t configure(const InOutStreamSettings_t *list, uint8_t list_size);
 
-  Status_t read(uint8_t *buffer, uint32_t size, uint8_t key = 0, uint32_t timeout = 0xFFFFFFFF);
+  Status_t read(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_NO_KEY, uint32_t timeout = 0xFFFFFFFF);
 
-  Status_t write(uint8_t *buffer, uint32_t size, uint8_t key = 0, uint32_t timeout = 0xFFFFFFFF);
+  Status_t write(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_NO_KEY, uint32_t timeout = 0xFFFFFFFF);
 
-  Status_t readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_NO_KEY, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   bool isReadAsyncDone();
 
-  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_NO_KEY, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   bool isWriteAsyncDone();
 
 private:

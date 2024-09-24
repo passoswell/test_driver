@@ -1,5 +1,5 @@
 /**
- * @file software_timer.hpp
+ * @file software_timer_interface.hpp
  * @author your name (you@domain.com)
  * @brief Interface class for a software timer
  * @version 0.1
@@ -8,6 +8,9 @@
  * @copyright Copyright (c) 2024
  *
  */
+
+#ifndef SOFTWARE_TIMER_INTERFACE_HPP
+#define SOFTWARE_TIMER_INTERFACE_HPP
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -61,3 +64,5 @@ public:
   // Blocking delay for a specified duration
   virtual void delay(uint32_t duration) = 0;
 };
+
+#endif /* SOFTWARE_TIMER_INTERFACE_HPP */

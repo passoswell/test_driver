@@ -9,7 +9,10 @@
  *
  */
 
-#include "interfaces.hpp"
+#ifndef DRV_SPT_BASE_HPP
+#define DRV_SPT_BASE_HPP
+
+#include "software_timer/software_timer_interface.hpp"
 
 class DrvSptBase : public SoftwareTimerInterface
 {
@@ -38,3 +41,5 @@ public:
 
   virtual void delay(uint32_t duration);
 };
+
+#endif /* DRV_SPT_BASE_HPP */

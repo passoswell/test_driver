@@ -83,7 +83,7 @@ DrvUART::~DrvUART()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvUART::configure(const InOutStreamConfigure_t *list, uint8_t list_size)
+Status_t DrvUART::configure(const InOutStreamSettings_t *list, uint8_t list_size)
 {
   Status_t status;
   struct termios termios_structure;
@@ -180,7 +180,7 @@ Status_t DrvUART::configure(const InOutStreamConfigure_t *list, uint8_t list_siz
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
+Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
   int byte_count = 0;
@@ -229,7 +229,7 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t tim
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
+Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   int byte_count;
@@ -267,7 +267,7 @@ Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t ti
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvUART::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_rx.mutex,  std::defer_lock);
 
@@ -315,7 +315,7 @@ bool DrvUART::isReadAsyncDone()
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
 
@@ -377,10 +377,6 @@ void DrvUART::readAsyncThread(void)
     {
       m_sync_rx.func(success, m_sync_rx.buffer, m_bytes_read, m_sync_rx.arg);
     }
-    else
-    {
-      readAsyncDoneCallback(success, m_sync_rx.buffer, m_bytes_read);
-    }
     m_is_read_done = true;
     m_is_operation_done = true;
     m_sync_rx.run = false;
@@ -411,9 +407,6 @@ void DrvUART::writeAsyncThread(void)
     if(m_sync_tx.func != nullptr)
     {
       m_sync_tx.func(success, m_sync_tx.buffer, m_sync_tx.size, m_sync_tx.arg);
-    }else
-    {
-      writeAsyncDoneCallback(success, m_sync_tx.buffer, m_sync_tx.size);
     }
     m_is_write_done = true;
     m_is_operation_done = true;

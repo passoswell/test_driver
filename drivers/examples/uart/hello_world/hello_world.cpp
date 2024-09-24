@@ -29,12 +29,12 @@ void printErrorMessage(Status_t status);
 DrvUART serial(handle);
 
 
-const InOutStreamConfigure_t g_uart_config_list[]
+const InOutStreamSettings_t g_uart_config_list[]
 {
   ADD_PARAMETER(DRV_PARAM_BAUD, 115200),
   ADD_PARAMETER(DRV_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
 };
-const uint32_t g_uart_config_list_size = sizeof(g_uart_config_list) / sizeof(InOutStreamConfigure_t);
+const uint32_t g_uart_config_list_size = sizeof(g_uart_config_list) / sizeof(InOutStreamSettings_t);
 
 /**
  * @brief Example code that prints a Hello World message on a uart port

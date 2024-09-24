@@ -35,7 +35,7 @@ typedef struct
   bool terminate;
   uint8_t *buffer;
   uint32_t size;
-  uint8_t key;
+  uint32_t key;
   InOutStreamCallback_t func;
   void *arg;
 }UtilsInOutSync_t;

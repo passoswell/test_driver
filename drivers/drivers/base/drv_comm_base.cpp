@@ -54,7 +54,7 @@ Status_t DrvCommBase::configure(uint8_t parameter, uint32_t value)
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvCommBase::configure(const InOutStreamConfigure_t *list, uint8_t list_size)
+Status_t DrvCommBase::configure(const InOutStreamSettings_t *list, uint8_t list_size)
 {
   (void) list;
   (void) list_size;
@@ -65,9 +65,12 @@ Status_t DrvCommBase::configure(const InOutStreamConfigure_t *list, uint8_t list
  * @brief Lock a peripheral to one id
  * @return Status_t
  */
-Status_t DrvCommBase::lock(uint8_t key)
+Status_t DrvCommBase::lock(uint32_t key)
 {
-  if(m_mutex.key == key)
+  if(key == INOUTSTREAM_NO_KEY)
+  {
+    return STATUS_DRV_ERR_PARAM;
+  }else if(m_mutex.key == key)
   {
     return STATUS_DRV_SUCCESS;
   }else if(!m_mutex.lock.test_and_set(std::memory_order_acquire))
@@ -75,22 +78,25 @@ Status_t DrvCommBase::lock(uint8_t key)
     m_mutex.key = key;
     return STATUS_DRV_SUCCESS;
   }
-  return STATUS_DRV_UNKNOWN_ERROR;
+  return STATUS_DRV_ERR_NOT_OWNED;
 }
 
 /**
  * @brief Unlock a peripheral
  * @return Status_t
  */
-Status_t DrvCommBase::unlock(uint8_t key)
+Status_t DrvCommBase::unlock(uint32_t key)
 {
-  if(m_mutex.key == key)
+  if(key == INOUTSTREAM_NO_KEY)
+  {
+    return STATUS_DRV_ERR_PARAM;
+  }else if(m_mutex.key == key)
   {
     m_mutex.key = INOUTSTREAM_NO_KEY;
     m_mutex.lock.clear(std::memory_order_release);
     return STATUS_DRV_SUCCESS;
   }
-  return STATUS_DRV_UNKNOWN_ERROR;
+  return STATUS_DRV_ERR_NOT_OWNED;
 }
 
 /**
@@ -101,7 +107,7 @@ Status_t DrvCommBase::unlock(uint8_t key)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvCommBase::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
+Status_t DrvCommBase::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   (void) buffer;
   (void) size;
@@ -118,7 +124,7 @@ Status_t DrvCommBase::read(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_t timeout)
+Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   (void) buffer;
   (void) size;
@@ -136,7 +142,7 @@ Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint8_t key, uint32_
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvCommBase::readAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvCommBase::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
 {
   (void) buffer;
   (void) size;
@@ -173,24 +179,6 @@ uint32_t DrvCommBase::bytesRead()
 }
 
 /**
- * @brief Template method for asynchronous reception callback
- * @param buffer Buffer where data is stored
- * @param size Number of bytes read
- * @param arg User-defined parameter
- * @return Status_t
- */
-Status_t DrvCommBase::readAsyncDoneCallback(Status_t error, uint8_t *buffer, uint32_t size, void *arg)
-{
-  (void) error;
-  (void) buffer;
-  (void) size;
-  (void) arg;
-  m_is_read_done = true;
-  m_is_operation_done = true;
-  return STATUS_DRV_NOT_IMPLEMENTED;
-}
-
-/**
  * @brief Template for a method to write data asynchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
@@ -199,7 +187,7 @@ Status_t DrvCommBase::readAsyncDoneCallback(Status_t error, uint8_t *buffer, uin
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
 {
   (void) buffer;
   (void) size;
@@ -233,24 +221,6 @@ bool DrvCommBase::isWriteAsyncDone()
 uint32_t DrvCommBase::bytesWritten()
 {
   return 0;
-}
-
-/**
- * @brief Template method for asynchronous transmission callback
- * @param buffer Buffer where data is stored
- * @param size Number of bytes to write
- * @param arg User-defined parameter
- * @return Status_t
- */
-Status_t DrvCommBase::writeAsyncDoneCallback(Status_t error, uint8_t *buffer, uint32_t size, void *arg)
-{
-  (void) error;
-  (void) buffer;
-  (void) size;
-  (void) arg;
-  m_is_write_done = true;
-  m_is_operation_done = true;
-  return STATUS_DRV_NOT_IMPLEMENTED;
 }
 
 /**
