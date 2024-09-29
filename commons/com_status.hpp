@@ -73,12 +73,13 @@ typedef enum
   ERR_LIST_ORDER                    , /*!< List items not following the enum  */
   ERR_NOT_AVAILABLE                 , /*!< Resource not available             */
   ERR_NOT_IMPLEMENTED               , /*!< Function or method not implemented */
+  ERR_NOT_CONFIGURED                , /*!< Resource isn't properly configured */
   ERR_BUFFER_SIZE                   , /*!< Buffer is smaller than data size   */
   ERR_REGISTER_SIZE                 , /*!< Register is smaller than data size */
   ERR_DEVICE_NOT_FOUND              , /*!< Device was no found                */
   ERR_WRITE_PROTECTED               , /*!< Device is write protected          */
   ERR_INVALID_FILE_SYSTEM           , /*!< No valid file system found         */
-  ERR_RESOURCE_DEPLETED             , /*!< Cannot alocate hardware or memory  */
+  ERR_RESOURCE_DEPLETED             , /*!< Cannot allocate hardware or memory */
   ERR_NOT_LOCKED                    , /*!< Resource is empty                  */
   ERR_ALREADY_LOCKED                , /*!< Resource is in use                 */
   ERR_OWNED                         , /*!< Resource is in use by the caller   */
@@ -90,6 +91,7 @@ typedef enum
   ERR_TRANSFER                      , /*!< Error during data transfer         */
   ERR_ACKNOWLEDGED                  , /*!< A unexpected NACK was received     */
   ERR_NOT_ACKNOWLEDGED              , /*!< A unexpected ACK was received      */
+  ERR_BAD_HANDLE                    , /*!< Invalid handle to the resource     */
 
   ERR_PARAM                 = 0x8080, /*!< Invalid parameter                  */
 
@@ -115,11 +117,13 @@ constexpr Status_t STATUS_DRV_BUSY = {true, SRC_DRIVER, OPERATION_BUSY, (char *)
 
 constexpr Status_t STATUS_DRV_UNKNOWN_ERROR = {false, SRC_DRIVER, ERR_UNKNOWN_ERROR, (char *)"An unknown or unverified error occurred.\r\n"};
 constexpr Status_t STATUS_DRV_NOT_IMPLEMENTED = {false, SRC_DRIVER, ERR_NOT_IMPLEMENTED, (char *)"Method not implemented.\r\n"};
+constexpr Status_t STATUS_DRV_NOT_CONFIGURED = {false, SRC_DRIVER, ERR_NOT_CONFIGURED, (char *)"Resource is not properly configured.\r\n"};
 constexpr Status_t STATUS_DRV_NULL_POINTER = {false, SRC_DRIVER, ERR_NULL_POINTER, (char *)"A null pointer was detected.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_TIMEOUT = {false, SRC_DRIVER, ERR_TIMEOUT, (char *)"Operation timed out.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_BUSY = {false, SRC_DRIVER, ERR_BUSY, (char *)"Underlying driver was reported to be busy.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_NOT_OWNED = {false, SRC_INTERFACE, ERR_NOT_OWNED, (char *)"Resource is in use by someone else.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_PARAM = {false, SRC_DRIVER, ERR_PARAM, (char *)"An unspecified parameter was reported as illegal.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_PARAM_SIZE = {false, SRC_DRIVER, ERR_PARAM_SIZE, (char *)"The size parameter is invalid or out of range.\r\n"};
+constexpr Status_t STATUS_DRV_BAD_HANDLE = {false, SRC_DRIVER, ERR_BAD_HANDLE, (char *)"Invalid handle to the resource.\r\n"};
 
 #endif /* COM_STATUS_HPP_ */

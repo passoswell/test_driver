@@ -279,7 +279,7 @@ Status_t DrvI2C::i2cRead(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
     if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
     {
 
-      byte_count = readSyscall(m_linux_handle, (char *)buffer, size);
+      byte_count = readSyscall(m_linux_handle, buffer, size);
       m_bytes_read = byte_count > 0 ? byte_count : 0;
       if (byte_count != size)
       {
@@ -317,7 +317,7 @@ Status_t DrvI2C::i2cWrite(uint8_t *buffer, uint32_t size, uint8_t address_8bits)
     if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
     {
 
-      byte_count = writeSyscall(m_linux_handle, (char *)buffer, size);
+      byte_count = writeSyscall(m_linux_handle, buffer, size);
       if (byte_count != size)
       {
         SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");

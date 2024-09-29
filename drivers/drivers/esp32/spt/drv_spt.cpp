@@ -37,7 +37,7 @@ uint32_t DrvSPT::getTimeSincePowerOn()
   {
     case SOFTWARE_TIMER_SECONDS:
       time_u64 = esp_timer_get_time() / 1000;
-      m_prev_time_ms[0] = time_u64 & 0xFFFFFFFF;
+      m_prev_time_ms[0] = time_u64 & UINT32_MAX;
       integer = (m_prev_time_ms[0] - m_prev_time_ms[1] + m_prev_time_ms[2]) / 1000;
       fractional = (m_prev_time_ms[0] - m_prev_time_ms[1] + m_prev_time_ms[2]) % 1000;
       m_seconds_counter = m_seconds_counter + integer;
@@ -47,11 +47,11 @@ uint32_t DrvSPT::getTimeSincePowerOn()
       break;
     case SOFTWARE_TIMER_MILLISECONDS:
       time_u64 = esp_timer_get_time() / 1000;
-      time = time_u64 & 0xFFFFFFFF;
+      time = time_u64 & UINT32_MAX;
       break;
     case SOFTWARE_TIMER_MICROSECONDS:
       time_u64 = esp_timer_get_time();
-      time = time_u64 & 0xFFFFFFFF;
+      time = time_u64 & UINT32_MAX;
       break;
     default:
       diff = 0;

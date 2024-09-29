@@ -26,8 +26,8 @@
 #endif
 
 /**
- * Maximum value in ms. When the tick is 0XFFFFFFFF - 1.
- * DRV_PIT_MAX_COUNT_MS = sl_sleeptimer_tick_to_ms(0xFFFFFFFF)
+ * Maximum value in ms. When the tick is UINT32_MAX - 1.
+ * DRV_PIT_MAX_COUNT_MS = sl_sleeptimer_tick_to_ms(UINT32_MAX)
  */
 #if defined(DRV_PIT_USE_SLEEPTIMER)
 #define DRV_PIT_MAX_COUNT_MS                                           0x7CFFFFF

@@ -65,7 +65,10 @@ typedef enum
 
 
 constexpr uint8_t INOUTSTREAM_INVALID_ID = 0;
-constexpr uint32_t INOUTSTREAM_NO_KEY = UINT32_MAX;
+// Represents a state where the lock is free
+constexpr uint32_t INOUTSTREAM_EMPTY_KEY = UINT32_MAX - 1;
+// Represents a state where the key system is bypassed
+constexpr uint32_t INOUTSTREAM_MASTER_KEY = UINT32_MAX;
 
 
 #endif /* INOUTSTREAM_INTERFACE_TYPES_HPP */

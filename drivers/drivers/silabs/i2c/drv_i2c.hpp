@@ -28,8 +28,8 @@ public:
   DrvI2C(void *port_handle);
   virtual ~DrvI2C();
 
-  Status_t read(uint8_t *buffer, uint32_t size, uint8_t address_8bits, uint32_t timeout = 0xFFFFFFFF);
-  Status_t write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, uint32_t timeout = 0xFFFFFFFF);
+  Status_t read(uint8_t *buffer, uint32_t size, uint8_t address_8bits, uint32_t timeout = UINT32_MAX);
+  Status_t write(uint8_t *buffer, uint32_t size, uint8_t address_8bits, uint32_t timeout = UINT32_MAX);
 
 private:
   uint8_t m_address; //8 bits address

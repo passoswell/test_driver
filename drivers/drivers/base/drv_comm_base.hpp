@@ -31,6 +31,7 @@ typedef enum
   DRV_PARAM_RTS_GPIO,
   DRV_PARAM_STOP_BITS,
   DRV_PARAM_LINE_MODE,
+  DRV_PARAM_START_DELAY_US,
   DRV_USE_HW_PARITY,
   DRV_USE_HW_FLOW_CTRL,
   DRV_USE_HW_CRC,
@@ -65,12 +66,12 @@ public:
 
   virtual Status_t write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX);
 
-  virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortReadAsync();
   virtual bool isReadAsyncDone();
   virtual uint32_t bytesRead();
 
-  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortWriteAsync();
   virtual bool isWriteAsyncDone();
   virtual uint32_t bytesWritten();

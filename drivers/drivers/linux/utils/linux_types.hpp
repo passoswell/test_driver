@@ -38,6 +38,7 @@ typedef struct
   uint32_t key;
   InOutStreamCallback_t func;
   void *arg;
+  uint32_t timeout;
 }UtilsInOutSync_t;
 
 #endif /* LINUX_UTILS_HPP */

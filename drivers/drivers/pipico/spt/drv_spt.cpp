@@ -49,7 +49,7 @@ uint32_t DrvSPT::getTimeSincePowerOn()
       break;
     case SOFTWARE_TIMER_MICROSECONDS:
       time_u64 = to_us_since_boot(get_absolute_time());
-      time = time_u64 & 0xFFFFFFFF;
+      time = time_u64 & UINT32_MAX;
       break;
     default:
       diff = 0;

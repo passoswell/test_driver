@@ -17,7 +17,7 @@
  */
 DrvCommBase::DrvCommBase()
 {
-  m_mutex.key = INOUTSTREAM_NO_KEY;
+  m_mutex.key = INOUTSTREAM_EMPTY_KEY;
   m_mutex.lock.clear(std::memory_order_release);
   m_handle = nullptr;
   m_is_initialized = false;
@@ -67,16 +67,24 @@ Status_t DrvCommBase::configure(const InOutStreamSettings_t *list, uint8_t list_
  */
 Status_t DrvCommBase::lock(uint32_t key)
 {
-  if(key == INOUTSTREAM_NO_KEY)
+  switch(key)
   {
-    return STATUS_DRV_ERR_PARAM;
-  }else if(m_mutex.key == key)
-  {
-    return STATUS_DRV_SUCCESS;
-  }else if(!m_mutex.lock.test_and_set(std::memory_order_acquire))
-  {
-    m_mutex.key = key;
-    return STATUS_DRV_SUCCESS;
+    case INOUTSTREAM_MASTER_KEY:
+      return STATUS_DRV_SUCCESS;
+      break;
+    case INOUTSTREAM_EMPTY_KEY:
+      return STATUS_DRV_ERR_PARAM;
+      break;
+    default:
+      if (m_mutex.key == key)
+      {
+        return STATUS_DRV_ERR_BUSY;
+      } else if (!m_mutex.lock.test_and_set(std::memory_order_acquire))
+      {
+        m_mutex.key = key;
+        return STATUS_DRV_SUCCESS;
+      }
+      break;
   }
   return STATUS_DRV_ERR_NOT_OWNED;
 }
@@ -87,14 +95,22 @@ Status_t DrvCommBase::lock(uint32_t key)
  */
 Status_t DrvCommBase::unlock(uint32_t key)
 {
-  if(key == INOUTSTREAM_NO_KEY)
+  switch(key)
   {
-    return STATUS_DRV_ERR_PARAM;
-  }else if(m_mutex.key == key)
-  {
-    m_mutex.key = INOUTSTREAM_NO_KEY;
-    m_mutex.lock.clear(std::memory_order_release);
-    return STATUS_DRV_SUCCESS;
+    case INOUTSTREAM_MASTER_KEY:
+      return STATUS_DRV_SUCCESS;
+      break;
+    case INOUTSTREAM_EMPTY_KEY:
+      return STATUS_DRV_ERR_PARAM;
+      break;
+    default:
+      if (m_mutex.key == key)
+      {
+        m_mutex.key = INOUTSTREAM_EMPTY_KEY;
+        m_mutex.lock.clear(std::memory_order_release);
+        return STATUS_DRV_SUCCESS;
+      }
+      break;
   }
   return STATUS_DRV_ERR_NOT_OWNED;
 }
@@ -142,11 +158,12 @@ Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvCommBase::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvCommBase::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
 {
   (void) buffer;
   (void) size;
   (void) key;
+  (void) timeout;
   (void) func;
   (void) arg;
   return STATUS_DRV_NOT_IMPLEMENTED;
@@ -187,11 +204,12 @@ uint32_t DrvCommBase::bytesRead()
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func, void *arg)
+Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
 {
   (void) buffer;
   (void) size;
   (void) key;
+  (void) timeout;
   (void) func;
   (void) arg;
   return STATUS_DRV_NOT_IMPLEMENTED;

@@ -16,9 +16,13 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-int readSyscall(int fd, void* buf, size_t cnt);
+int readSyscall(int fd, uint8_t *buffer, size_t cnt);
 
-int writeSyscall(int fd, void* buf, size_t cnt);
+int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_ms);
+
+int readOnTimeoutSyscall2(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_ms);
+
+int writeSyscall(int fd, uint8_t *buffer, size_t cnt);
 
 int bytesAvailableSyscall(int fd);
 

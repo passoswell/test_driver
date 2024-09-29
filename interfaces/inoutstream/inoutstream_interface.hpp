@@ -42,7 +42,7 @@ public:
   virtual Status_t write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX) = 0;
 
   // Read data asynchronously
-  virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr) = 0;
+  virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr) = 0;
 
   // Abort an ongoing readAsync operation
   virtual Status_t abortReadAsync() = 0;
@@ -54,7 +54,7 @@ public:
   virtual uint32_t bytesRead() = 0;
 
   // Write data asynchronously
-  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr) = 0;
+  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr) = 0;
 
   // Abort an ongoing writeAsync operation
   virtual Status_t abortWriteAsync() = 0;
