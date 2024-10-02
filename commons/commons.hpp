@@ -13,6 +13,7 @@
 
 
 #include "com_status.hpp"
+#include "com_types.hpp"
 
 
 #endif /* COMMONS_HPP_ */

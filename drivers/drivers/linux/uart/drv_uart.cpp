@@ -254,7 +254,7 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t ti
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvUART::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
+Status_t DrvUART::write(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   Status_t status;
   int byte_count;
@@ -351,7 +351,7 @@ bool DrvUART::isReadAsyncDone()
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
+Status_t DrvUART::writeAsync(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
   Status_t status;
@@ -367,7 +367,7 @@ Status_t DrvUART::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint3
   m_is_write_done = false;
   m_is_operation_done = false;
   m_sync_tx.run = true;
-  m_sync_tx.buffer = buffer;
+  m_sync_tx.buffer_const = buffer;
   m_sync_tx.size = size;
   m_sync_tx.key = key;
   m_sync_tx.timeout = timeout;
@@ -439,11 +439,11 @@ void DrvUART::writeAsyncThread(void)
     m_sync_tx.condition.wait(locker1, [this]{ return this->m_sync_tx.run | this->m_terminate; });
     if(m_terminate) { break;}
 
-    status = write(m_sync_tx.buffer, m_sync_tx.size, m_sync_tx.key, m_sync_tx.timeout);
+    status = write(m_sync_tx.buffer_const, m_sync_tx.size, m_sync_tx.key, m_sync_tx.timeout);
 
     if(m_sync_tx.func != nullptr)
     {
-      m_sync_tx.func(status, m_sync_tx.buffer, m_sync_tx.size, m_sync_tx.arg);
+      m_sync_tx.func(status, m_sync_tx.buffer_const, m_sync_tx.size, m_sync_tx.arg);
     }
     m_is_write_done = true;
     m_is_operation_done = true;
@@ -460,7 +460,7 @@ void DrvUART::writeAsyncThread(void)
  * @param key Parameter
  * @return Status_t
  */
-Status_t DrvUART::checkInputs(uint8_t *buffer, uint32_t size, uint32_t timeout, uint32_t key)
+Status_t DrvUART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout, uint32_t key)
 {
   if(!m_is_initialized) { return STATUS_DRV_NOT_CONFIGURED;}
   if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}

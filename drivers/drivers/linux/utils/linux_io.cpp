@@ -139,7 +139,7 @@ int readOnTimeoutSyscall2(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_
  * @param cnt Number of bytes to write
  * @return int Number of bytes actually written
  */
-int writeSyscall(int fd, uint8_t *buffer, size_t cnt)
+int writeSyscall(int fd, const uint8_t *buffer, size_t cnt)
 {
   if(cnt == 0 || buffer == nullptr) { return 0;}
   return write(fd, buffer, cnt);

@@ -63,15 +63,19 @@ public:
   Status_t unlock(uint32_t key);
 
   virtual Status_t read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX);
+  virtual Status_t read(Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX);
 
-  virtual Status_t write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX);
+  virtual Status_t write(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX);
+  virtual Status_t write(const Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX);
 
   virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t readAsync(Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortReadAsync();
   virtual bool isReadAsyncDone();
   virtual uint32_t bytesRead();
 
-  virtual Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t writeAsync(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  virtual Status_t writeAsync(const Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   virtual Status_t abortWriteAsync();
   virtual bool isWriteAsyncDone();
   virtual uint32_t bytesWritten();

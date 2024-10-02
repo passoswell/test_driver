@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <atomic>
+#include <span>
 
 #include "commons.hpp"
 
@@ -28,7 +29,7 @@
  * @param arg An argument supplied by the caller
  * @return Status_t
  */
-typedef Status_t (*InOutStreamCallback_t)(Status_t error, uint8_t *buffer, uint32_t size, void *arg);
+using InOutStreamCallback_t = std::function<Status_t(Status_t error, const uint8_t *buffer, uint32_t size, void *arg)>;
 
 /**
  * @brief Parameter - value pair for configuration

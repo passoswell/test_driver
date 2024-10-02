@@ -22,7 +22,7 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
 
 int readOnTimeoutSyscall2(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_ms);
 
-int writeSyscall(int fd, uint8_t *buffer, size_t cnt);
+int writeSyscall(int fd, const uint8_t *buffer, size_t cnt);
 
 int bytesAvailableSyscall(int fd);
 

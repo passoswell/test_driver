@@ -133,6 +133,18 @@ Status_t DrvCommBase::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_
 }
 
 /**
+ * @brief Template for a method to read data synchronously
+ * @param buffer Buffer to store the data
+ * @param key A parameter with different uses depending on the implementation
+ * @param timeout Time to wait in milliseconds before returning an error
+ * @return Status_t
+ */
+Status_t DrvCommBase::read(Buffer_t buffer, uint32_t key, uint32_t timeout)
+{
+  return read(buffer.data(), buffer.size(), key, timeout);
+}
+
+/**
  * @brief Template for a method to write data synchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
@@ -140,13 +152,25 @@ Status_t DrvCommBase::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
+Status_t DrvCommBase::write(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   (void) buffer;
   (void) size;
   (void) key;
   (void) timeout;
   return STATUS_DRV_NOT_IMPLEMENTED;
+}
+
+/**
+ * @brief Template for a method to write data synchronously
+ * @param buffer Buffer where data is stored
+ * @param key A parameter with different uses depending on the implementation
+ * @param timeout Time to wait in milliseconds before returning an error
+ * @return Status_t
+ */
+Status_t DrvCommBase::write(const Buffer_t buffer, uint32_t key, uint32_t timeout)
+{
+  return write(buffer.data(), buffer.size(), key, timeout);
 }
 
 /**
@@ -167,6 +191,19 @@ Status_t DrvCommBase::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, ui
   (void) func;
   (void) arg;
   return STATUS_DRV_NOT_IMPLEMENTED;
+}
+
+/**
+ * @brief Template for a method to read data asynchronously
+ * @param buffer Buffer to store the data
+ * @param key A parameter with different uses depending on the implementation
+ * @param func Pointer to a function to call at the end of operation
+ * @param arg Parameter to pass to the callback function
+ * @return Status_t
+ */
+Status_t DrvCommBase::readAsync(Buffer_t buffer, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
+{
+  return readAsync(buffer.data(), buffer.size(), key, timeout, func, arg);
 }
 
 /**
@@ -204,7 +241,7 @@ uint32_t DrvCommBase::bytesRead()
  * @param arg Parameter to pass to the callback function
  * @return Status_t
  */
-Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
+Status_t DrvCommBase::writeAsync(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
 {
   (void) buffer;
   (void) size;
@@ -213,6 +250,19 @@ Status_t DrvCommBase::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, u
   (void) func;
   (void) arg;
   return STATUS_DRV_NOT_IMPLEMENTED;
+}
+
+/**
+ * @brief Template for a method to write data asynchronously
+ * @param buffer Buffer where data is stored
+ * @param key A parameter with different uses depending on the implementation
+ * @param func Pointer to a function to call at the end of operation
+ * @param arg Parameter to pass to the callback function
+ * @return Status_t
+ */
+Status_t DrvCommBase::writeAsync(const Buffer_t buffer, uint32_t key, uint32_t timeout, InOutStreamCallback_t func, void *arg)
+{
+  return writeAsync(buffer.data(), buffer.size(), key, timeout, func, arg);
 }
 
 /**

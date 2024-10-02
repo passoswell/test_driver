@@ -5,7 +5,7 @@ include(cmake/postproject_configuration.cmake)
 
 project(TEST_DRIVER VERSION 0.1.0 LANGUAGES C CXX ASM)
 set(CMAKE_C_STANDARD 11)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast") # Optimize for speed on release configuration
 
 # Define the directory where external repositories should be cloned

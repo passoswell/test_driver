@@ -35,14 +35,18 @@ public:
 
   Status_t configure(const InOutStreamSettings_t *list, uint8_t list_size);
 
+  using DrvCommBase::read;
   Status_t read(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_MASTER_KEY, uint32_t timeout = UINT32_MAX);
 
-  Status_t write(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_MASTER_KEY, uint32_t timeout = UINT32_MAX);
+  using DrvCommBase::write;
+  Status_t write(const uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_MASTER_KEY, uint32_t timeout = UINT32_MAX);
 
+  using DrvCommBase::readAsync;
   Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_MASTER_KEY, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   bool isReadAsyncDone();
 
-  Status_t writeAsync(uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_MASTER_KEY, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
+  using DrvCommBase::writeAsync;
+  Status_t writeAsync(const uint8_t *buffer, uint32_t size, uint32_t key = INOUTSTREAM_MASTER_KEY, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
   bool isWriteAsyncDone();
 
 private:
@@ -57,7 +61,7 @@ private:
 
   void writeAsyncThread(void);
 
-  Status_t checkInputs(uint8_t *buffer, uint32_t size, uint32_t timeout, uint32_t key);
+  Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout, uint32_t key);
 };
 
 
