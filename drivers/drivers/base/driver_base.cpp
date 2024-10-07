@@ -16,10 +16,8 @@
  */
 DriverBase::DriverBase()
 {
-  m_bytes_written = 0;
-  m_bytes_read = 0;
-  m_write_status = STATUS_DRV_NOT_CONFIGURED;
-  m_read_status = STATUS_DRV_NOT_CONFIGURED;
+  m_func = nullptr;
+  m_arg = nullptr;
 }
 
 /**
@@ -28,4 +26,34 @@ DriverBase::DriverBase()
 DriverBase::~DriverBase()
 {
   // Nothing is done here
+}
+
+/**
+ * @brief Configure a list of parameters
+ *
+ * @param list List of parameter-value pairs
+ * @param list_size Number of parameters on the list
+ * @return Status_t
+ */
+Status_t DriverBase::configure(const DriverParamList_t *list, uint8_t list_size)
+{
+  (void) list;
+  (void) list_size;
+  return STATUS_DRV_NOT_IMPLEMENTED;
+}
+
+/**
+ * @brief Install a callback function
+ *
+ * @param event An event to trigger the call
+ * @param function A function
+ * @param user_arg A argument used as a parameter to the function
+ * @return Status_t
+ */
+Status_t DriverBase::setCallback(uint8_t event, Callback_t function, void *user_arg)
+{
+  (void) event;
+  (void) function;
+  (void) user_arg;
+  return STATUS_DRV_NOT_IMPLEMENTED;
 }

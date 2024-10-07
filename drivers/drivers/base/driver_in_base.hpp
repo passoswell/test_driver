@@ -13,9 +13,9 @@
 #define DRIVER_IN_HPP
 
 #include "commons.hpp"
-#include "driver_base_types.hpp"
+#include "driver_base.hpp"
 
-class DriverInBase
+class DriverInBase : public DriverBase
 {
 public:
 
@@ -25,9 +25,6 @@ public:
 
   DriverInBase();
   virtual ~DriverInBase();
-
-  // Initialization function
-  virtual Status_t configure(const DriverParamList_t *list, uint8_t list_size);
 
   // Receive data
   virtual Status_t read(uint32_t &data);

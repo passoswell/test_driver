@@ -13,9 +13,9 @@
 #define DRIVER_OUT_HPP
 
 #include "commons.hpp"
-#include "driver_base_types.hpp"
+#include "driver_base.hpp"
 
-class DriverOutBase
+class DriverOutBase : public DriverBase
 {
 public:
 
@@ -25,9 +25,6 @@ public:
 
   DriverOutBase();
   virtual ~DriverOutBase();
-
-  // Initialization function
-  virtual Status_t configure(const DriverParamList_t *list, uint8_t list_size);
 
   // Transmit data
   virtual Status_t write(uint32_t &data);

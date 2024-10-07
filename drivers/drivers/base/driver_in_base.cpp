@@ -30,20 +30,6 @@ DriverInBase::~DriverInBase()
 }
 
 /**
- * @brief Configure a list of parameters
- *
- * @param list List of parameter-value pairs
- * @param list_size Number of parameters on the list
- * @return Status_t
- */
-Status_t DriverInBase::configure(const DriverParamList_t *list, uint8_t list_size)
-{
-  (void) list;
-  (void) list_size;
-  return STATUS_DRV_NOT_IMPLEMENTED;
-}
-
-/**
  * @brief Read an integer
  *
  * @param data Buffer to store the integer read

@@ -13,14 +13,22 @@
 #define DRIVER_HPP
 
 #include "commons.hpp"
-#include "driver_in_base.hpp"
-#include "driver_out_base.hpp"
+#include "driver_base_types.hpp"
 
-class DriverBase : public DriverInBase, public DriverOutBase
+class DriverBase
 {
 public:
+  Callback_t m_func;
+  void *m_arg;
+
   DriverBase();
   virtual ~DriverBase();
+
+  // Initialization function
+  virtual Status_t configure(const DriverParamList_t *list, uint8_t list_size);
+
+  // Callback
+  virtual Status_t setCallback(uint8_t event, Callback_t function, void *user_arg = nullptr);
 };
 
 #endif  // DRIVER_HPP
