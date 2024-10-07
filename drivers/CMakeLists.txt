@@ -7,6 +7,12 @@ drivers/base/drv_dio_base.hpp
 drivers/base/drv_dio_base.cpp
 drivers/base/drv_spt_base.hpp
 drivers/base/drv_spt_base.cpp
+drivers/base/driver_base.hpp
+drivers/base/driver_base.cpp
+drivers/base/driver_in_base.hpp
+drivers/base/driver_in_base.cpp
+drivers/base/driver_out_base.hpp
+drivers/base/driver_out_base.cpp
 )
 
 target_link_libraries(drivers interfaces)

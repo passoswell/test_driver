@@ -19,4 +19,6 @@
 
 using Buffer_t = std::span<uint8_t>;
 
+using Size_t = int32_t;
+
 #endif /* COM_TYPES_HPP */
