@@ -219,12 +219,13 @@ Status_t UART::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
   }else
   {
     status = readBlocking(data, byte_count, timeout);
+    m_sync_rx.run = false;
+    m_read_status = status;
+    locker1.unlock();
+    return status;
   }
 
-  m_read_status = status;
-  m_sync_rx.run = false;
-
-  return status;
+  return STATUS_DRV_UNKNOWN_ERROR;
 }
 
 /**
@@ -264,12 +265,80 @@ Status_t UART::write(const uint8_t *data, Size_t byte_count, uint32_t timeout)
   }else
   {
     status = writeBlocking(data, byte_count, timeout);
+    m_sync_tx.run = false;
+    m_write_status = status;
+    locker1.unlock();
+    return status;
   }
 
-  m_read_status = status;
-  m_sync_tx.run = false;
-  locker1.unlock();
+  return STATUS_DRV_UNKNOWN_ERROR;
+}
 
+/**
+ * @brief Install a callback function
+ *
+ * @param event An event to trigger the call
+ * @param function A function to call back
+ * @param user_arg A argument used as a parameter to the function
+ * @return Status_t
+ */
+Status_t UART::setCallback(uint8_t event, bool enable, Callback_t function, void *user_arg)
+{
+  std::unique_lock<std::mutex> locker1(m_sync_tx.mutex,  std::defer_lock);
+  std::unique_lock<std::mutex> locker2(m_sync_rx.mutex,  std::defer_lock);
+  Status_t status = STATUS_DRV_SUCCESS;
+
+  if(function == nullptr) { return STATUS_DRV_NULL_POINTER;}
+  if(m_sync_rx.run || m_sync_tx.run) { return STATUS_DRV_ERR_BUSY;}
+
+  if(!locker1.try_lock())
+  {
+    return STATUS_DRV_ERR_BUSY;
+  }else if(!locker2.try_lock())
+  {
+    locker1.unlock();
+    return STATUS_DRV_ERR_BUSY;
+  }
+
+  switch (event)
+  {
+  case EVENT_READ:
+    if(enable)
+    {
+      if(function == nullptr) {status = STATUS_DRV_NULL_POINTER;}
+      m_sync_rx.func = function;
+      m_sync_rx.arg = user_arg;
+    }else
+    {
+      m_sync_rx.func = nullptr;
+      m_sync_rx.arg = nullptr;
+    }
+    break;
+  case EVENT_WRITE:
+    if(enable)
+    {
+      if(function == nullptr) {status = STATUS_DRV_NULL_POINTER;}
+      m_sync_tx.func = function;
+      m_sync_tx.arg = user_arg;
+    }else
+    {
+      m_sync_tx.func = nullptr;
+      m_sync_tx.arg = nullptr;
+    }
+    break;
+  case EVENT_NONE:
+    m_sync_rx.func = nullptr;
+    m_sync_rx.arg = user_arg;
+    m_sync_tx.func = nullptr;
+    m_sync_tx.arg = user_arg;
+    break;
+  default:
+    status = STATUS_DRV_ERR_PARAM;
+    break;
+  }
+
+  locker1.unlock();
+  locker2.unlock();
   return status;
 }
 
@@ -332,7 +401,7 @@ void UART::readAsyncThread(void)
     if (m_sync_rx.func != nullptr)
     {
       Buffer_t data(m_sync_rx.buffer, m_bytes_read);
-      m_sync_rx.func(status, COMM_READ, data, m_sync_rx.arg);
+      m_sync_rx.func(status, EVENT_READ, data, m_sync_rx.arg);
     }
 
     m_read_status = status;
@@ -390,10 +459,10 @@ void UART::writeAsyncThread(void)
     if(m_sync_tx.func != nullptr)
     {
       Buffer_t data(m_sync_tx.buffer, m_bytes_written);
-      m_sync_tx.func(status, COMM_WRITE, data, m_sync_tx.arg);
+      m_sync_tx.func(status, EVENT_WRITE, data, m_sync_tx.arg);
     }
 
-    m_read_status = status;
+    m_write_status = status;
     m_sync_tx.run = false;
   }
 }

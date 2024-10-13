@@ -197,6 +197,7 @@ Status_t DIO::toggle()
 Status_t DIO::setCallback(uint8_t edge, bool enable, Callback_t function, void *user_arg)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
+  Status_t status = STATUS_DRV_SUCCESS;
   struct gpiod_line_request_config settings =
   {
     .consumer = "my_driver",
@@ -208,47 +209,71 @@ Status_t DIO::setCallback(uint8_t edge, bool enable, Callback_t function, void *
   if(m_line_handle == nullptr || m_chip_handle == nullptr) return STATUS_DRV_NULL_POINTER;
   settings.flags = m_flags;
 
+  if(!enable)
+  {
+    if(m_sync.thread != nullptr)
+    {
+      // locker1.lock();
+      m_sync.terminate = true;
+      m_sync.run = true;
+      // locker1.unlock();
+      m_sync.condition.notify_one();
+      m_sync.thread->join();
+    }
+    m_func = nullptr;
+    m_arg = nullptr;
+    return STATUS_DRV_SUCCESS;
+  }
+
   switch (edge)
   {
-    case DIO_EDGE_RISING:
+    case EVENT_EDGE_RISING:
       if(function == nullptr) return STATUS_DRV_NULL_POINTER;
       gpiod_line_release((struct gpiod_line *)m_line_handle);
       settings.request_type = GPIOD_LINE_REQUEST_EVENT_RISING_EDGE;
       m_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_chip_handle, m_line_number);
       ret = gpiod_line_request((struct gpiod_line *)m_line_handle, &settings, val);
       break;
-    case DIO_EDGE_FALLING:
+    case EVENT_EDGE_FALLING:
       if(function == nullptr) return STATUS_DRV_NULL_POINTER;
       gpiod_line_release((struct gpiod_line *)m_line_handle);
       settings.request_type = GPIOD_LINE_REQUEST_EVENT_FALLING_EDGE;
       m_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_chip_handle, m_line_number);
       ret = gpiod_line_request((struct gpiod_line *)m_line_handle, &settings, val);
       break;
-    case DIO_EDGE_BOTH:
+    case EVENT_EDGE_BOTH:
       if(function == nullptr) return STATUS_DRV_NULL_POINTER;
       gpiod_line_release((struct gpiod_line *)m_line_handle);
       settings.request_type = GPIOD_LINE_REQUEST_EVENT_BOTH_EDGES;
       m_line_handle = gpiod_chip_get_line((struct gpiod_chip *)m_chip_handle, m_line_number);
       ret = gpiod_line_request((struct gpiod_line *)m_line_handle, &settings, val);
       break;
-    default:
-      if(m_func != nullptr)
+    case EVENT_NONE:
+      if(m_sync.thread != nullptr)
       {
-        locker1.lock();
+        // locker1.lock();
         m_sync.terminate = true;
         m_sync.run = true;
-        locker1.unlock();
+        // locker1.unlock();
         m_sync.condition.notify_one();
         m_sync.thread->join();
       }
+      m_func = nullptr;
+      m_arg = nullptr;
       return STATUS_DRV_SUCCESS;
+      break;
+    default:
+      return STATUS_DRV_ERR_PARAM;
       break;
   }
 
   if(ret < 0) { return STATUS_DRV_UNKNOWN_ERROR;}
   m_func = function;
   m_arg = user_arg;
-  m_sync.thread = new std::thread(&DIO::readAsyncThread, this);
+  if(m_sync.thread == nullptr)
+  {
+    m_sync.thread = new std::thread(&DIO::readAsyncThread, this);
+  }
 
   return STATUS_DRV_SUCCESS;
 }
@@ -260,7 +285,7 @@ void DIO::readAsyncThread(void)
 {
   struct timespec ts = {0, 100000000};
   struct gpiod_line_event event;
-  DioEdge_t edge;
+  DriverEventsList_t edge;
   Status_t status;
   uint8_t state[1];
   int ret;
@@ -276,22 +301,25 @@ void DIO::readAsyncThread(void)
     switch(event.event_type)
     {
       case GPIOD_LINE_EVENT_RISING_EDGE:
-        edge = DIO_EDGE_RISING;
+        edge = EVENT_EDGE_RISING;
         state[0] = true;
         status = STATUS_DRV_SUCCESS;
         break;
       case GPIOD_LINE_EVENT_FALLING_EDGE:
-        edge = DIO_EDGE_FALLING;
+        edge = EVENT_EDGE_FALLING;
         state[0] = false;
         status = STATUS_DRV_SUCCESS;
         break;
       default:
-        edge = DIO_EDGE_NONE;
+        edge = EVENT_NONE;
         state[0] = false;
         status = STATUS_DRV_UNKNOWN_ERROR;
         break;
     }
-    m_func(status, edge, state, m_sync.arg);
+    if(m_func != nullptr)
+    {
+      m_func(status, edge, state, m_sync.arg);
+    }
   }
   m_sync.terminate = false;
   m_sync.run = false;

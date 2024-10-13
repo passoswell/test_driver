@@ -37,7 +37,7 @@ public:
   using UartBase::write;
   Status_t write(const uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
 
-  // Status_t setCallback(uint8_t event, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
+  Status_t setCallback(uint8_t event, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
 
 private:
   int m_linux_handle;

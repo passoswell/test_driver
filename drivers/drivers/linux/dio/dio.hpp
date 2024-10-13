@@ -25,7 +25,6 @@ public:
   DIO(uint32_t line_offset, uint32_t chip_number = 0);
   virtual ~DIO();
 
-  // Status_t configure(uint8_t parameter, uint32_t value);
   Status_t configure(const DriverSettings_t *list, uint8_t list_size);
 
   Status_t read(uint32_t &state);
