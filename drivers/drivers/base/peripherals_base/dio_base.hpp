@@ -29,15 +29,15 @@ class DioBase : public DriverInOutBase
 {
 public:
 
-  Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size);
 
-  Status_t read(uint32_t &state);
+  virtual Status_t read(uint32_t &state);
 
-  Status_t write(uint32_t value);
+  virtual Status_t write(uint32_t value);
 
-  Status_t toggle();
+  virtual Status_t toggle();
 
-  Status_t setCallback(uint8_t edge, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
+  virtual Status_t setCallback(uint8_t edge, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
 };
 
 #endif /* DIO_BASE_HPP */

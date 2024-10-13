@@ -26,15 +26,15 @@ class UartBase : public DriverInOutBase
 {
 public:
 
-  Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size){;}
 
-  Status_t read(uint8_t* data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
-  Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX);
+  using DriverInOutBase::read;
+  virtual Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX){;}
 
-  Status_t write(const uint8_t* data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
-  Status_t write(const Buffer_t data, uint32_t timeout = UINT32_MAX);
+  using DriverInOutBase::write;
+  virtual Status_t write(const uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX){;}
 
-  Status_t setCallback(uint8_t edge, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
+  virtual Status_t setCallback(uint8_t event, bool enable, Callback_t function = nullptr, void *user_arg = nullptr){;}
 };
 
 #endif /* UART_BASE_HPP */

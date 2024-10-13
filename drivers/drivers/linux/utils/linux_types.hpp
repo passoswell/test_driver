@@ -21,7 +21,7 @@
 #include <chrono>
 #include <cerrno>
 
-#include "drivers/base/drv_comm_base.hpp"
+#include "com_types.hpp"
 
 /**
  * @brief Structure to use with nom-blocking threaded data transfer
@@ -37,7 +37,7 @@ typedef struct
   uint8_t const *buffer_const;
   uint32_t size;
   uint32_t key;
-  InOutStreamCallback_t func;
+  Callback_t func;
   void *arg;
   uint32_t timeout;
 }UtilsInOutSync_t;

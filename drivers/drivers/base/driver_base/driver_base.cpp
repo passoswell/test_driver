@@ -16,8 +16,10 @@
  */
 DriverBase::DriverBase()
 {
+  m_handle = nullptr;
   m_func = nullptr;
   m_arg = nullptr;
+  m_is_async_mode = false;
 }
 
 /**

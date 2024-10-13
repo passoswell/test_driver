@@ -6,8 +6,8 @@ utils/linux_io.hpp
 utils/linux_io.cpp
 std_in_out/drv_std_in_out.cpp
 std_in_out/drv_std_in_out.hpp
-uart/drv_uart.cpp
-uart/drv_uart.hpp
+uart/uart.cpp
+uart/uart.hpp
 i2c/drv_i2c.cpp
 i2c/drv_i2c.hpp
 dio/dio.cpp

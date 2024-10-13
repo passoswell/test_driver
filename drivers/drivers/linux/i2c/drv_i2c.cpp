@@ -190,7 +190,7 @@ Status_t DrvI2C::readAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bits
   m_sync.buffer = buffer;
   m_sync.size = size;
   m_sync.key = address_8bits;
-  m_sync.func = func;
+  // m_sync.func = func;
   m_sync.arg = arg;
   locker1.unlock();
   m_sync.condition.notify_one();
@@ -237,7 +237,7 @@ Status_t DrvI2C::writeAsync(uint8_t *buffer, uint32_t size, uint8_t address_8bit
   m_sync.buffer = buffer;
   m_sync.size = size;
   m_sync.key = address_8bits;
-  m_sync.func = func;
+  // m_sync.func = func;
   m_sync.arg = arg;
   locker1.unlock();
   m_sync.condition.notify_one();
@@ -355,7 +355,7 @@ void DrvI2C::asyncThread(void)
       status = i2cRead(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
-        m_sync.func(status, m_sync.buffer, m_bytes_read, m_sync.arg);
+        // m_sync.func(status, m_sync.buffer, m_bytes_read, m_sync.arg);
       }
       m_is_read_done = true;
       m_is_operation_done = true;
@@ -368,7 +368,7 @@ void DrvI2C::asyncThread(void)
       status = i2cWrite(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
-        m_sync.func(status, m_sync.buffer, m_sync.size, m_sync.arg);
+        // m_sync.func(status, m_sync.buffer, m_sync.size, m_sync.arg);
       }
       m_is_write_done = true;
       m_is_operation_done = true;

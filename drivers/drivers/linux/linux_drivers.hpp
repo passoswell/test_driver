@@ -17,16 +17,16 @@
 #include "drivers/linux/std_in_out/drv_std_in_out.hpp"
 #endif
 
-#if __has_include("drivers/linux/uart/drv_uart.hpp")
-#include "drivers/linux/uart/drv_uart.hpp"
+#if __has_include("drivers/linux/uart/uart.hpp")
+#include "drivers/linux/uart/uart.hpp"
 #endif
 
 #if __has_include("drivers/linux/i2c/drv_i2c.hpp")
 #include "drivers/linux/i2c/drv_i2c.hpp"
 #endif
 
-#if __has_include("drivers/linux/spi/drv_spi.hpp")
-#include "drivers/linux/spi/drv_spi.hpp"
+#if __has_include("drivers/linux/spi/spi.hpp")
+#include "drivers/linux/spi/spi.hpp"
 #endif
 
 #if __has_include("drivers/linux/dio/dio.hpp")

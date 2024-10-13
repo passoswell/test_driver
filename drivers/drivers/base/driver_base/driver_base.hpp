@@ -18,8 +18,10 @@
 class DriverBase
 {
 public:
+  void *m_handle;
   Callback_t m_func;
   void *m_arg;
+  bool m_is_async_mode;
 
   DriverBase();
   virtual ~DriverBase();
