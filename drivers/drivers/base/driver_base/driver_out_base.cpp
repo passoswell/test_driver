@@ -60,7 +60,7 @@ Status_t DriverOutBase::write(float data)
  * @param byte_count Number of bytes to write
  * @return Status_t
  */
-Status_t DriverOutBase::write(const uint8_t *data, Size_t byte_count)
+Status_t DriverOutBase::write(const uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
   (void) data;
   (void) byte_count;
@@ -73,9 +73,9 @@ Status_t DriverOutBase::write(const uint8_t *data, Size_t byte_count)
  * @param data Buffer and size
  * @return Status_t
  */
-Status_t DriverOutBase::write(const Buffer_t data)
+Status_t DriverOutBase::write(const Buffer_t data, uint32_t timeout)
 {
-  return write(data.data(), data.size());
+  return write(data.data(), data.size(), timeout);
 }
 
 /**
@@ -105,5 +105,5 @@ Size_t DriverOutBase::getBytesWritten()
  */
 Status_t DriverOutBase::getWriteStatus()
 {
-  return STATUS_DRV_NOT_IMPLEMENTED;
+  return m_write_status;
 }

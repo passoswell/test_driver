@@ -60,7 +60,7 @@ Status_t DriverInBase::read(float &data)
  * @param byte_count Number of bytes to read
  * @return Status_t
  */
-Status_t DriverInBase::read(uint8_t *data, Size_t byte_count)
+Status_t DriverInBase::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
   (void) data;
   (void) byte_count;
@@ -73,9 +73,9 @@ Status_t DriverInBase::read(uint8_t *data, Size_t byte_count)
  * @param data Buffer and size
  * @return Status_t
  */
-Status_t DriverInBase::read(Buffer_t data)
+Status_t DriverInBase::read(Buffer_t data, uint32_t timeout)
 {
-  return read(data.data(), data.size());
+  return read(data.data(), data.size(), timeout);
 }
 
 /**
@@ -104,5 +104,5 @@ Size_t DriverInBase::getBytesRead()
  */
 Status_t DriverInBase::getReadStatus()
 {
-  return STATUS_DRV_NOT_IMPLEMENTED;
+  return m_read_status;
 }
