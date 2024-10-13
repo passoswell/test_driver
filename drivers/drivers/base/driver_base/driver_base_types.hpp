@@ -42,29 +42,30 @@ typedef enum
 }DioBias_t;
 
 /**
- * @brief List of possible dio edge events
- */
-typedef enum
-{
-  // DIO events
-  DIO_EDGE_NONE,
-  DIO_EDGE_RISING,
-  DIO_EDGE_FALLING,
-  DIO_EDGE_BOTH,
-
-  // Communication events
-  COMM_READ,
-  COMM_WRITE,
-  COMM_READ_WRITE,
-}DioEdge_t;
-
-/**
  * @brief List of possible dio states
  */typedef enum
 {
   DIO_STATE_LOW = 0,
   DIO_STATE_HIGH,
 }DioActiveState_t;
+
+/**
+ * @brief List of possible dio edge events
+ */
+typedef enum
+{
+  EVENT_NONE,
+
+  // DIO events
+  EVENT_EDGE_RISING,
+  EVENT_EDGE_FALLING,
+  EVENT_EDGE_BOTH,
+
+  // Communication events
+  EVENT_READ,
+  EVENT_WRITE,
+  EVENT_READ_WRITE,
+}DriverEventsList_t;
 
 typedef enum
 {
