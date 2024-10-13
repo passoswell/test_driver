@@ -32,6 +32,7 @@ typedef struct
 typedef enum
 {
   SRC_INTERFACE = 0,  /*!< SRC_INTERFACE */
+  SRC_HAL,            /*!< SRC_HAL */
   SRC_DRIVER,         /*!< SRC_DRIVER */
   SRC_DEVICE,         /*!< SRC_DEVICE */
   SRC_MIDDLEWARE,     /*!< SRC_MIDDLEWARE */

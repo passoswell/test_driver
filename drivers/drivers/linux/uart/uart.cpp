@@ -18,8 +18,6 @@
 
 #include "drivers/linux/utils/linux_io.hpp"
 
-static Status_t convertErrorCode(int code);
-
 static speed_t convertSpeed(uint32_t speed);
 
 /**
@@ -364,7 +362,7 @@ Status_t UART::readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout)
 
   if(bytes_read < 0)
   {
-    status = convertErrorCode(errno);
+    status = convertErrnoCode(errno);
   }else if(bytes_read == 0)
   {
     status = STATUS_DRV_ERR_TIMEOUT;
@@ -426,7 +424,7 @@ Status_t UART::writeBlocking(const uint8_t *data, Size_t byte_count, uint32_t ti
     drain_status = tcdrain(m_linux_handle);
     if (drain_status < 0)
     {
-      status = convertErrorCode(errno);
+      status = convertErrnoCode(errno);
     }
     else
     {
@@ -435,7 +433,7 @@ Status_t UART::writeBlocking(const uint8_t *data, Size_t byte_count, uint32_t ti
   }
   else
   {
-    status = convertErrorCode(errno);
+    status = convertErrnoCode(errno);
   }
   return status;
 }
@@ -482,21 +480,6 @@ Status_t UART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeou
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_BAD_HANDLE;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   return STATUS_DRV_SUCCESS;
-}
-
-Status_t convertErrorCode(int code)
-{
-  Status_t status;
-  switch(code)
-  {
-    case 0:
-      status = STATUS_DRV_SUCCESS;
-      break;
-    default:
-      status = STATUS_DRV_UNKNOWN_ERROR;
-      break;
-  }
-  return status;
 }
 
 speed_t convertSpeed(uint32_t speed)
