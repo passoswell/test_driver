@@ -14,6 +14,7 @@ drivers/base/driver_base/driver_out_base.hpp
 drivers/base/driver_base/driver_out_base.cpp
 
 drivers/base/peripherals_base/dio_base.hpp
+drivers/base/peripherals_base/uart_base.hpp
 )
 
 target_link_libraries(drivers interfaces)
