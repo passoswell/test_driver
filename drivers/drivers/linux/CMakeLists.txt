@@ -4,16 +4,17 @@ add_library(drv_linux STATIC
 utils/linux_types.hpp
 utils/linux_io.hpp
 utils/linux_io.cpp
+
+dio/dio.cpp
+dio/dio.hpp
+iic/iic.cpp
+iic/iic.hpp
+spt/drv_spt.cpp
+spt/drv_spt.hpp
 std_in_out/drv_std_in_out.cpp
 std_in_out/drv_std_in_out.hpp
 uart/uart.cpp
 uart/uart.hpp
-i2c/drv_i2c.cpp
-i2c/drv_i2c.hpp
-dio/dio.cpp
-dio/dio.hpp
-spt/drv_spt.cpp
-spt/drv_spt.hpp
 )
 
 include(FetchContent)

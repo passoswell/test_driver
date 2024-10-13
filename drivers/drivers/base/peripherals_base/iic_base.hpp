@@ -28,7 +28,7 @@ public:
 
   virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t setAddress(uint16_t address) = 0;
+  virtual void setAddress(uint16_t address) = 0;
 
   using DriverInOutBase::read;
   virtual Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;

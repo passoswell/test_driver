@@ -21,8 +21,8 @@
 #include "drivers/linux/uart/uart.hpp"
 #endif
 
-#if __has_include("drivers/linux/i2c/drv_i2c.hpp")
-#include "drivers/linux/i2c/drv_i2c.hpp"
+#if __has_include("drivers/linux/iic/iic.hpp")
+#include "drivers/linux/iic/iic.hpp"
 #endif
 
 #if __has_include("drivers/linux/spi/spi.hpp")

@@ -14,6 +14,8 @@ drivers/base/driver_base/driver_out_base.hpp
 drivers/base/driver_base/driver_out_base.cpp
 
 drivers/base/peripherals_base/dio_base.hpp
+drivers/base/peripherals_base/iic_base.hpp
+drivers/base/peripherals_base/spi_base.hpp
 drivers/base/peripherals_base/uart_base.hpp
 )
 
