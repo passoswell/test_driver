@@ -15,7 +15,7 @@
 #include "commons.hpp"
 #include "driver_base.hpp"
 
-class DriverOutBase : public DriverBase
+class DriverOutBase : virtual public DriverBase
 {
 public:
 
@@ -27,8 +27,8 @@ public:
   virtual ~DriverOutBase();
 
   // Transmit data
-  virtual Status_t write(uint32_t &data);
-  virtual Status_t write(float &data);
+  virtual Status_t write(uint32_t data);
+  virtual Status_t write(float data);
   virtual Status_t write(const uint8_t* data, Size_t byte_count);
   virtual Status_t write(const Buffer_t data);
 

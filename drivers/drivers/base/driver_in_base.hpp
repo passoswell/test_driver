@@ -15,7 +15,7 @@
 #include "commons.hpp"
 #include "driver_base.hpp"
 
-class DriverInBase : public DriverBase
+class DriverInBase : virtual public DriverBase
 {
 public:
 

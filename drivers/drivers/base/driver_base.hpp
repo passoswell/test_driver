@@ -25,10 +25,10 @@ public:
   virtual ~DriverBase();
 
   // Initialization function
-  virtual Status_t configure(const DriverParamList_t *list, uint8_t list_size);
+  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size);
 
   // Callback
-  virtual Status_t setCallback(uint8_t event, Callback_t function, void *user_arg = nullptr);
+  virtual Status_t setCallback(uint8_t event, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
 };
 
 #endif  // DRIVER_HPP
