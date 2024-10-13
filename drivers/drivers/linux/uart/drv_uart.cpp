@@ -28,12 +28,12 @@ static speed_t convertSpeed(uint32_t speed);
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
  */
-DrvUART::DrvUART(void *port_handle, DrvDIO *read_write_dio, bool dio_read_state)
+DrvUART::DrvUART(void *port_handle/*, DrvDIO *read_write_dio, bool dio_read_state*/)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
   m_terminate = false;
-  m_read_write_dio = read_write_dio;
+  // m_read_write_dio = read_write_dio;
   m_dio_delay_us = 1000;
 
   m_sync_rx.run = false;
@@ -179,11 +179,11 @@ Status_t DrvUART::configure(const InOutStreamSettings_t *list, uint8_t list_size
   tcflush(m_linux_handle, TCIFLUSH);
   tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
 
-  if(m_read_write_dio != nullptr)
-  {
-    m_read_write_dio->write(m_dio_read_state);
-    std::this_thread::sleep_for(std::chrono::microseconds(m_dio_delay_us));
-  }
+  // if(m_read_write_dio != nullptr)
+  // {
+  //   m_read_write_dio->write(m_dio_read_state);
+  //   std::this_thread::sleep_for(std::chrono::microseconds(m_dio_delay_us));
+  // }
 
   m_is_initialized = true;
   return STATUS_DRV_SUCCESS;
@@ -213,11 +213,11 @@ Status_t DrvUART::read(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t ti
   m_is_operation_done = false;
   m_sync_rx.run = true;
 
-  if(m_read_write_dio != nullptr)
-  {
-    m_read_write_dio->write(m_dio_read_state);
-    std::this_thread::sleep_for(std::chrono::microseconds(m_dio_delay_us));
-  }
+  // if(m_read_write_dio != nullptr)
+  // {
+  //   m_read_write_dio->write(m_dio_read_state);
+  //   std::this_thread::sleep_for(std::chrono::microseconds(m_dio_delay_us));
+  // }
 
   if(timeout == 0)
   {
@@ -270,11 +270,11 @@ Status_t DrvUART::write(const uint8_t *buffer, uint32_t size, uint32_t key, uint
   m_is_operation_done = false;
   m_sync_tx.run = true;
 
-  if(m_read_write_dio != nullptr)
-  {
-    m_read_write_dio->write(!m_dio_read_state);
-    std::this_thread::sleep_for(std::chrono::microseconds(m_dio_delay_us));
-  }
+  // if(m_read_write_dio != nullptr)
+  // {
+  //   m_read_write_dio->write(!m_dio_read_state);
+  //   std::this_thread::sleep_for(std::chrono::microseconds(m_dio_delay_us));
+  // }
 
   byte_count = writeSyscall(m_linux_handle, buffer, size);
   if(byte_count < 0)

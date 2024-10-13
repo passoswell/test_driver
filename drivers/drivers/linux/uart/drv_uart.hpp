@@ -20,7 +20,7 @@
 
 #include "drivers/base/drv_comm_base.hpp"
 #include "drivers/linux/utils/linux_types.hpp"
-#include "drivers/linux/dio/drv_dio.hpp"
+// #include "drivers/linux/dio/drv_dio.hpp"
 
 
 /**
@@ -29,7 +29,7 @@
 class DrvUART final : public DrvCommBase
 {
 public:
-  DrvUART(void *port_handle, DrvDIO *read_write_dio = nullptr, bool dio_read_state = false);
+  DrvUART(void *port_handle/*, DrvDIO *read_write_dio = nullptr, bool dio_read_state = false*/);
 
   ~DrvUART();
 
@@ -53,7 +53,7 @@ private:
   int m_linux_handle;
   UtilsInOutSync_t m_sync_rx, m_sync_tx;
   bool m_terminate;
-  DrvDIO *m_read_write_dio;
+  // DrvDIO *m_read_write_dio;
   bool m_dio_read_state;
   uint32_t m_dio_delay_us;
 

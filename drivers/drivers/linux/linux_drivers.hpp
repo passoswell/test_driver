@@ -29,8 +29,8 @@
 #include "drivers/linux/spi/drv_spi.hpp"
 #endif
 
-#if __has_include("drivers/linux/dio/drv_dio.hpp")
-#include "drivers/linux/dio/drv_dio.hpp"
+#if __has_include("drivers/linux/dio/dio.hpp")
+#include "drivers/linux/dio/dio.hpp"
 #endif
 
 #if __has_include("drivers/linux/spt/drv_spt.hpp")
