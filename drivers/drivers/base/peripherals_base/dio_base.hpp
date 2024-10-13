@@ -1,7 +1,7 @@
 /**
  * @file dio_base.hpp
  * @author your name (you@domain.com)
- * @brief
+ * @brief Interface class for DIO
  * @version 0.1
  * @date 2024-10-12
  *
