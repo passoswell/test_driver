@@ -16,9 +16,10 @@ include(cmake/GitUtils.cmake)
 add_subdirectory(commons)
 add_subdirectory(interfaces)
 add_subdirectory(drivers)
+add_subdirectory(devices)
 
 add_executable(TEST_DRIVER TEST_DRIVER.cpp)
-target_link_libraries(TEST_DRIVER drivers)
+target_link_libraries(TEST_DRIVER drivers devices)
 _postbuild_task(TEST_DRIVER)
 
 include(CTest)
