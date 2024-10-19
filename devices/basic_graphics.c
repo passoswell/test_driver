@@ -390,7 +390,7 @@ void BGFX_DrawTriangleFill(uint16_t x0, uint16_t y0, uint16_t x1,
 
 
 
-void BGFX_DrawChar(uint16_t x, uint16_t y, uint8_t c, uint16_t color,
+void BGFX_DrawChar(uint16_t x, uint16_t y, const char c, uint16_t color,
     uint16_t bg, uint8_t size_x, uint8_t size_y, BGFX_Parameters_t Display)
 {
 
@@ -404,9 +404,9 @@ void BGFX_DrawChar(uint16_t x, uint16_t y, uint8_t c, uint16_t color,
       return;
     }
 
-    if (!Display.Cp437 && (c >= 176)){
-      c++; /* Handle 'classic' charset behavior */
-    }
+    // if (!Display.Cp437 && (c >= 176)){
+    //   c++; /* Handle 'classic' charset behavior */
+    // }
 
 
     for (int8_t i = 0; i < 5; i++) { /* Char bitmap = 5 columns */
@@ -443,7 +443,7 @@ void BGFX_DrawChar(uint16_t x, uint16_t y, uint8_t c, uint16_t color,
 
 
 
-void BGFX_SendString(uint16_t X, uint16_t Y, uint8_t *Buffer, uint32_t Length,
+void BGFX_SendString(uint16_t X, uint16_t Y, const char *Buffer, uint32_t Length,
     uint16_t Color, uint16_t Bgc, uint8_t SizeX, uint8_t SizeY,
     BGFX_Parameters_t Display)
 {
@@ -659,4 +659,3 @@ void BGFX_DrawCircleFillHelper(uint16_t x0, uint16_t y0, uint16_t r,
     px = x;
   }
 }
-

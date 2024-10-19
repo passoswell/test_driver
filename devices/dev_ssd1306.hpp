@@ -43,7 +43,7 @@ public:
 
   Status_t writeAsync(const uint8_t *buffer, uint32_t size, uint8_t key, InOutStreamCallback_t func = nullptr, void *arg = nullptr);
 
-  Status_t writePixels(uint8_t *buffer, uint32_t size);
+  Status_t writePixels(const uint8_t *buffer, uint32_t size);
 
 protected:
   bool m_is_initialized;

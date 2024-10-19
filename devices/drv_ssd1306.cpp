@@ -338,7 +338,7 @@ Status_t SSD1306::writeAsync(const uint8_t *buffer, uint32_t size, uint8_t key, 
  * @param size
  * @return Status_t
  */
-Status_t SSD1306::writePixels(uint8_t *buffer, uint32_t size)
+Status_t SSD1306::writePixels(const uint8_t *buffer, uint32_t size)
 {
   Status_t status;
   if(size > 128*8) { return STATUS_DRV_ERR_PARAM_SIZE;}

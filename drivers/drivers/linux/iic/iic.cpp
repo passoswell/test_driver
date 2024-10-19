@@ -37,7 +37,7 @@ IIC::IIC(void *port_handle, uint16_t address)
   m_sync.size = 0;
   m_sync.func = nullptr;
   m_sync.arg = nullptr;
-  // m_sync.thread = new std::thread(&IIC::asyncThread, this);
+  m_sync.thread = new std::thread(&IIC::asyncThread, this);
 }
 
 /**
@@ -232,28 +232,56 @@ Status_t IIC::i2cWrite(const uint8_t *buffer, uint32_t size, uint16_t address_8b
 {
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
+  static bool is_open = false;
 
-  // TODO: read errno for all syscall failures
-  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
+  if(!is_open)
   {
-    if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
+    if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
     {
-
-      byte_count = writeSyscall(m_linux_handle, buffer, size);
-      if (byte_count != size)
-      {
-        SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");
-      }
-
-    }else
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+      is_open = true;
     }
-    close(m_linux_handle);
-  }else
-  {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+    else
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+      return status;
+    }
   }
+
+  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
+  {
+
+    byte_count = writeSyscall(m_linux_handle, buffer, size);
+    if (byte_count != size)
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");
+    }
+  }
+  else
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+  }
+
+  // // TODO: read errno for all syscall failures
+  // if ((m_linux_handle = open((char *)m_handle, O_RDWR)) >= 0)
+  // {
+  //   if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address_8bits >> 1) >= 0)
+  //   {
+
+  //     byte_count = writeSyscall(m_linux_handle, buffer, size);
+  //     if (byte_count != size)
+  //     {
+  //       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through i2c is smaller than the requested.");
+  //     }
+
+  //   }else
+  //   {
+  //     SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+  //   }
+  //   close(m_linux_handle);
+  // }else
+  // {
+  //   SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+  // }
   return status;
 }
 
