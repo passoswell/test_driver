@@ -45,6 +45,7 @@ private:
   uint16_t m_address;
   int m_linux_handle;
   bool m_terminate;
+  bool m_is_configured;
   UtilsInOutSync_t m_sync;
 
   Status_t i2cRead(uint8_t *buffer, uint32_t size, uint16_t address_8bits);
