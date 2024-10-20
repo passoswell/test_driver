@@ -17,7 +17,6 @@
 #include <stdbool.h>
 
 #include "drivers/base/driver_base/driver_inout_base.hpp"
-#include "drivers/linux/utils/linux_types.hpp"
 
 constexpr uint32_t DIO_INVALID_LINE = UINT32_MAX;
 constexpr uint32_t DIO_INVALID_PORT = UINT32_MAX;
