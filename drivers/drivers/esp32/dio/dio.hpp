@@ -17,12 +17,12 @@
 /**
  * @brief Class that export DIO functionalities
  */
-class DIO final : public DriverInOutBase
+class DIO : public  DriverInOutBase
 {
 public:
   uint32_t m_line_number;
 
-  DIO(uint32_t line_offsetline_offset, uint32_t port = 0);
+  DIO(uint32_t line_offset, uint32_t port = 0);
   virtual ~DIO();
 
   Status_t configure(const DriverSettings_t *list, uint8_t list_size);
@@ -35,9 +35,9 @@ public:
 
   Status_t setCallback(uint8_t edge, bool enable, Callback_t function = nullptr, void *user_arg = nullptr);
 
+  void callback(void);
+
 private:
-  void *m_line_handle;
-  DioBias_t m_line_bias;
   int m_flags;
   bool m_value;
 };

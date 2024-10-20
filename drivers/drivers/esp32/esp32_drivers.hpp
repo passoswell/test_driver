@@ -25,8 +25,8 @@
 #include "drivers/esp32/spi/drv_spi.hpp"
 #endif
 
-#if __has_include("drivers/esp32/dio/drv_dio.hpp")
-#include "drivers/esp32/dio/drv_dio.hpp"
+#if __has_include("drivers/esp32/dio/dio.hpp")
+#include "drivers/esp32/dio/dio.hpp"
 #endif
 
 #if __has_include("drivers/esp32/spt/drv_spt.hpp")
