@@ -19,4 +19,8 @@
 
 using Buffer_t = std::span<uint8_t>;
 
+using Size_t = int32_t;
+
+using Callback_t = std::function<Status_t(Status_t status, uint8_t event, const Buffer_t data, void *user_arg)>;
+
 #endif /* COM_TYPES_HPP */

@@ -13,20 +13,20 @@
 #define PIPICO_DRIVERS_HPP_
 
 
-#if __has_include("drivers/pipico/uart/drv_uart.hpp")
-#include "drivers/pipico/uart/drv_uart.hpp"
+#if __has_include("drivers/pipico/uart/uart.hpp")
+#include "drivers/pipico/uart/uart.hpp"
 #endif
 
-#if __has_include("drivers/pipico/i2c/drv_i2c.hpp")
-#include "drivers/pipico/i2c/drv_i2c.hpp"
+#if __has_include("drivers/pipico/iic/iic.hpp")
+#include "drivers/pipico/iic/iic.hpp"
 #endif
 
-#if __has_include("drivers/pipico/spi/drv_spi.hpp")
-#include "drivers/pipico/spi/drv_spi.hpp"
+#if __has_include("drivers/pipico/spi/spi.hpp")
+#include "drivers/pipico/spi/spi.hpp"
 #endif
 
-#if __has_include("drivers/pipico/dio/drv_dio.hpp")
-#include "drivers/pipico/dio/drv_dio.hpp"
+#if __has_include("drivers/pipico/dio/dio.hpp")
+#include "drivers/pipico/dio/dio.hpp"
 #endif
 
 #if __has_include("drivers/pipico/spt/drv_spt.hpp")

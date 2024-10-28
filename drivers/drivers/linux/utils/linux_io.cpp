@@ -18,6 +18,7 @@
 #include <chrono>
 #include <poll.h>
 #include <sys/types.h>
+#include <string.h>
 
 
 
@@ -191,4 +192,30 @@ int waitOnReceptionTimeoutSyscall(int fd, uint32_t size, uint32_t wait_time)
     byte_count = bytesAvailableSyscall(fd);
   } while (byte_count >= 0 && byte_count < size && timeout_counter > 0);
   return byte_count;
+}
+
+/**
+ * @brief Convert errno code into Status_t code
+ *
+ * @param code errno code
+ * @return Status_t
+ */
+Status_t convertErrnoCode(int code)
+{
+  Status_t status;
+
+  // TODO: Implement a thorough translation between error codes
+  switch(code)
+  {
+    case 0:
+      status = STATUS_DRV_SUCCESS;
+      break;
+    default:
+      status.code = ERR_UNKNOWN_ERROR;
+      status.description = strerror(code);
+      status.source = SRC_HAL;
+      status.success = false;
+      break;
+  }
+  return status;
 }

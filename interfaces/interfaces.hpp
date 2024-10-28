@@ -11,8 +11,6 @@
 #ifndef INTERFACES_HPP
 #define INTERFACES_HPP
 
-// #include "dio/dio_interface.hpp"
-
 // #include "inoutstream/inoutstream_interface.hpp"
 
 // #include "software_timer/software_timer_interface.hpp"

@@ -13,20 +13,20 @@
 #define ESP32_DRIVERS_HPP_
 
 
-#if __has_include("drivers/esp32/uart/drv_uart.hpp")
-#include "drivers/esp32/uart/drv_uart.hpp"
+#if __has_include("drivers/esp32/uart/uart.hpp")
+#include "drivers/esp32/uart/uart.hpp"
 #endif
 
-#if __has_include("drivers/esp32/i2c/drv_i2c.hpp")
-#include "drivers/esp32/i2c/drv_i2c.hpp"
+#if __has_include("drivers/esp32/iic/iic.hpp")
+#include "drivers/esp32/i2c/iic.hpp"
 #endif
 
-#if __has_include("drivers/esp32/spi/drv_spi.hpp")
-#include "drivers/esp32/spi/drv_spi.hpp"
+#if __has_include("drivers/esp32/spi/spi.hpp")
+#include "drivers/esp32/spi/spi.hpp"
 #endif
 
-#if __has_include("drivers/esp32/dio/drv_dio.hpp")
-#include "drivers/esp32/dio/drv_dio.hpp"
+#if __has_include("drivers/esp32/dio/dio.hpp")
+#include "drivers/esp32/dio/dio.hpp"
 #endif
 
 #if __has_include("drivers/esp32/spt/drv_spt.hpp")

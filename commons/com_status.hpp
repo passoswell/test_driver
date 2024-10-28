@@ -32,6 +32,7 @@ typedef struct
 typedef enum
 {
   SRC_INTERFACE = 0,  /*!< SRC_INTERFACE */
+  SRC_HAL,            /*!< SRC_HAL */
   SRC_DRIVER,         /*!< SRC_DRIVER */
   SRC_DEVICE,         /*!< SRC_DEVICE */
   SRC_MIDDLEWARE,     /*!< SRC_MIDDLEWARE */
@@ -111,6 +112,7 @@ typedef enum
 }
 
 constexpr Status_t STATUS_DRV_SUCCESS = {true, SRC_DRIVER, OPERATION_OK, (char *)"Request processed successfully.\r\n"};
+constexpr Status_t STATUS_DRV_READY = {true, SRC_DRIVER, OPERATION_OK, (char *)"Ready to process a new request.\r\n"};
 constexpr Status_t STATUS_DRV_IDLE = {true, SRC_DRIVER, OPERATION_IDLE, (char *)"No operation is being processed.\r\n"};
 constexpr Status_t STATUS_DRV_RUNNING = {true, SRC_DRIVER, OPERATION_RUNNING, (char *)"The requested operation is on-going, keep calling this method to update the status.\r\n"};
 constexpr Status_t STATUS_DRV_BUSY = {true, SRC_DRIVER, OPERATION_BUSY, (char *)"The resource is busy processing other request.\r\n"};

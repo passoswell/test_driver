@@ -1,32 +1,32 @@
 /**
- * @file drv_dio.cpp
+ * @file dio.cpp
  * @author your name (you@domain.com)
- * @brief
+ * @brief Give access to digital inputs and outputs on pipico
  * @version 0.1
- * @date 2024-08-03
+ * @date 2024-10-20
  *
  * @copyright Copyright (c) 2024
  *
  */
 
-#include "drv_dio.hpp"
+#include "dio.hpp"
 
 #include <vector>
 
 #include "hardware/gpio.h"
 
 /**
- * @brief Vector of GPIO pointers, used for the interruption callback
+ * @brief Vector of DIO pointers, used for the interruption callback
  */
-std::vector<DrvDIO*> g_gpio_ptr;
+std::vector<DIO*> g_dio_ptr;
 
-void drvGpioCallback(uint gpio, uint32_t events);
+void drvDioCallback(uint dio, uint32_t events);
 
 /**
  * @brief Constructor
- * @param line_offset GPIO number
+ * @param line_offset DIO number
  */
-DrvDIO::DrvDIO(uint32_t line_offset, uint32_t port)
+DIO::DIO(uint32_t line_offset, uint32_t port)
 {
   m_line_number = line_offset;
   m_line_bias = DIO_BIAS_DISABLED;
@@ -35,7 +35,7 @@ DrvDIO::DrvDIO(uint32_t line_offset, uint32_t port)
 /**
  * @brief Destructor
  */
-DrvDIO::~DrvDIO()
+DIO::~DIO()
 {
   // Nothing is done here
 }
@@ -46,7 +46,7 @@ DrvDIO::~DrvDIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvDIO::configure(const DioSettings_t *list, uint8_t list_size)
+Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
 {
   Status_t success;
   DioDirection_t line_direction = DIO_DIRECTION_INPUT;
@@ -109,9 +109,9 @@ Status_t DrvDIO::configure(const DioSettings_t *list, uint8_t list_size)
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DrvDIO::read(bool &state)
+Status_t DIO::read(uint32_t &state)
 {
-  state = gpio_get(m_line_number) == 0 ? false : true;
+  state = gpio_get(m_line_number);
   return STATUS_DRV_SUCCESS;
 }
 
@@ -120,9 +120,9 @@ Status_t DrvDIO::read(bool &state)
  * @param state The state to set in the gpio
  * @return Status_t
  */
-Status_t DrvDIO::write(bool value)
+Status_t DIO::write(uint32_t value)
 {
-  gpio_put(m_line_number, value);
+  gpio_put(m_line_number, (bool)value);
   return STATUS_DRV_SUCCESS;
 }
 
@@ -130,7 +130,7 @@ Status_t DrvDIO::write(bool value)
  * @brief Toggle the state of a digital output
  * @return Status_t
  */
-Status_t DrvDIO::toggle()
+Status_t DIO::toggle()
 {
   gpio_xor_mask(1 << m_line_number);
   return STATUS_DRV_SUCCESS;
@@ -144,48 +144,60 @@ Status_t DrvDIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
+Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, void *user_arg)
+{
+  m_func = function;
+  m_arg = user_arg;
+  return STATUS_DRV_SUCCESS;
+}
+
+/**
+ * @brief Enable or disable callback operation
+ *
+ * @param enable True to enable callback operation
+ * @return Status_t
+ */
+Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
 {
   uint32_t interruption_type;
-  if(func == nullptr) { return STATUS_DRV_NULL_POINTER;}
+
+  if(!enable)
+  {
+    gpio_set_irq_enabled(m_line_number, GPIO_IRQ_LEVEL_LOW, false);
+
+    for (auto it = g_dio_ptr.begin(); it != g_dio_ptr.end(); it++)
+    {
+      DIO *obj;
+      obj = *it;
+      // if the current index is needed:
+      auto i = std::distance(g_dio_ptr.begin(), it);
+      if (obj->m_line_number == m_line_number)
+      {
+        g_dio_ptr.erase(it);
+        break;
+      }
+    }
+    return STATUS_DRV_SUCCESS;
+  }
 
   switch(edge)
   {
-    case DIO_EDGE_RISING:
+    case EVENT_EDGE_RISING:
       interruption_type = GPIO_IRQ_EDGE_RISE;
       break;
-    case DIO_EDGE_FALLING:
+    case EVENT_EDGE_FALLING:
       interruption_type = GPIO_IRQ_EDGE_FALL;
       break;
-    case DIO_EDGE_BOTH:
+    case EVENT_EDGE_BOTH:
       interruption_type = GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL;
       break;
     default:
-      gpio_set_irq_enabled(m_line_number, GPIO_IRQ_LEVEL_LOW, false);
-
-      for (auto it = g_gpio_ptr.begin(); it != g_gpio_ptr.end(); it++)
-      {
-        DrvDIO *obj;
-        obj = *it;
-        // if the current index is needed:
-        auto i = std::distance(g_gpio_ptr.begin(), it);
-        if (obj->m_line_number == m_line_number)
-        {
-          g_gpio_ptr.erase(it);
-          break;
-        }
-      }
-
-      m_func = nullptr;
-      m_arg = nullptr;
-      return STATUS_DRV_SUCCESS;
+      return STATUS_DRV_ERR_PARAM;
       break;
   }
 
-  m_func = func;
-  m_arg = arg;
-  g_gpio_ptr.push_back(this);
-  gpio_set_irq_enabled_with_callback(m_line_number, interruption_type, true, &drvGpioCallback);
+  g_dio_ptr.push_back(this);
+  gpio_set_irq_enabled_with_callback(m_line_number, interruption_type, true, &drvDioCallback);
 
   // Setting bias here because pipico disables its configuration when setting interruption
   if(m_line_bias == DIO_BIAS_PULL_UP)
@@ -202,30 +214,30 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
 /**
  * @brief Callback function called when a configured edge event occurs
  *
- * @param gpio GPIO number
+ * @param dio GPIO number
  * @param events A mask with the events that occurred
  */
-void drvGpioCallback(uint gpio, uint32_t events)
+void drvDioCallback(uint dio, uint32_t events)
 {
-  DioEdge_t edge = DIO_EDGE_FALLING;
-  bool state = false;
+  DriverEventsList_t edge = EVENT_EDGE_FALLING;
+  uint8_t state[1] = {false};
 
-  for (auto it = g_gpio_ptr.begin(); it != g_gpio_ptr.end(); it++)
+  for (auto it = g_dio_ptr.begin(); it != g_dio_ptr.end(); it++)
   {
-    DrvDIO *obj;
+    DIO *obj;
     obj = *it;
     // if the current index is needed:
-    auto i = std::distance(g_gpio_ptr.begin(), it);
-    if (obj->m_line_number == gpio)
+    auto i = std::distance(g_dio_ptr.begin(), it);
+    if (obj->m_line_number == dio)
     {
       if(obj->m_func != nullptr)
       {
         if(events & GPIO_IRQ_EDGE_RISE)
         {
-          edge = DIO_EDGE_RISING;
-          state = true;
+          edge = EVENT_EDGE_RISING;
+          state[0] = true;
         }
-        obj->m_func(STATUS_DRV_SUCCESS, gpio, edge, state, obj->m_arg);
+        obj->m_func(STATUS_DRV_SUCCESS, edge, state, obj->m_arg);
       }
       break;
     }

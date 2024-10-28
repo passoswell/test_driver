@@ -1,23 +1,24 @@
 /**
- * @file drv_dio.cpp
+ * @file dio.cpp
  * @author your name (you@domain.com)
  * @brief Give access to digital inputs and outputs on esp32
  * @version 0.1
- * @date 2024-08-01
+ * @date 2024-10-20
  *
  * @copyright Copyright (c) 2024
  *
  */
 
-#include "drv_dio.hpp"
+#include "dio.hpp"
 
 #include  "driver/gpio.h"
 
 /**
  * @brief Constructor
- * @param line_offset GPIO number
+ * @param line_offset DIO number
+ * @param port port number
  */
-DrvDIO::DrvDIO(uint32_t line_offset, uint32_t port)
+DIO::DIO(uint32_t line_offset, uint32_t port)
 {
   m_line_number = line_offset;
   m_value = false;
@@ -26,7 +27,7 @@ DrvDIO::DrvDIO(uint32_t line_offset, uint32_t port)
 /**
  * @brief Destructor
  */
-DrvDIO::~DrvDIO()
+DIO::~DIO()
 {
   // Nothing is done here
 }
@@ -37,7 +38,7 @@ DrvDIO::~DrvDIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DrvDIO::configure(const DioSettings_t *list, uint8_t list_size)
+Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
 {
   Status_t success;
   gpio_config_t settings =
@@ -127,9 +128,9 @@ Status_t DrvDIO::configure(const DioSettings_t *list, uint8_t list_size)
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DrvDIO::read(bool &state)
+Status_t DIO::read(uint32_t &state)
 {
-  state = gpio_get_level((gpio_num_t) m_line_number) == 0 ? false : true;
+  state = gpio_get_level((gpio_num_t) m_line_number);
   return STATUS_DRV_SUCCESS;
 }
 
@@ -138,13 +139,13 @@ Status_t DrvDIO::read(bool &state)
  * @param state The state to set in the gpio
  * @return Status_t
  */
-Status_t DrvDIO::write(bool value)
+Status_t DIO::write(uint32_t value)
 {
   esp_err_t esp_err;
   esp_err = gpio_set_level((gpio_num_t) m_line_number, value);
   if(esp_err == ESP_OK)
   {
-    m_value = value;
+    m_value = (bool) value;
     return STATUS_DRV_SUCCESS;
   }else
   {
@@ -156,7 +157,7 @@ Status_t DrvDIO::write(bool value)
  * @brief Toggle the state of a digital output
  * @return Status_t
  */
-Status_t DrvDIO::toggle()
+Status_t DIO::toggle()
 {
   m_value = !m_value;
   return write(m_value);
@@ -170,41 +171,54 @@ Status_t DrvDIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
+Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, void *user_arg)
+{
+  m_func = function;
+  m_arg = user_arg;
+  return STATUS_DRV_SUCCESS;
+}
+
+/**
+ * @brief Enable or disable callback operation
+ *
+ * @param enable True to enable callback operation
+ * @return Status_t
+ */
+Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
 {
   gpio_int_type_t interruption_type;
-  if(func == nullptr) { return STATUS_DRV_NULL_POINTER;}
+
+  if(!enable)
+  {
+    gpio_set_intr_type((gpio_num_t)m_line_number, GPIO_INTR_DISABLE);
+    gpio_isr_handler_remove((gpio_num_t)m_line_number);
+    return STATUS_DRV_SUCCESS;
+  }
 
   // install gpio isr service
   gpio_install_isr_service(0);
 
   switch(edge)
   {
-    case DIO_EDGE_RISING:
+    case EVENT_EDGE_RISING:
       interruption_type = GPIO_INTR_POSEDGE;
       break;
-    case DIO_EDGE_FALLING:
+    case EVENT_EDGE_FALLING:
       interruption_type = GPIO_INTR_NEGEDGE;
       break;
-    case DIO_EDGE_BOTH:
+    case EVENT_EDGE_BOTH:
       interruption_type = GPIO_INTR_ANYEDGE;
       break;
     default:
-      gpio_set_intr_type((gpio_num_t) m_line_number, GPIO_INTR_DISABLE);
-      gpio_isr_handler_remove((gpio_num_t) m_line_number);
-      m_func = nullptr;
-      m_arg = nullptr;
-      return STATUS_DRV_SUCCESS;
+      return STATUS_DRV_ERR_PARAM;
       break;
   }
 
-  m_func = func;
-  m_arg = arg;
   gpio_set_intr_type((gpio_num_t)m_line_number, interruption_type);
   gpio_isr_handler_add((gpio_num_t)m_line_number,
                        [] (void *arg) -> void
                        {
-                        DrvDIO *self = (DrvDIO *) arg;
+                        DIO *self = (DIO *) arg;
                         self->callback();
                        },
                        this);
@@ -215,14 +229,19 @@ Status_t DrvDIO::setCallback(DioEdge_t edge, DioCallback_t func, void *arg)
 /**
  * @brief Callback method, called when a configured edge event occurs
  */
-void DrvDIO::callback(void)
+void DIO::callback(void)
 {
-  DioEdge_t edge = DIO_EDGE_FALLING;
-  bool state;
+  DriverEventsList_t edge = EVENT_EDGE_FALLING;
+  uint32_t aux;
+  uint8_t state[1] = {false};
   if(m_func != nullptr)
   {
-    read(state);
-    if(state) { edge = DIO_EDGE_RISING;}
-    m_func(STATUS_DRV_SUCCESS, m_line_number, edge, state, m_arg);
+    read(aux);
+    state[0] = aux;
+    if(state[0] > 0) { edge = EVENT_EDGE_RISING;}
+    if(m_func != nullptr)
+    {
+      m_func(STATUS_DRV_SUCCESS, edge, state, m_arg);
+    }
   }
 }

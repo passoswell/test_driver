@@ -192,7 +192,7 @@ Status_t DrvStdInOut::readAsync(uint8_t *buffer, uint32_t size, uint32_t key, In
   m_sync_rx.buffer = buffer;
   m_sync_rx.size = size;
   m_sync_rx.key = key;
-  m_sync_rx.func = func;
+  // m_sync_rx.func = func;
   m_sync_rx.arg = arg;
   locker1.unlock();
   m_sync_rx.condition.notify_one();
@@ -263,7 +263,7 @@ Status_t DrvStdInOut::writeAsync(uint8_t *buffer, uint32_t size, uint32_t key, I
   m_sync_tx.buffer = buffer;
   m_sync_tx.size = size;
   m_sync_tx.key = key;
-  m_sync_tx.func = func;
+  // m_sync_tx.func = func;
   m_sync_tx.arg = arg;
   locker1.unlock();
   m_sync_tx.condition.notify_one();
@@ -307,7 +307,7 @@ void DrvStdInOut::readAsyncThread(void)
     m_bytes_read = fread(m_sync_rx.buffer, 1, m_sync_rx.size, m_in_file);
     if (m_sync_rx.func != nullptr)
     {
-      m_sync_rx.func(STATUS_DRV_SUCCESS, m_sync_rx.buffer, bytes_available, m_sync_rx.arg);
+      // m_sync_rx.func(STATUS_DRV_SUCCESS, m_sync_rx.buffer, bytes_available, m_sync_rx.arg);
     }
     m_is_read_done = true;
     m_is_operation_done = true;
@@ -331,7 +331,7 @@ void DrvStdInOut::writeAsyncThread(void)
     fflush(m_out_file);
     if(m_sync_tx.func != nullptr)
     {
-      m_sync_tx.func(STATUS_DRV_SUCCESS, m_sync_tx.buffer, m_sync_tx.size, m_sync_tx.arg);
+      // m_sync_tx.func(STATUS_DRV_SUCCESS, m_sync_tx.buffer, m_sync_tx.size, m_sync_tx.arg);
     }
     m_is_write_done = true;
     m_is_operation_done = true;
