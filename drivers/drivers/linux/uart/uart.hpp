@@ -17,6 +17,7 @@
 
 #include "drivers/base/peripherals_base/uart_base.hpp"
 #include "drivers/linux/utils/linux_types.hpp"
+#include "drivers/linux/utils/linux_threads.hpp"
 
 
 /**
@@ -25,7 +26,7 @@
 class UART final : public UartBase
 {
 public:
-  UART(void *port_handle);
+  UART(const void *port_handle);
 
   ~UART();
 
@@ -35,22 +36,23 @@ public:
   Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
 
   using UartBase::write;
-  Status_t write(const uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
+  Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
 
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
   int m_linux_handle;
-  UtilsInOutSync_t m_sync_rx, m_sync_tx;
   bool m_terminate;
 
-  Status_t readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout);
-  void readAsyncThread(void);
+  Status_t readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);
+  static Status_t readFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
 
-  Status_t writeBlocking(const uint8_t *data, Size_t byte_count, uint32_t timeout);
-  void writeAsyncThread(void);
+  Status_t writeBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);
+  static Status_t writeFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
 
   Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
+  LinuxThreads<DataBundle_t, Status_t, 10> m_rx_thread_handle;
+  LinuxThreads<DataBundle_t, Status_t, 10> m_tx_thread_handle;
 };
 
 

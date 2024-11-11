@@ -56,6 +56,7 @@ DIO::~DIO()
     locker1.unlock();
     m_sync.condition.notify_one();
     m_sync.thread->join();
+    delete m_sync.thread;
   }
 
   if(m_line_handle != nullptr)
@@ -232,6 +233,7 @@ Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
       // locker1.unlock();
       m_sync.condition.notify_one();
       m_sync.thread->join();
+      delete m_sync.thread;
     }
     return STATUS_DRV_SUCCESS;
   }

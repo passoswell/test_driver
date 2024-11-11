@@ -33,7 +33,7 @@ public:
   virtual Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
 
   using DriverInOutBase::write;
-  virtual Status_t write(const uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
+  virtual Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
 
   virtual Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
 };

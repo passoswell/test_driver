@@ -152,7 +152,7 @@ Status_t DrvCommBase::read(Buffer_t buffer, uint32_t key, uint32_t timeout)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvCommBase::write(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
+Status_t DrvCommBase::write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout)
 {
   (void) buffer;
   (void) size;
@@ -168,7 +168,7 @@ Status_t DrvCommBase::write(const uint8_t *buffer, uint32_t size, uint32_t key, 
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t DrvCommBase::write(const Buffer_t buffer, uint32_t key, uint32_t timeout)
+Status_t DrvCommBase::write(Buffer_t buffer, uint32_t key, uint32_t timeout)
 {
   return write(buffer.data(), buffer.size(), key, timeout);
 }

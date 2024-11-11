@@ -22,6 +22,8 @@ public:
   Size_t m_bytes_read;
   Size_t m_bytes_available;
   Status_t m_read_status;
+  DriverCallback_t m_func_rx;
+  void *m_arg_rx;
 
   DriverInBase();
   virtual ~DriverInBase();

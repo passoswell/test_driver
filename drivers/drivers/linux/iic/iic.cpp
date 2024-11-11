@@ -48,20 +48,21 @@ IIC::~IIC()
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
 
-  locker1.lock();
-  m_terminate = true;
-  m_sync.run = true;
-  locker1.unlock();
-
-  m_sync.condition.notify_one();
-
-  m_sync.thread->join();
+  if(m_sync.thread != nullptr)
+  {
+    locker1.lock();
+    m_terminate = true;
+    m_sync.run = true;
+    locker1.unlock();
+    m_sync.condition.notify_one();
+    m_sync.thread->join();
+    delete m_sync.thread;
+  }
 
   if(m_linux_handle >= 0)
   {
     close(m_linux_handle);
   }
-  delete m_sync.thread;
 }
 
 /**
@@ -186,7 +187,7 @@ Status_t IIC::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t IIC::write(const uint8_t *data, Size_t byte_count, uint32_t timeout)
+Status_t IIC::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
   Status_t status = STATUS_DRV_SUCCESS;
@@ -204,7 +205,7 @@ Status_t IIC::write(const uint8_t *data, Size_t byte_count, uint32_t timeout)
   if(m_is_async_mode)
   {
     m_sync.run = true;
-    m_sync.buffer_const = data;
+    m_sync.buffer = data;
     m_sync.size = byte_count;
     m_sync.key = m_address;
     locker1.unlock();
@@ -231,6 +232,8 @@ Status_t IIC::write(const uint8_t *data, Size_t byte_count, uint32_t timeout)
  */
 Status_t IIC::setCallback(DriverEventsList_t event, DriverCallback_t function, void *user_arg)
 {
+  m_sync.func = function;
+  m_sync.arg = user_arg;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -310,7 +313,8 @@ void IIC::asyncThread(void)
       status = i2cRead(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
-        // m_sync.func(status, m_sync.buffer, m_bytes_read, m_sync.arg);
+        Buffer_t data(m_sync.buffer, m_sync.size);
+        m_sync.func(status, EVENT_READ, data, m_sync.arg);
       }
       m_read_status = status;
       m_sync.run = false;
@@ -321,7 +325,8 @@ void IIC::asyncThread(void)
       status = i2cWrite(m_sync.buffer, m_sync.size, m_sync.key);
       if (m_sync.func != nullptr)
       {
-        // m_sync.func(status, m_sync.buffer, m_sync.size, m_sync.arg);
+        Buffer_t data(m_sync.buffer, m_sync.size);
+        m_sync.func(status, EVENT_WRITE, data, m_sync.arg);
       }
       m_write_status = status;
       m_sync.run = false;

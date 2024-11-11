@@ -18,6 +18,8 @@ DriverOutBase::DriverOutBase()
 {
   m_bytes_written = 0;
   m_bytes_pending = 0;
+  m_func_tx = nullptr;
+  m_arg_tx = nullptr;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
 }
 
@@ -60,7 +62,7 @@ Status_t DriverOutBase::write(float data)
  * @param byte_count Number of bytes to write
  * @return Status_t
  */
-Status_t DriverOutBase::write(const uint8_t *data, Size_t byte_count, uint32_t timeout)
+Status_t DriverOutBase::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
   (void) data;
   (void) byte_count;
@@ -73,7 +75,7 @@ Status_t DriverOutBase::write(const uint8_t *data, Size_t byte_count, uint32_t t
  * @param data Buffer and size
  * @return Status_t
  */
-Status_t DriverOutBase::write(const Buffer_t data, uint32_t timeout)
+Status_t DriverOutBase::write(Buffer_t data, uint32_t timeout)
 {
   return write(data.data(), data.size(), timeout);
 }

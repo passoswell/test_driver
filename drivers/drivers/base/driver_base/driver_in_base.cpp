@@ -18,6 +18,8 @@ DriverInBase::DriverInBase()
 {
   m_bytes_read = 0;
   m_bytes_available = 0;
+  m_func_rx = nullptr;
+  m_arg_rx = nullptr;
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
 }
 

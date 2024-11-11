@@ -17,10 +17,19 @@
 #include <span>
 #include <functional>
 
+#include "com_status.hpp"
+
 using Buffer_t = std::span<uint8_t>;
 
 using Size_t = int32_t;
 
 using Callback_t = std::function<Status_t(Status_t status, uint8_t event, const Buffer_t data, void *user_arg)>;
+
+typedef struct
+{
+  uint8_t *buffer;
+  uint32_t size;
+  uint32_t timeout;
+} DataBundle_t;
 
 #endif /* COM_TYPES_HPP */

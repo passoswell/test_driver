@@ -22,6 +22,8 @@ public:
   Size_t m_bytes_written;
   Size_t m_bytes_pending;
   Status_t m_write_status;
+  DriverCallback_t m_func_tx;
+  void *m_arg_tx;
 
   DriverOutBase();
   virtual ~DriverOutBase();
@@ -29,8 +31,8 @@ public:
   // Transmit data
   virtual Status_t write(uint32_t data);
   virtual Status_t write(float data);
-  virtual Status_t write(const uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
-  virtual Status_t write(const Buffer_t data, uint32_t timeout = UINT32_MAX);
+  virtual Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
+  virtual Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX);
 
   // Bytes exchanged
   virtual Size_t getBytesPending();

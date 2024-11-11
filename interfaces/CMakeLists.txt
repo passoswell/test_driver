@@ -3,6 +3,7 @@ interfaces.hpp
 inoutstream/inoutstream_interface_types.hpp
 inoutstream/inoutstream_interface.hpp
 software_timer/software_timer_interface.hpp
+task_interface/task_interface.hpp
 )
 
 target_link_libraries(interfaces INTERFACE commons)

@@ -18,7 +18,7 @@
 class DriverBase
 {
 public:
-  void *m_handle;
+  void const *m_handle;
   DriverCallback_t m_func;
   void *m_arg;
   bool m_is_async_mode;

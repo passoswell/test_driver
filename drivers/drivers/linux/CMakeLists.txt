@@ -4,6 +4,9 @@ add_library(drv_linux STATIC
 utils/linux_types.hpp
 utils/linux_io.hpp
 utils/linux_io.cpp
+utils/linux_threads.hpp
+utils/linux_threads.tpp
+utils/linux_queue.hpp
 
 dio/dio.cpp
 dio/dio.hpp
@@ -32,4 +35,4 @@ message("lgpio downloaded into ${lg_SOURCE_DIR}")
 file(GLOB lg_SRC CONFIGURE_DEPENDS "${lg_SOURCE_DIR}/*.h" "${lg_SOURCE_DIR}/*.c")
 add_library(lgpio_lib STATIC ${lg_SRC})
 
-target_link_libraries(drv_linux drivers ${CMAKE_THREAD_LIBS_INIT} gpiod)
+target_link_libraries(drv_linux interfaces drivers ${CMAKE_THREAD_LIBS_INIT} gpiod)

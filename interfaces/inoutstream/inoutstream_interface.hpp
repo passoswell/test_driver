@@ -40,8 +40,8 @@ public:
   virtual Status_t read(Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX) = 0;
 
   // Write data synchronously
-  virtual Status_t write(const uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX) = 0;
-  virtual Status_t write(const Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX) = 0;
+  virtual Status_t write(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX) = 0;
+  virtual Status_t write(Buffer_t buffer, uint32_t key, uint32_t timeout = UINT32_MAX) = 0;
 
   // Read data asynchronously
   virtual Status_t readAsync(uint8_t *buffer, uint32_t size, uint32_t key, uint32_t timeout = UINT32_MAX, InOutStreamCallback_t func = nullptr, void *arg = nullptr) = 0;

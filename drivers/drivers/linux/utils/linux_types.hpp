@@ -35,7 +35,6 @@ typedef struct
   bool run;
   bool terminate;
   uint8_t *buffer;
-  uint8_t const *buffer_const;
   uint32_t size;
   uint32_t key;
   DriverCallback_t func;
