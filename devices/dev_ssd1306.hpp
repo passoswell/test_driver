@@ -26,7 +26,7 @@ public:
 
   SSD1306(IIC *port_handle, uint8_t address_8bits = SSE1306_0x3C);
   ~SSD1306();
-  bool initialize(void);
+  Status_t initialize(void);
 
   bool setCursor(uint8_t row, uint8_t column);
 
@@ -50,7 +50,7 @@ protected:
   uint8_t m_address;
   uint8_t m_internal_buffer[128*8 + 1];
 
-  bool writeCommand(uint8_t command);
+  Status_t writeCommand(uint8_t command);
   bool writeData(uint8_t data);
 };
 

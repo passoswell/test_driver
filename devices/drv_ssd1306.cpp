@@ -55,19 +55,20 @@ SSD1306::~SSD1306()
  * @brief Initialize and configure the display
  * @return true if successful
  */
-bool SSD1306::initialize(void)
+Status_t SSD1306::initialize(void)
 {
-  bool returncode;
+  Status_t status;
 
   m_driver->setAddress(SSE1306_0x3C);
 
   for(uint16_t index = 0; index < sizeof(SD1306_InitSeq); index++)
   {
-    returncode = writeCommand(SD1306_InitSeq[index]);
-    if(!returncode) break;
+    status = writeCommand(SD1306_InitSeq[index]);
+    if(!status.success) break;
   }
-  m_is_initialized = true;
-  return returncode;
+  if(status.success) m_is_initialized = true;
+  else m_is_initialized = false;
+  return status;
 }
 
 /**
@@ -84,13 +85,13 @@ bool SSD1306::setCursor(uint8_t row, uint8_t column)
 
   // Set row
   command = SD1306_PAGESTARTADDR | row;
-  if(!writeCommand(command)) return false;
+  if(!writeCommand(command).success) return false;
   // Set column
   command = SD1306_SETHIGHCOLUMN | ( column >> 4 );
-  if(!writeCommand(command)) return false;
+  if(!writeCommand(command).success) return false;
   // Set column
   command = 0x0F & column;
-  if(!writeCommand(command)) return false;
+  if(!writeCommand(command).success) return false;
 
   return true;
 }
@@ -353,12 +354,12 @@ Status_t SSD1306::writePixels(const uint8_t *buffer, uint32_t size)
  * @param Command A command byte
  * @return true if successful
  */
-bool SSD1306::writeCommand(uint8_t command)
+Status_t SSD1306::writeCommand(uint8_t command)
 {
   uint8_t buffer[2];
   buffer[0] = SD1306_COMMAND;
   buffer[1] = command;
-  return m_driver->write(buffer, 2, m_address).success;
+  return m_driver->write(buffer, 2, m_address);
 }
 
 /**
