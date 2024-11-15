@@ -43,7 +43,7 @@ public:
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
-  LinuxThreads<DataBundle_t, Status_t, 10> m_thread_handle;
+  LinuxThreads<DataBundle_t, Status_t, 1, 0> m_thread_handle;
   uint16_t m_address;
   int m_linux_handle;
   bool m_terminate;
