@@ -36,6 +36,8 @@ public:
     std::unique_lock<std::mutex> lock(mutex);
     std::cv_status status = std::cv_status::no_timeout;
 
+    if(max_size == 0) return false;
+
     if(queue.size() >= max_size)
     {
       status = not_full.wait_for(lock, std::chrono::milliseconds(timeout)); // Wait until queue is not full or timeout
@@ -55,6 +57,8 @@ public:
   {
     std::unique_lock<std::mutex> lock(mutex);
     std::cv_status status = std::cv_status::no_timeout;
+
+    if(max_size == 0) return false;
 
     if(queue.empty())
     {
