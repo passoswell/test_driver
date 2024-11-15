@@ -41,6 +41,8 @@ public:
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
+  LinuxThreads<DataBundle_t, Status_t, UART_QUEUE_SIZE, 0> m_rx_thread_handle;
+  LinuxThreads<DataBundle_t, Status_t, UART_QUEUE_SIZE, 0> m_tx_thread_handle;
   int m_linux_handle;
   bool m_terminate;
 
@@ -51,8 +53,6 @@ private:
   static Status_t writeFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
 
   Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
-  LinuxThreads<DataBundle_t, Status_t, 10> m_rx_thread_handle;
-  LinuxThreads<DataBundle_t, Status_t, 10> m_tx_thread_handle;
 };
 
 
