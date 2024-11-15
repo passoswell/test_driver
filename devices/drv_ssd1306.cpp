@@ -356,10 +356,17 @@ Status_t SSD1306::writePixels(const uint8_t *buffer, uint32_t size)
  */
 Status_t SSD1306::writeCommand(uint8_t command)
 {
+  Status_t status;
   uint8_t buffer[2];
   buffer[0] = SD1306_COMMAND;
   buffer[1] = command;
-  return m_driver->write(buffer, 2, m_address);
+  status = m_driver->write(buffer, 2, m_address);
+  if(status.success)
+  {
+    status = m_driver->getWriteStatus();
+    while(status.code == OPERATION_RUNNING);
+  }
+  return status;
 }
 
 /**
@@ -369,8 +376,15 @@ Status_t SSD1306::writeCommand(uint8_t command)
  */
 bool SSD1306::writeData(uint8_t data)
 {
+  Status_t status;
   uint8_t buffer[2];
   buffer[0] = SD1306_DATA;
   buffer[1] = data;
-  return m_driver->write(buffer, 2, m_address).success;
+  status = m_driver->write(buffer, 2, m_address);
+  if(status.success)
+  {
+    status = m_driver->getWriteStatus();
+    while(status.code == OPERATION_RUNNING);
+  }
+  return status.success;
 }
