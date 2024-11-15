@@ -29,7 +29,7 @@
  * @tparam OUTPUT_DATA Data type of the output
  * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE = MAX_IN_QUEUE_SIZE>
 class LinuxThreads : public TaskInterface
 {
 public:
@@ -53,8 +53,8 @@ private:
   bool m_terminate;
   ThreadFunction_t m_function;
   void *m_user_arg;
-  LinuxQueue<INPUT_DATA, MAX_QUEUE_SIZE> m_input_queue;
-  LinuxQueue<OUTPUT_DATA, MAX_QUEUE_SIZE> m_output_queue;
+  LinuxQueue<INPUT_DATA, MAX_IN_QUEUE_SIZE> m_input_queue;
+  LinuxQueue<OUTPUT_DATA, MAX_OUT_QUEUE_SIZE> m_output_queue;
 
   void run();
 };

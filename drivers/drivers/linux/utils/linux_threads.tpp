@@ -12,16 +12,17 @@
 #include "linux_threads.hpp"
 
 /**
- * @brief Construct a new LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::LinuxThreads object
+ * @brief Constructor
  *
  * @tparam INPUT_DATA Data type of the input
  * @tparam OUTPUT_DATA Data type of the output
- * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
+ * @tparam MAX_IN_QUEUE_SIZE Maximum number of bytes in the input queue
+ * @tparam MAX_OUT_QUEUE_SIZE Maximum number of bytes in the input queue
  * @param function Pointer to the function that will execute the work
  * @param user_arg User argument passed to the worker function
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::LinuxThreads(ThreadFunction_t function, void *user_arg)
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::LinuxThreads(ThreadFunction_t function, void *user_arg)
 {
   m_thread_handle = nullptr;
   m_terminate = true;
@@ -34,10 +35,11 @@ LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::LinuxThreads(ThreadFuncti
  *
  * @tparam INPUT_DATA Data type of the input
  * @tparam OUTPUT_DATA Data type of the output
- * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
+ * @tparam MAX_IN_QUEUE_SIZE Maximum number of bytes in the input queue
+ * @tparam MAX_OUT_QUEUE_SIZE Maximum number of bytes in the input queue
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::~LinuxThreads()
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::~LinuxThreads()
 {
   (void) terminate();
 }
@@ -47,11 +49,12 @@ LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::~LinuxThreads()
  *
  * @tparam INPUT_DATA Data type of the input
  * @tparam OUTPUT_DATA Data type of the output
- * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
+ * @tparam MAX_IN_QUEUE_SIZE Maximum number of bytes in the input queue
+ * @tparam MAX_OUT_QUEUE_SIZE Maximum number of bytes in the input queue
  * @return bool
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::create()
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::create()
 {
   if(m_function == nullptr || m_thread_handle != nullptr)
   {
@@ -71,11 +74,12 @@ bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::create()
  *
  * @tparam INPUT_DATA Data type of the input
  * @tparam OUTPUT_DATA Data type of the output
- * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
+ * @tparam MAX_IN_QUEUE_SIZE Maximum number of bytes in the input queue
+ * @tparam MAX_OUT_QUEUE_SIZE Maximum number of bytes in the input queue
  * @return bool
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::terminate()
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::terminate()
 {
   INPUT_DATA input_data;
   if(!m_terminate)
@@ -94,16 +98,17 @@ bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::terminate()
  *
  * @tparam INPUT_DATA Data type of the input
  * @tparam OUTPUT_DATA Data type of the output
- * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
+ * @tparam MAX_IN_QUEUE_SIZE Maximum number of bytes in the input queue
+ * @tparam MAX_OUT_QUEUE_SIZE Maximum number of bytes in the input queue
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-void LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::join()
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+void LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::join()
 {
   m_thread_handle->join();
 }
 
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::setInputData(const void *data, uint32_t timeout)
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::setInputData(const void *data, uint32_t timeout)
 {
   INPUT_DATA *input_data = (INPUT_DATA *) data;
   if(input_data != nullptr)
@@ -113,8 +118,8 @@ bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::setInputData(const v
   return false;
 }
 
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::getOutputData(void *data, uint32_t timeout)
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::getOutputData(void *data, uint32_t timeout)
 {
   OUTPUT_DATA *output_data = static_cast<OUTPUT_DATA *>(data);
   if(output_data != nullptr)
@@ -129,10 +134,11 @@ bool LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::getOutputData(void *
  *
  * @tparam INPUT_DATA Data type of the input
  * @tparam OUTPUT_DATA Data type of the output
- * @tparam MAX_QUEUE_SIZE Maximum number of bytes in the queue
+ * @tparam MAX_IN_QUEUE_SIZE Maximum number of bytes in the input queue
+ * @tparam MAX_OUT_QUEUE_SIZE Maximum number of bytes in the input queue
  */
-template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_QUEUE_SIZE>
-void LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_QUEUE_SIZE>::run()
+template <typename INPUT_DATA, typename OUTPUT_DATA, uint32_t MAX_IN_QUEUE_SIZE, uint32_t MAX_OUT_QUEUE_SIZE>
+void LinuxThreads<INPUT_DATA, OUTPUT_DATA, MAX_IN_QUEUE_SIZE, MAX_OUT_QUEUE_SIZE>::run()
 {
   INPUT_DATA input;
   OUTPUT_DATA output;

@@ -18,14 +18,15 @@
 
 #include "drivers/base/peripherals_base/iic_base.hpp"
 #include "drivers/linux/utils/linux_types.hpp"
+#include "drivers/linux/utils/linux_threads.hpp"
 
 /**
  * @brief Base class for iic drivers
  */
-class IIC : public IicBase
+class IIC final : public IicBase
 {
 public:
-  IIC(void *port_handle, uint16_t address);
+  IIC(const void *port_handle, uint16_t address);
 
   ~IIC();
 
@@ -42,17 +43,20 @@ public:
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
+  LinuxThreads<DataBundle_t, Status_t, IIC_QUEUE_SIZE, 0> m_thread_handle;
   uint16_t m_address;
   int m_linux_handle;
   bool m_terminate;
   bool m_is_configured;
   UtilsInOutSync_t m_sync;
 
-  Status_t i2cRead(uint8_t *buffer, uint32_t size, uint16_t address_8bits);
+  Status_t iicRead(uint8_t *buffer, uint32_t size, uint16_t address);
 
-  Status_t i2cWrite(const uint8_t *buffer, uint32_t size, uint16_t address_8bits);
+  Status_t iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address);
 
-  void asyncThread(void);
+  static Status_t transferDataAsync(DataBundle_t data_bundle, void *user_arg);
+
+  Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
 };
 
 #endif /* IIC_HPP */

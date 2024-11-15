@@ -17,6 +17,13 @@
 #include <stdbool.h>
 
 #include "drivers/base/driver_base/driver_inout_base.hpp"
+#if __has_include("setup.hpp")
+#include "setup.hpp"
+#endif
+
+#ifndef IIC_QUEUE_SIZE
+#define IIC_QUEUE_SIZE                                                         1
+#endif
 
 /**
  * @brief Base class for iic drivers
