@@ -58,10 +58,12 @@ SSD1306::~SSD1306()
 Status_t SSD1306::initialize(void)
 {
   Status_t status;
+  uint8_t init_seq_size;
 
   m_driver->setAddress(SSE1306_0x3C);
+  init_seq_size = sizeof(SD1306_InitSeq) / sizeof(SD1306_InitSeq[0]);
 
-  for(uint16_t index = 0; index < sizeof(SD1306_InitSeq); index++)
+  for(uint16_t index = 0; index < init_seq_size; index++)
   {
     status = writeCommand(SD1306_InitSeq[index]);
     if(!status.success) break;
@@ -363,8 +365,10 @@ Status_t SSD1306::writeCommand(uint8_t command)
   status = m_driver->write(buffer, 2, m_address);
   if(status.success)
   {
-    status = m_driver->getWriteStatus();
-    while(status.code == OPERATION_RUNNING);
+    do
+    {
+      status = m_driver->getWriteStatus();
+    } while(status.code == OPERATION_RUNNING);
   }
   return status;
 }
@@ -383,8 +387,10 @@ bool SSD1306::writeData(uint8_t data)
   status = m_driver->write(buffer, 2, m_address);
   if(status.success)
   {
-    status = m_driver->getWriteStatus();
-    while(status.code == OPERATION_RUNNING);
+    do
+    {
+      status = m_driver->getWriteStatus();
+    } while(status.code == OPERATION_RUNNING);
   }
   return status.success;
 }
