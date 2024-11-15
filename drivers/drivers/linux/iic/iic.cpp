@@ -74,13 +74,10 @@ Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
     }
   }
 
-  if(m_linux_handle >= 0)
+  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
   {
-    if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
-      return status;
-    }
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+    return status;
   }
 
   if(m_is_async_mode)
