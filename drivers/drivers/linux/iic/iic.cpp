@@ -31,7 +31,6 @@ m_thread_handle(IIC::transferDataAsync, this)
   m_address = address;
   m_handle = port_handle;
   m_linux_handle = -1;
-  m_is_configured = false;
 }
 
 /**

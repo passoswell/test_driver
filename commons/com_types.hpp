@@ -29,6 +29,10 @@ typedef struct
 {
   uint8_t *buffer;
   uint32_t size;
+  uint8_t *rx_buffer;
+  uint32_t rx_size;
+  uint8_t *tx_buffer;
+  uint32_t tx_size;
   uint32_t timeout;
 } DataBundle_t;
 

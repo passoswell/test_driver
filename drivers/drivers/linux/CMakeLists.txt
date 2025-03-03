@@ -12,6 +12,9 @@ dio/dio.cpp
 dio/dio.hpp
 iic/iic.cpp
 iic/iic.hpp
+iic/iic_types.hpp
+spi/spi.cpp
+spi/spi.hpp
 spt/drv_spt.cpp
 spt/drv_spt.hpp
 std_in_out/drv_std_in_out.cpp
