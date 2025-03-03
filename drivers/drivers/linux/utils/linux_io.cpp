@@ -195,6 +195,24 @@ int waitOnReceptionTimeoutSyscall(int fd, uint32_t size, uint32_t wait_time)
 }
 
 /**
+ * @brief Verify if the inputs are in ther expected range
+ *
+ * @param buffer Data buffer
+ * @param size Number of bytes in the data buffer
+ * @param timeout Operation timeout value
+ * @param handle A pointer that should not be nullptr
+ * @param fd A linux's file descriptor, should not be negative
+ * @return Status_t
+ */
+Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout, const void *handle, int fd)
+{
+  if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
+  if(handle == nullptr || fd < 0) { return STATUS_DRV_BAD_HANDLE;}
+  if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
+  return STATUS_DRV_SUCCESS;
+}
+
+/**
  * @brief Convert errno code into Status_t code
  *
  * @param code errno code

@@ -53,6 +53,7 @@ typedef enum
   OPERATION_IDLE                    , /*!< No operation running               */
   OPERATION_RUNNING                 , /*!< Operation still running            */
   OPERATION_BUSY                    , /*!< Busy with other caller's operation */
+  OPERATION_TIMED_OUT               , /*!< Request timedout without error     */
 /******** TYPE DELIMITER ITEM *************************************************/
   RETURN_ERROR_VALUE        = 0x8000, /*!< Error codes follow this item       */
 /******* ERROR TYPE RETURN LIST ***********************************************/
@@ -116,6 +117,7 @@ constexpr Status_t STATUS_DRV_READY = {true, SRC_DRIVER, OPERATION_OK, (char *)"
 constexpr Status_t STATUS_DRV_IDLE = {true, SRC_DRIVER, OPERATION_IDLE, (char *)"No operation is being processed.\r\n"};
 constexpr Status_t STATUS_DRV_RUNNING = {true, SRC_DRIVER, OPERATION_RUNNING, (char *)"The requested operation is on-going, keep calling this method to update the status.\r\n"};
 constexpr Status_t STATUS_DRV_BUSY = {true, SRC_DRIVER, OPERATION_BUSY, (char *)"The resource is busy processing other request.\r\n"};
+constexpr Status_t STATUS_DRV_TIMED_OUT = {true, SRC_DRIVER, OPERATION_TIMED_OUT, (char *)"The request timedout without error.\r\n"};
 
 constexpr Status_t STATUS_DRV_UNKNOWN_ERROR = {false, SRC_DRIVER, ERR_UNKNOWN_ERROR, (char *)"An unknown or unverified error occurred.\r\n"};
 constexpr Status_t STATUS_DRV_NOT_IMPLEMENTED = {false, SRC_DRIVER, ERR_NOT_IMPLEMENTED, (char *)"Method not implemented.\r\n"};

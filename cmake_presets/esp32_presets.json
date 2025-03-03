@@ -13,7 +13,8 @@
         "ESP_PLATFORM": "1",
         "CCACHE_ENABLE": "0",
         "ESP_IDF_FETCH_FROM_GIT_PATH": "${sourceDir}/external/esp-idf",
-        "USE_ESP32": "1"
+        "USE_ESP32": "1",
+        "TARGET": "esp32"
       }
     },
     {

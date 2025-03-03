@@ -7,6 +7,8 @@ utils/linux_io.cpp
 utils/linux_threads.hpp
 utils/linux_threads.tpp
 utils/linux_queue.hpp
+utils/linux_serial_file.hpp
+utils/linux_serial_file.cpp
 
 dio/dio.cpp
 dio/dio.hpp
@@ -17,8 +19,8 @@ spi/spi.cpp
 spi/spi.hpp
 spt/drv_spt.cpp
 spt/drv_spt.hpp
-std_in_out/drv_std_in_out.cpp
-std_in_out/drv_std_in_out.hpp
+std_in_out/std_in_out.cpp
+std_in_out/std_in_out.hpp
 uart/uart.cpp
 uart/uart.hpp
 )

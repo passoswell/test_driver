@@ -89,6 +89,7 @@ Size_t DriverInBase::getBytesAvailable()
 {
   return m_bytes_available;
 }
+
 /**
  * @brief Get number of bytes read in the last operation
  *

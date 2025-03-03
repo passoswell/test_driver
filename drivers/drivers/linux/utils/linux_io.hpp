@@ -30,6 +30,8 @@ int bytesAvailableSyscall(int fd);
 
 int waitOnReceptionTimeoutSyscall(int fd, uint32_t size, uint32_t wait_time);
 
+Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout, const void *handle, int fd);
+
 Status_t convertErrnoCode(int code);
 
 

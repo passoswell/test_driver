@@ -42,4 +42,8 @@ typedef struct
   uint32_t timeout;
 }UtilsInOutSync_t;
 
+constexpr char STD_OUT_FILE[] = "/dev/fd/0";
+constexpr char STD_IN_FILE[] = "/dev/fd/1";
+constexpr char STD_ERR_FILE[] = "/dev/fd/2";
+
 #endif /* LINUX_UTILS_HPP */
