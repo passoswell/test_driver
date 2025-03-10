@@ -38,9 +38,23 @@ DrvSptBase::~DrvSptBase()
  */
 void DrvSptBase::start(uint32_t duration, SoftwareTimerMode_t mode)
 {
-  m_start_time = getTimeSincePowerOn();
-  m_duration = duration;
+  m_start_time = getTimeSincePowerOnUs();
   m_mode = mode;
+  switch(m_unit)
+  {
+    case SOFTWARE_TIMER_SECONDS:
+      m_duration = duration * 1000000;
+      break;
+    case SOFTWARE_TIMER_MILLISECONDS:
+      m_duration = duration * 1000;
+      break;
+    case SOFTWARE_TIMER_MICROSECONDS:
+      m_duration = duration;
+      break;
+    default:
+      m_duration = duration * 1000;
+      break;
+  }
   m_is_running = true;
 }
 
@@ -51,7 +65,14 @@ void DrvSptBase::start(uint32_t duration, SoftwareTimerMode_t mode)
  */
 bool DrvSptBase::hasExpired()
 {
-  if (m_is_running && ((getTimeSincePowerOn() - m_start_time) >= m_duration))
+  if (!m_is_running)
+  {
+    return true;
+  }
+
+  sft_time_us_t now_time = getTimeSincePowerOnUs();
+  sft_time_us_t difference = now_time - m_start_time;
+  if (difference >= m_duration)
   {
     if (m_mode == SOFTWARE_TIMER_ONE_SHOT)
     {
@@ -59,7 +80,7 @@ bool DrvSptBase::hasExpired()
     }
     else if (m_mode == SOFTWARE_TIMER_PERIODIC)
     {
-      m_start_time = getTimeSincePowerOn(); // Restart the timer for periodic mode
+      m_start_time = getTimeSincePowerOnUs(); // Restart the timer for periodic mode
     }
     return true;
   }
@@ -90,21 +111,36 @@ bool DrvSptBase::isRunning()
  */
 uint32_t DrvSptBase::getElapsedTime()
 {
-  if (m_is_running)
+  sft_time_us_t now_time = getTimeSincePowerOnUs();
+  sft_time_us_t difference = now_time - m_start_time;
+  uint32_t time;
+  if(difference > UINT32_MAX)
   {
-    return getTimeSincePowerOn() - m_start_time;
+    return UINT32_MAX;
   }
-  else
+  switch(m_unit)
   {
-    return 0; // If the timer isn't running, no time has elapsed
+    case SOFTWARE_TIMER_SECONDS:
+      time = difference / 1000000;
+      break;
+    case SOFTWARE_TIMER_MILLISECONDS:
+      time = difference / 1000;
+      break;
+    case SOFTWARE_TIMER_MICROSECONDS:
+      time = difference;
+      break;
+    default:
+      time = difference / 1000;
+      break;
   }
+  return time;
 }
 
 /**
- * @brief Get the time since power on
+ * @brief Get the time since power on in microseconds
  * @return uint32_t
  */
-uint32_t DrvSptBase::getTimeSincePowerOn()
+sft_time_us_t DrvSptBase::getTimeSincePowerOnUs()
 {
   return 0;
 }
@@ -115,9 +151,27 @@ uint32_t DrvSptBase::getTimeSincePowerOn()
  */
 void DrvSptBase::delay(uint32_t duration)
 {
-  uint32_t start_time = getTimeSincePowerOn();
-  while (getTimeSincePowerOn() - start_time < duration)
+  sft_time_us_t start_time = getTimeSincePowerOnUs();
+  sft_time_us_t now_time, time_difference;
+  time_difference = start_time;
+  while (time_difference < duration)
   {
     // Busy-wait until the delay period has passed
+    now_time = getTimeSincePowerOnUs();
+    time_difference = now_time - start_time;
+    switch(m_unit)
+    {
+      case SOFTWARE_TIMER_SECONDS:
+        time_difference = time_difference / 1000000;
+        break;
+      case SOFTWARE_TIMER_MILLISECONDS:
+        time_difference = time_difference / 1000;
+        break;
+      case SOFTWARE_TIMER_MICROSECONDS:
+        break;
+      default:
+        time_difference = time_difference / 1000;
+        break;
+    }
   }
 }

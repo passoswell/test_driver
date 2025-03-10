@@ -17,8 +17,8 @@
 class DrvSptBase : public SoftwareTimerInterface
 {
 public:
-  uint32_t m_start_time;     // Time at which the timer was started
-  uint32_t m_duration;       // m_duration for which the timer should run
+  sft_time_us_t m_start_time;     // Time at which the timer was started
+  sft_time_us_t m_duration;       // m_duration for which the timer should run
   bool m_is_running;         // Indicates if the timer is currently running
   SoftwareTimerMode_t m_mode;        // The mode of the timer (ONE_SHOT or PERIODIC)
   SoftwareTimerCountUnit_t m_unit;   // The count unit
@@ -37,7 +37,7 @@ public:
 
   uint32_t getElapsedTime();
 
-  virtual uint32_t getTimeSincePowerOn();
+  virtual sft_time_us_t getTimeSincePowerOnUs();
 
   virtual void delay(uint32_t duration);
 };

@@ -20,7 +20,7 @@ public:
 
   DrvSPT(SoftwareTimerCountUnit_t time_unit = SOFTWARE_TIMER_MILLISECONDS);
 
-  uint32_t getTimeSincePowerOn();
+  sft_time_us_t getTimeSincePowerOnUs();
 
   void delay(uint32_t duration);
 };

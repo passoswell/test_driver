@@ -25,39 +25,19 @@ DrvSPT::DrvSPT(SoftwareTimerCountUnit_t time_unit) : DrvSptBase(time_unit)
 }
 
 /**
- * @brief Get the time since power on
- * @return uint32_t
+ * @brief Get the time since power on in microseconds
+ * @return uint64_t
  */
-uint32_t DrvSPT::getTimeSincePowerOn()
+sft_time_us_t DrvSPT::getTimeSincePowerOnUs()
 {
-  uint32_t time;
-  static auto start_time = std::chrono::high_resolution_clock::now();
-  auto clock_now = std::chrono::high_resolution_clock::now();
-  double diff;
-
-  switch(m_unit)
-  {
-    case SOFTWARE_TIMER_SECONDS:
-      diff = std::chrono::duration_cast<std::chrono::seconds>(clock_now - start_time).count();
-      break;
-    case SOFTWARE_TIMER_MILLISECONDS:
-      diff = std::chrono::duration_cast<std::chrono::milliseconds>(clock_now - start_time).count();
-      break;
-    case SOFTWARE_TIMER_MICROSECONDS:
-      diff = std::chrono::duration_cast<std::chrono::microseconds>(clock_now - start_time).count();
-      break;
-    default:
-      diff = 0;
-      break;
-  }
-  auto integer = std::floor(diff / UINT32_MAX);
-  time = ((diff / UINT32_MAX) - integer) * UINT32_MAX;
-  return time;
+  sft_time_us_t now_time = std::chrono::duration_cast<std::chrono::microseconds>(
+    std::chrono::high_resolution_clock::now().time_since_epoch()).count();
+  return now_time;
 }
 
 /**
  * @brief Blocking delay for a specified duration
- * @param duration
+ * @param duration The specified time to delay
  */
 void DrvSPT::delay(uint32_t duration)
 {
@@ -73,7 +53,7 @@ void DrvSPT::delay(uint32_t duration)
       std::this_thread::sleep_for(std::chrono::microseconds(duration));
       break;
     default:
-      DrvSptBase::delay(duration);
+      std::this_thread::sleep_for(std::chrono::milliseconds(duration));
       break;
   }
 }

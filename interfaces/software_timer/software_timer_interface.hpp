@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+typedef uint64_t sft_time_us_t;
+
 /**
  * @brief Modes of operation for software timers
  */
@@ -59,7 +61,7 @@ public:
   virtual uint32_t getElapsedTime() = 0;
 
   // Get the time in units since power-on
-  virtual uint32_t getTimeSincePowerOn() = 0;
+  virtual sft_time_us_t getTimeSincePowerOnUs() = 0;
 
   // Blocking delay for a specified duration
   virtual void delay(uint32_t duration) = 0;
