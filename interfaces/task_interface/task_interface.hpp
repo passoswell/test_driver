@@ -14,7 +14,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <any>
 
 /**
  * @brief Interface class for task creation
