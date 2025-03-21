@@ -302,14 +302,25 @@ Status_t UART::readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, 
 {
   Status_t status = STATUS_DRV_SUCCESS;
   int bytes_read = 0;
-  if (timeout == 0)
+
+  m_bytes_read = 0;
+
+  if(call_back)
   {
-    bytes_read = readSyscall(m_linux_handle, data, byte_count);
-  }
-  else
-  {
+    timeout = 5;
     bytes_read = readOnTimeoutSyscall(m_linux_handle, data, byte_count, timeout);
+  }else
+  {
+    if (timeout == 0)
+    {
+      bytes_read = readSyscall(m_linux_handle, data, byte_count);
+    }
+    else
+    {
+      bytes_read = readOnTimeoutSyscall3(m_linux_handle, data, byte_count, timeout);
+    }
   }
+
 
   if(bytes_read < 0)
   {

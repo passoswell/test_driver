@@ -61,7 +61,15 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
   auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
   do
   {
-    ready = poll(fds, 1, timeout_ms - elapsed_time);
+
+    if(bytes_read == 0)
+    {
+      ready = poll(fds, 1, UINT32_MAX);
+    }else
+    {
+      ready = poll(fds, 1, timeout_ms - elapsed_time);
+    }
+
     if (ready < 0)
     {
       bytes_read = -1;
@@ -71,6 +79,7 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
       break;
     }else
     {
+
       byte_count = bytesAvailableSyscall(fd);
       if (byte_count < 0)
       {
@@ -78,6 +87,7 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
         break;
       }else if(byte_count > 0)
       {
+        start = std::chrono::steady_clock::now();
         if(byte_count > (cnt - bytes_read))
         {
           byte_count = cnt - bytes_read;
@@ -89,6 +99,7 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
           break;
         }
         bytes_read += byte_count;
+
       }
     }
     end = std::chrono::steady_clock::now();
@@ -128,6 +139,69 @@ int readOnTimeoutSyscall2(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_
       bytes_read = byte_count;
     }
   }
+
+  return bytes_read;
+}
+
+/**
+ * @brief Use system calls to read from a file or wait on timeout
+ *
+ * @param fd File descriptor
+ * @param buffer Buffer to store the data
+ * @param cnt Number of bytes to read
+ * @param timeout_ms Max. time to wait for data
+ * @return int Number of bytes actually read
+ */
+int readOnTimeoutSyscall3(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_ms)
+{
+  struct pollfd fds[1];
+  if(cnt == 0 || buffer == nullptr) { return 0;}
+  int byte_count = 0, bytes_read = 0, ready;
+
+  // Set up the pollfd structure for UART to check for data to read
+  fds[0].fd = fd;
+  fds[0].events = POLLIN;
+
+  // Poll for data
+  auto start = std::chrono::steady_clock::now();
+  auto end = start;
+  auto elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+  do
+  {
+    ready = poll(fds, 1, timeout_ms - elapsed_time);
+    if (ready < 0)
+    {
+      bytes_read = -1;
+      break;
+    } else if (ready == 0)
+    {
+      break;
+    }else
+    {
+      byte_count = bytesAvailableSyscall(fd);
+      if (byte_count < 0)
+      {
+        bytes_read = -1;
+        break;
+      }else if(byte_count > 0)
+      {
+        start = std::chrono::steady_clock::now();
+        if(byte_count > (cnt - bytes_read))
+        {
+          byte_count = cnt - bytes_read;
+        }
+        byte_count = readSyscall(fd, buffer + bytes_read, byte_count);
+        if (byte_count < 0)
+        {
+          bytes_read = -1;
+          break;
+        }
+        bytes_read += byte_count;
+      }
+    }
+    end = std::chrono::steady_clock::now();
+    elapsed_time = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count();
+  } while(elapsed_time < timeout_ms);
 
   return bytes_read;
 }
