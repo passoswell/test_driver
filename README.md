@@ -1,71 +1,68 @@
 # Test driver
 
-## To download the repository:
+> This repository keeps the history of trials, errors and successes on how to lay out the structure of a layered architecture for embedded systems.
 
+## Table of contents
+* [General info](#general-info)
+* [Technologies](#technologies)
+* [Setup](#setup)
+* [Features](#features)
+* [Status](#status)
 
+## General info
+
+This project is for planning, implementing and maintaining a firmware architecture supporting multiple embedded platforms. To reach this goal, this project uses cmake to configure the build and a self-proposed hardware abstraction layer (HAL).
+
+## Technologies
+
+* Linux host system for the build, tested only on Ubuntu 22 (might work with [WSL2](https://learn.microsoft.com/en-us/windows/wsl/install))
+* CMake version 3.23 or latter because of support to presets ([this link](https://cmake.org/download/))
+* Ninja ([this link](https://ninja-build.org/))
+* Visual Studio Code with the tools to build c/c++ projects and cmake tools ((this link)[https://code.visualstudio.com/docs/setup/setup-overview])
+* Platform dependent dependencies, including tool chains and compilers
+
+Code can be built for the following platforms:
+* [Linux](drivers/linux) - HAL to access peripherals on linux systems
+
+## Setup
+
+### 1 - Download the repository:
+
+* Clone the repository
 ```bash
 git clone https://github.com/passoswell/test_driver.git
 ```
 
+* Enter the folder
 ```bash
 cd test_driver
 ```
 
+### 2 - Compile on linux using presets using the linux terminal
 
-## To compile on linux on the target machine (no cross compilation):
-
-### Dependencies:
-
-1. cmake 3.20 or later
-2. gcc
-3. git
-4. build-essential
-5. gdb (optional, for debugging)
-
-To instal everything, run:
-
+* List the presets available
 ```bash
-sudo apt update -y && sudo apt upgrade -y && sudo apt install cmake gcc git gdb -y
+cmake --list-presets
 ```
 
-### Compilation process:
-
-From the "test_driver" folder:
-
+* Configure the desired preset. A corresponding folder will be created inside folder `build`.
 ```bash
-cmake -DCMAKE_C_COMPILER=/usr/bin/gcc -DCMAKE_BUILD_TYPE=Debug -DUSE_LINUX=1 -S. -B./build/gcc_linux
+cmake --preset <preset_name>
 ```
 
+* Build the targets created in the cmake project
 ```bash
-cmake --build ./build/gcc_linux --parallel $nproc
+cmake --build ./build/<preset_name>
 ```
 
-The "TEST_DRIVER" binary is on the "build/gcc_linux" folder.
+* The binaries are saved inside `build/<preset_name>/bin`
 
-### To run the Linux binary:
+For specific instructions about a platform, please read the readme files on the respective folder.
 
-```bash
-(sudo) ./build/gcc_linux/TEST_DRIVER
-```
+## Features
 
+Under construction
 
+## Status
 
-## To cross compile for the raspberry pi pico:
-
-### Dependencies:
-
-Instructions on how to setup the raspberry pi pico development environment can be found on [the raspberry pi website](https://datasheets.raspberrypi.com/pico/getting-started-with-pico.pdf).
-
-### Compilation process:
-
-From the "test_driver" folder:
-
-```bash
-cmake -DCMAKE_C_COMPILER=/usr/bin/arm-none-eabi-gcc -DCMAKE_BUILD_TYPE=Debug -DUSE_PIPICO=1 -S. -B./build/pipico
-```
-
-```bash
-cmake --build ./build/pipico --parallel $nproc
-```
-
-The "TEST_DRIVER.elf" file is on the "build/pipico" folder.
+On-going.
