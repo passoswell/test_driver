@@ -37,5 +37,22 @@
 #include "linux/spt/spt.hpp"
 #endif
 
+#ifndef AP_MAIN
+#define AP_MAIN() \
+    int main(void)
+#endif /* AP_MAIN() */
+
+#ifndef AP_MAIN_ARDUINO
+#define AP_MAIN_ARDUINO() \
+    int main(void)\
+    {             \
+      setup();    \
+      while(true) \
+      {           \
+        loop();   \
+      }           \
+    }
+#endif /* AP_MAIN_ARDUINO() */
+
 
 #endif /* LINUX_DRIVERS_HPP_ */
