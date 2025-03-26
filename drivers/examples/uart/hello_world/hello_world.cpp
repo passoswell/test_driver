@@ -9,74 +9,70 @@
  *
  */
 
-#include "drivers.hpp"
-
-#include <stdint.h>
-#include <stdbool.h>
 #include <string.h>
 
+#include "drivers.hpp"
+
+static void errorHandler(Status_t status);
+
+// Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-#include <iostream>
 void *handle = (void *) "/dev/ttyUSB0";
 #else
 void *handle = nullptr;
 #endif
 
-
-void printErrorMessage(Status_t status);
-
-
-DrvUART serial(handle);
-
-
-const InOutStreamSettings_t g_uart_config_list[]
+/**
+ * @brief Configuration parameters for the uart port
+ */
+const DriverSettings_t g_uart_config_list[]
 {
-  ADD_PARAMETER(DRV_PARAM_BAUD, 115200),
-  ADD_PARAMETER(DRV_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
+  ADD_PARAMETER(COMM_PARAM_BAUD, 115200),
+  ADD_PARAMETER(COMM_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
+  ADD_PARAMETER(COMM_WORK_ASYNC, true)
 };
-const uint32_t g_uart_config_list_size = sizeof(g_uart_config_list) / sizeof(InOutStreamSettings_t);
+uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+
 
 /**
  * @brief Example code that prints a Hello World message on a uart port
- *
- * @return int
  */
-#if defined(USE_ESP32)
-extern "C" void app_main(void)
-#else
-int main(void)
-#endif
+AP_MAIN()
 {
+  UART my_serial(handle);
+  SPT my_timer(SOFTWARE_TIMER_SECONDS);
   uint8_t message[] = "Hello world!!!\r\n";
   Status_t status;
 
-  status = serial.configure(g_uart_config_list, g_uart_config_list_size);
+  status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status.success)
   {
-    printErrorMessage(status);
-    return -1;
+    errorHandler(status);
+    return status.code; // Should not get here
   }
 
   while(true)
   {
-    status = serial.write(message, strlen((char *)message), 0);
+    status = my_serial.write(message);
+    // status = my_serial.write(message, strlen((char *)message)); // Another write format
     if(!status.success)
     {
-      printErrorMessage(status);
-      return -1;
+      errorHandler(status);
+      return status.code; // Should not get here
     }
+    my_timer.delay(1); // One second delay
   }
   return 0;
 }
 
 /**
- * @brief Prints a message on the linux console
- *
- * @param status
+ * @brief Dummy error handler
  */
-void printErrorMessage(Status_t status)
+void errorHandler(Status_t status)
 {
-#if defined(USE_LINUX)
-  std::cout << status.description << std::endl;
-#endif
+  (void) status;
+  while(true)
+  {
+    ;
+  }
 }
