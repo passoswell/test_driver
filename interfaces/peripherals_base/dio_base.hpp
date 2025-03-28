@@ -30,9 +30,9 @@ public:
 
   virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t read(uint32_t &state) = 0;
+  virtual Status_t read(bool &state) = 0;
 
-  virtual Status_t write(uint32_t value) = 0;
+  virtual Status_t write(bool value) = 0;
 
   virtual Status_t toggle() = 0;
 

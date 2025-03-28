@@ -27,9 +27,9 @@ public:
 
   Status_t configure(const DriverSettings_t *list, uint8_t list_size);
 
-  Status_t read(uint32_t &state);
+  Status_t read(bool &state);
 
-  Status_t write(uint32_t value);
+  Status_t write(bool value);
 
   Status_t toggle();
 

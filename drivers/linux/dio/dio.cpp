@@ -151,7 +151,7 @@ Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DIO::read(uint32_t &state)
+Status_t DIO::read(bool &state)
 {
   int val;
   if(m_line_handle == nullptr) return STATUS_DRV_NULL_POINTER;
@@ -167,7 +167,7 @@ Status_t DIO::read(uint32_t &state)
  * @param state The state to set in the gpio
  * @return Status_t
  */
-Status_t DIO::write(uint32_t value)
+Status_t DIO::write(bool value)
 {
   int ret;
   if(m_line_handle == nullptr) return STATUS_DRV_NULL_POINTER;

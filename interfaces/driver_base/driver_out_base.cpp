@@ -37,7 +37,7 @@ DriverOutBase::~DriverOutBase()
  * @param data Integer to write
  * @return Status_t
  */
-Status_t DriverOutBase::write(uint32_t data)
+Status_t DriverOutBase::write(bool data)
 {
   (void) data;
   return STATUS_DRV_NOT_IMPLEMENTED;

@@ -37,7 +37,7 @@ DriverInBase::~DriverInBase()
  * @param data Buffer to store the integer read
  * @return Status_t
  */
-Status_t DriverInBase::read(uint32_t &data)
+Status_t DriverInBase::read(bool &data)
 {
   (void) data;
   return STATUS_DRV_NOT_IMPLEMENTED;

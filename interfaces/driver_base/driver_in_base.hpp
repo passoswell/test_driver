@@ -29,7 +29,7 @@ public:
   virtual ~DriverInBase();
 
   // Receive data
-  virtual Status_t read(uint32_t &data);
+  virtual Status_t read(bool &data);
   virtual Status_t read(float &data);
   virtual Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
   virtual Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX);
