@@ -1,0 +1,16 @@
+if((DEFINED BUILD_EX_BLINK) OR ((DEFINED BUILD_ALL_EXAMPLES) AND (BUILD_ALL_EXAMPLES EQUAL 1)))
+
+  set(BUILD_EX_BLINK TRUE)
+  message("Building gpio example blink and saving binary on ${CMAKE_BINARY_DIR}/bin/\r\n")
+
+  add_executable(ex_blink
+  blink.cpp
+  )
+
+  # pull in common dependencies
+  target_link_libraries(ex_blink drivers)
+
+
+  _postbuild_task(ex_blink)
+
+endif()

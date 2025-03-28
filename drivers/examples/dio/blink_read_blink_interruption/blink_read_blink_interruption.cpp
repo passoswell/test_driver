@@ -11,11 +11,17 @@
 
 #include "drivers.hpp"
 
+/**
+ * @brief DIO pins
+ */
 #define DIO_INPUT_LINE_NUMBER                                                203
 #define DIO_INPUT_CHIP_NUMBER                                                  0
 #define DIO_OUTPUT_LINE_NUMBER                                                 6
 #define DIO_OUTPUT_CHIP_NUMBER                                                 0
 
+/**
+ * @brief Digital input parameters
+ */
 const DriverSettings_t g_dio_input_list[]
 {
   ADD_PARAMETER(DIO_LINE_DIRECTION, DIO_DIRECTION_INPUT),
@@ -24,6 +30,9 @@ const DriverSettings_t g_dio_input_list[]
 };
 uint8_t g_dio_input_list_size = sizeof(g_dio_input_list)/sizeof(g_dio_input_list[0]);
 
+/**
+ * @brief Digital output parameters
+ */
 const DriverSettings_t g_dio_output_list[]
 {
   ADD_PARAMETER(DIO_LINE_DIRECTION, DIO_DIRECTION_OUTPUT),
@@ -33,7 +42,9 @@ const DriverSettings_t g_dio_output_list[]
 };
 uint8_t g_dio_output_list_size = sizeof(g_dio_output_list)/sizeof(g_dio_output_list[0]);
 
-
+/**
+ * @brief Callback function for dio events
+ */
 Status_t inputCallback(Status_t status, DriverEventsList_t event, const Buffer_t data, void *user_arg)
 {
   if(status.success)
@@ -52,7 +63,11 @@ Status_t inputCallback(Status_t status, DriverEventsList_t event, const Buffer_t
   return status;
 }
 
-
+/**
+ * @brief Connect the input and output digital pint together and run the code
+ *        using break points. If printf is available, uncomment the lines
+ *        where a call to it appears
+ */
 int main(void)
 {
   bool input_value, output_value = false;
