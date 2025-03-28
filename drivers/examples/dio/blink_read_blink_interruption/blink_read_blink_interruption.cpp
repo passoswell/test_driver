@@ -68,7 +68,7 @@ Status_t inputCallback(Status_t status, DriverEventsList_t event, const Buffer_t
  *        using break points. If printf is available, uncomment the lines
  *        where a call to it appears
  */
-int main(void)
+AP_MAIN()
 {
   bool input_value, output_value = false;
   DIO input(DIO_INPUT_LINE_NUMBER, DIO_INPUT_CHIP_NUMBER);
@@ -91,6 +91,4 @@ int main(void)
     output_value = !output_value;
     output.write(output_value);
   }
-
-  return 0;
 }

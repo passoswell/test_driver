@@ -32,7 +32,7 @@ uint8_t g_dio_output_list_size = sizeof(g_dio_output_list)/sizeof(g_dio_output_l
 /**
  * @brief Blinks a LED every 1 second
  */
-int main(void)
+AP_MAIN()
 {
   SPT my_timer;
   bool input_value, output_value = false;
@@ -46,6 +46,4 @@ int main(void)
     output.write(output_value);
     my_timer.delay(1000);
   }
-
-  return 0;
 }

@@ -62,7 +62,6 @@ AP_MAIN()
     }
     my_timer.delay(1); // One second delay
   }
-  return 0;
 }
 
 /**
