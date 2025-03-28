@@ -1,0 +1,3 @@
+add_subdirectory(blink)
+add_subdirectory(blink_read_blink)
+add_subdirectory(blink_read_blink_interruption)

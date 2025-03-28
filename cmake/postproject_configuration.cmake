@@ -14,18 +14,11 @@ function (_postbuild_task A_TARGET)
 
     ELSEIF(DEFINED USE_PIPICO)
 
-        if (NOT ELF2UF2_FOUND)
-            find_package(pico-sdk-tools "${PICO_SDK_VERSION_MAJOR}.${PICO_SDK_VERSION_MINOR}.${PICO_SDK_VERSION_REVISION}" QUIET CONFIG CMAKE_FIND_ROOT_PATH_BOTH)
-            if (NOT ELF2UF2_FOUND)
-                set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PICO_SDK_PATH}/tools)
-                find_package(ELF2UF2)
-            endif()
-        endif()
-        if (ELF2UF2_FOUND)
-            add_custom_command(TARGET ${A_TARGET} POST_BUILD
-                COMMAND ELF2UF2 $<TARGET_FILE:${A_TARGET}> ${CMAKE_BINARY_DIR}/bin/${A_TARGET}.uf2
-                VERBATIM)
-        endif()
+        pico_add_extra_outputs(${A_TARGET})
+        add_custom_command(TARGET ${A_TARGET} POST_BUILD
+                COMMAND mv "${A_TARGET}.uf2" "${CMAKE_BINARY_DIR}/bin"
+                )
+
     ENDIF()
 endfunction()
 

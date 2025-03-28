@@ -1,31 +1,30 @@
 
-add_library(drivers STATIC
+add_library(drivers INTERFACE
 drivers.hpp
-drivers/base/drv_comm_base.hpp
-drivers/base/drv_comm_base.cpp)
+)
 
-target_link_libraries(drivers interfaces)
+target_link_libraries(drivers INTERFACE interfaces)
 
 IF(DEFINED USE_ESP32)
 
-  add_subdirectory(drivers/esp32)
+  add_subdirectory(esp32)
   target_link_libraries(drivers drv_esp32)
   message("\r\nLinking esp32 drivers because USE_ESP32 is defined\r\n")
 
 ELSEIF(DEFINED USE_PIPICO)
 
-  add_subdirectory(drivers/pipico)
+  add_subdirectory(pipico)
   target_link_libraries(drivers drv_pipico)
   message("\r\nLinking pipico drivers because USE_PIPICO is defined\r\n")
 
 ELSEIF(DEFINED USE_LINUX)
 
-  add_subdirectory(drivers/linux)
-  target_link_libraries(drivers drv_linux)
+  add_subdirectory(linux)
+  target_link_libraries(drivers INTERFACE drv_linux)
   message("\r\nLinking linux drivers because USE_LINUX is defined\r\n")
 
 ENDIF()
 
-target_include_directories(drivers PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(drivers INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(examples)

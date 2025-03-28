@@ -12,26 +12,24 @@
 #define DRIVERS_HPP_
 
 
-#include "drivers/base/drv_comm_base.hpp"
-
 #if defined(USE_SILABS) || __has_include("sl_status.h")
-#include "drivers/silabs/silabs_drivers.hpp"
+#include "silabs/silabs_drivers.hpp"
 #endif
 
 #if defined(USE_STM32)
-#include "drivers/stm32/stm32_drivers.hpp"
+#include "stm32/stm32_drivers.hpp"
 #endif
 
 #if defined(USE_ESP32)
-#include "drivers/esp32/esp32_drivers.hpp"
+#include "esp32/esp32_drivers.hpp"
 #endif
 
 #if defined(USE_PIPICO)
-#include "drivers/pipico/pipico_drivers.hpp"
+#include "pipico/pipico_drivers.hpp"
 #endif
 
 #if defined(USE_LINUX)
-#include "drivers/linux/linux_drivers.hpp"
+#include "linux/linux_drivers.hpp"
 #endif
 
 
