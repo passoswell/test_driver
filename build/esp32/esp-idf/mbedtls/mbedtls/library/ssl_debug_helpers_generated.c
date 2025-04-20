@@ -1,1 +1,0 @@
-/home/user/esp-idf/esp_idf-src/components/mbedtls/mbedtls/library/ssl_debug_helpers_generated.c
