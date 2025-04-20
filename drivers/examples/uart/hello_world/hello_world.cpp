@@ -47,31 +47,21 @@ AP_MAIN()
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status.success)
   {
-    errorHandler(status);
+    AP_EXIT();
     return status.code; // Should not get here
   }
 
   while(true)
   {
-    status = my_serial.write(message);
-    // status = my_serial.write(message, strlen((char *)message)); // Another write format
+    // status = my_serial.write(message);
+    status = my_serial.write(message, strlen((char *)message)); // Another write format
     if(!status.success)
     {
-      errorHandler(status);
+      AP_EXIT();
       return status.code; // Should not get here
     }
     my_timer.delay(1); // One second delay
   }
-}
 
-/**
- * @brief Dummy error handler
- */
-void errorHandler(Status_t status)
-{
-  (void) status;
-  while(true)
-  {
-    ;
-  }
+  AP_EXIT();
 }

@@ -8,7 +8,7 @@ target_link_libraries(drivers INTERFACE interfaces)
 IF(DEFINED USE_ESP32)
 
   add_subdirectory(esp32)
-  target_link_libraries(drivers drv_esp32)
+  target_link_libraries(drivers INTERFACE drv_esp32)
   message("\r\nLinking esp32 drivers because USE_ESP32 is defined\r\n")
 
 ELSEIF(DEFINED USE_PIPICO)

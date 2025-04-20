@@ -37,6 +37,28 @@
 #include "linux/spt/spt.hpp"
 #endif
 
+#if __has_include("linux/pwm/pwm.hpp")
+#include "linux/pwm/pwm.hpp"
+#endif
+
+#if __has_include("linux/adc/adc.hpp")
+#include "linux/adc/adc.hpp"
+#endif
+
+#if __has_include("linux/dac/dac.hpp")
+#include "linux/dac/dac.hpp"
+#endif
+
+#if __has_include("linux/mem/mem.hpp")
+#include "linux/mem/mem.hpp"
+#endif
+
+#if __has_include("linux/rtc/rtc.hpp")
+#include "linux/rtc/rtc.hpp"
+#endif
+
+#include "linux/task_system/task_system.hpp"
+
 #ifndef AP_MAIN
 #define AP_MAIN() \
     int main(void)
@@ -54,5 +76,8 @@
     }
 #endif /* AP_MAIN_ARDUINO() */
 
+#ifndef AP_EXIT
+#define AP_EXIT() return 0;
+#endif /* AP_EXIT */
 
 #endif /* LINUX_DRIVERS_HPP_ */

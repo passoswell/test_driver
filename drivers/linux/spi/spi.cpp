@@ -25,8 +25,7 @@
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
  */
-SPI::SPI(const void *port_handle) :
-m_thread_handle(SPI::transferDataAsync, this)
+SPI::SPI(const void *port_handle)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
@@ -55,6 +54,7 @@ Status_t SPI::configure(const DriverSettings_t *list, uint8_t list_size)
   char mode = 0;
   char n_bits = 8;
   int max_baud = 1000000;
+  bool result;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
@@ -125,7 +125,8 @@ Status_t SPI::configure(const DriverSettings_t *list, uint8_t list_size)
 
   if(m_is_async_mode)
   {
-    if(!m_thread_handle.create())
+    result = m_thread_handle.create(SPI::transferDataAsync, this, 0);
+    if(!result)
     {
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the spi task.\r\n");
       return status;
@@ -167,7 +168,7 @@ Status_t SPI::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
     data_bundle.tx_buffer = nullptr;
     data_bundle.tx_size = 0;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(&data_bundle, 0))
+    if(m_thread_handle.setInputData(data_bundle, 0))
     {
       status = STATUS_DRV_SUCCESS;
     }else
@@ -211,7 +212,7 @@ Status_t SPI::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
     data_bundle.tx_buffer = data;
     data_bundle.tx_size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(&data_bundle, 0))
+    if(m_thread_handle.setInputData(data_bundle, 0))
     {
       status = STATUS_DRV_SUCCESS;
     }else
@@ -258,7 +259,7 @@ Status_t SPI::transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, ui
     data_bundle.tx_buffer = tx_data;
     data_bundle.tx_size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(&data_bundle, 0))
+    if(m_thread_handle.setInputData(data_bundle, 0))
     {
       status = STATUS_DRV_SUCCESS;
     }else

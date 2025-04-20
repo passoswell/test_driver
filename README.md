@@ -22,7 +22,7 @@ This project is for planning, implementing and maintaining a firmware architectu
 * Platform dependent dependencies, including tool chains and compilers
 
 Code can be built for the following platforms:
-* [Linux](drivers/linux) - HAL to access peripherals on linux systems
+* [Linux](drivers/linux/README.md) - HAL to access peripherals on linux systems
 
 ## Setup
 

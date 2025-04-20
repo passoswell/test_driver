@@ -12,9 +12,11 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "ESP_PLATFORM": "1",
         "CCACHE_ENABLE": "0",
-        "ESP_IDF_FETCH_FROM_GIT_PATH": "${sourceDir}/external/esp-idf",
+        "ESP_IDF_FETCH_FROM_GIT_PATH": "~/esp-idf",
         "USE_ESP32": "1",
-        "TARGET": "esp32"
+        "ESP32_TARGET": "esp32",
+        "ESP32_IDF_VERSION": "v5.2.2",
+        "BUILD_ALL_EXAMPLES": "1"
       }
     },
     {

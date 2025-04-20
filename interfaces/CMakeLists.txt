@@ -4,6 +4,8 @@ inoutstream/inoutstream_interface_types.hpp
 inoutstream/inoutstream_interface.hpp
 software_timer_interface/software_timer_interface.hpp
 task_interface/task_interface.hpp
+task_interface/queue_interface.hpp
+task_interface/mutex_interface.hpp
 
 driver_base/driver_base.hpp
 driver_base/driver_base.cpp

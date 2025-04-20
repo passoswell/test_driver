@@ -17,7 +17,7 @@
 
 #include "peripherals_base/uart_base.hpp"
 #include "linux/utils/linux_types.hpp"
-#include "linux/utils/linux_threads.hpp"
+#include "linux/task_system/task_system.hpp"
 
 
 /**
@@ -41,8 +41,8 @@ public:
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
-  LinuxThreads<DataBundle_t, Status_t, UART_QUEUE_SIZE, 0> m_rx_thread_handle;
-  LinuxThreads<DataBundle_t, Status_t, UART_QUEUE_SIZE, 0> m_tx_thread_handle;
+  Task<DataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_rx_thread_handle;
+  Task<DataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_tx_thread_handle;
   int m_linux_handle;
   bool m_terminate;
 

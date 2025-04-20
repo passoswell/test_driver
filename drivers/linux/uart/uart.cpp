@@ -24,9 +24,7 @@ static speed_t convertSpeed(uint32_t speed);
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
  */
-UART::UART(const void *port_handle) :
-m_rx_thread_handle(UART::readFromThreadBlocking, this),
-m_tx_thread_handle(UART::writeFromThreadBlocking, this)
+UART::UART(const void *port_handle)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
@@ -56,7 +54,7 @@ Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
   struct termios termios_structure;
   speed_t speed = B1152000;
   uint32_t stop_bits_count = 1;
-  bool use_parity = false, use_hw_flow_ctrl = false;
+  bool use_parity = false, use_hw_flow_ctrl = false, result;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
@@ -145,7 +143,9 @@ Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
 
   if(m_is_async_mode)
   {
-    if(!m_rx_thread_handle.create() || !m_tx_thread_handle.create())
+    result = m_rx_thread_handle.create(UART::readFromThreadBlocking, this, 0);
+    result &= m_tx_thread_handle.create(UART::writeFromThreadBlocking, this, 0);
+    if(!result)
     {
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch one or more UART tasks.\r\n");
       return status;
@@ -187,7 +187,7 @@ Status_t UART::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_rx_thread_handle.setInputData(&data_bundle, 0))
+    if(m_rx_thread_handle.setInputData(data_bundle, 0))
     {
       return STATUS_DRV_SUCCESS;
     }else
@@ -231,7 +231,7 @@ Status_t UART::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_tx_thread_handle.setInputData(&data_bundle, 0))
+    if(m_tx_thread_handle.setInputData(data_bundle, 0))
     {
       return STATUS_DRV_SUCCESS;
     }else

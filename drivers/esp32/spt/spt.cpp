@@ -1,27 +1,28 @@
 /**
  * @file spt.cpp
  * @author your name (you@domain.com)
- * @brief Software Periodic Timer driver for linux
+ * @brief Software Periodic Timer driver for esp32
  * @version 0.1
- * @date 2024-09-14
+ * @date 2024-09-15
  *
  * @copyright Copyright (c) 2024
  *
  */
 
-#include "linux/spt/spt.hpp"
+#include "spt.hpp"
 
-#include <chrono>
-#include <cmath>
-#include <cstdint>
-#include <thread>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "esp_timer.h"
 
 /**
  * @brief Constructor
  */
 SPT::SPT(SoftwareTimerCountUnit_t time_unit) : SptBase(time_unit)
 {
-  // Nothing is done here
+  m_prev_time_ms[0] = 0;
+  m_prev_time_ms[1] = 0;
+  m_prev_time_ms[2] = 0;
 }
 
 /**
@@ -30,9 +31,7 @@ SPT::SPT(SoftwareTimerCountUnit_t time_unit) : SptBase(time_unit)
  */
 sft_time_us_t SPT::getTimeSincePowerOnUs()
 {
-  sft_time_us_t now_time = std::chrono::duration_cast<std::chrono::microseconds>(
-    std::chrono::high_resolution_clock::now().time_since_epoch()).count();
-  return now_time;
+  return (sft_time_us_t) esp_timer_get_time();
 }
 
 /**
@@ -41,19 +40,20 @@ sft_time_us_t SPT::getTimeSincePowerOnUs()
  */
 void SPT::delay(uint32_t duration)
 {
+  TickType_t xDelay = duration / portTICK_PERIOD_MS;
   switch(m_unit)
   {
     case SOFTWARE_TIMER_SECONDS:
-      std::this_thread::sleep_for(std::chrono::seconds(duration));
+      vTaskDelay(1000 * duration / portTICK_PERIOD_MS);
       break;
     case SOFTWARE_TIMER_MILLISECONDS:
-      std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+      vTaskDelay(duration / portTICK_PERIOD_MS);
       break;
     case SOFTWARE_TIMER_MICROSECONDS:
-      std::this_thread::sleep_for(std::chrono::microseconds(duration));
+      vTaskDelay(duration / (1000 * portTICK_PERIOD_MS));
       break;
     default:
-      std::this_thread::sleep_for(std::chrono::milliseconds(duration));
+      vTaskDelay(1000 * duration / portTICK_PERIOD_MS);
       break;
   }
 }

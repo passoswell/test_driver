@@ -14,7 +14,7 @@
 
 #include "peripherals_base/spi_base.hpp"
 #include "linux/utils/linux_types.hpp"
-#include "linux/utils/linux_threads.hpp"
+#include "linux/task_system/task_system.hpp"
 
 /**
  * @brief Base class for spi drivers
@@ -40,7 +40,7 @@ public:
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
-  LinuxThreads<DataBundle_t, Status_t, SPI_QUEUE_SIZE, 0> m_thread_handle;
+  Task<DataBundle_t, SPI_QUEUE_SIZE, Status_t, 0> m_thread_handle;
   int m_linux_handle;
   uint32_t m_speed;
 

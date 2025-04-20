@@ -18,7 +18,7 @@
 
 #include "peripherals_base/iic_base.hpp"
 #include "linux/utils/linux_types.hpp"
-#include "linux/utils/linux_threads.hpp"
+#include "linux/task_system/task_system.hpp"
 
 /**
  * @brief Base class for iic drivers
@@ -43,7 +43,7 @@ public:
   Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
-  LinuxThreads<DataBundle_t, Status_t, IIC_QUEUE_SIZE, 0> m_thread_handle;
+  Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
   uint16_t m_address;
   int m_linux_handle;
 

@@ -25,8 +25,7 @@
  * @param port_handle A string containing the path to the peripheral
  * @param address 8 or 10 bits address
  */
-IIC::IIC(const void *port_handle, uint16_t address) :
-m_thread_handle(IIC::transferDataAsync, this)
+IIC::IIC(const void *port_handle, uint16_t address)
 {
   m_address = address;
   m_handle = port_handle;
@@ -53,6 +52,7 @@ IIC::~IIC()
 Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
 {
   Status_t status = STATUS_DRV_SUCCESS;
+  bool result;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
@@ -81,7 +81,8 @@ Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
 
   if(m_is_async_mode)
   {
-    if(!m_thread_handle.create())
+    result = m_thread_handle.create(IIC::transferDataAsync, this, 0);
+    if(!result)
     {
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the IIC task.\r\n");
       return status;
@@ -131,7 +132,7 @@ Status_t IIC::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(&data_bundle, 0))
+    if(m_thread_handle.setInputData(data_bundle, 0))
     {
       return STATUS_DRV_SUCCESS;
     }else
@@ -175,7 +176,7 @@ Status_t IIC::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(&data_bundle, 0))
+    if(m_thread_handle.setInputData(data_bundle, 0))
     {
       return STATUS_DRV_SUCCESS;
     }else

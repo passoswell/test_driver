@@ -1,5 +1,7 @@
 
 
+set(FETCHCONTENT_QUIET OFF)
+
 IF(DEFINED USE_ESP32)
 
   message("Using ESP32")
