@@ -1,0 +1,2020 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28
+					]
+				},
+				{
+					"build" : "commons",
+					"jsonFile" : "directory-commons-Debug-2439e3b5517700ece306.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "commons",
+					"targetIndexes" : 
+					[
+						29
+					]
+				},
+				{
+					"build" : "interfaces",
+					"jsonFile" : "directory-interfaces-Debug-e847e2b7f463abe3cfcb.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "interfaces",
+					"targetIndexes" : 
+					[
+						42
+					]
+				},
+				{
+					"build" : "drivers",
+					"childIndexes" : 
+					[
+						4,
+						5
+					],
+					"jsonFile" : "directory-drivers-Debug-de73785f203206602693.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "drivers",
+					"targetIndexes" : 
+					[
+						30
+					]
+				},
+				{
+					"build" : "drivers/linux",
+					"jsonFile" : "directory-drivers.linux-Debug-984134395336431da34d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "drivers/linux",
+					"targetIndexes" : 
+					[
+						31
+					]
+				},
+				{
+					"build" : "drivers/examples",
+					"childIndexes" : 
+					[
+						6,
+						10,
+						14
+					],
+					"jsonFile" : "directory-drivers.examples-Debug-8dff8d2efa2ac6e1282b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "drivers/examples"
+				},
+				{
+					"build" : "drivers/examples/dio",
+					"childIndexes" : 
+					[
+						7,
+						8,
+						9
+					],
+					"jsonFile" : "directory-drivers.examples.dio-Debug-a6e75fd06ae0fe49e503.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio"
+				},
+				{
+					"build" : "drivers/examples/dio/blink",
+					"jsonFile" : "directory-drivers.examples.dio.blink-Debug-11a2fc0b89fc10223146.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink",
+					"targetIndexes" : 
+					[
+						33
+					]
+				},
+				{
+					"build" : "drivers/examples/dio/blink_read_blink",
+					"jsonFile" : "directory-drivers.examples.dio.blink_read_blink-Debug-065dc971731650b42ff1.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink_read_blink",
+					"targetIndexes" : 
+					[
+						34
+					]
+				},
+				{
+					"build" : "drivers/examples/dio/blink_read_blink_interruption",
+					"jsonFile" : "directory-drivers.examples.dio.blink_read_blink_interruption-Debug-c294e01f3fb644428a76.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink_read_blink_interruption",
+					"targetIndexes" : 
+					[
+						35
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system",
+					"childIndexes" : 
+					[
+						11,
+						12,
+						13
+					],
+					"jsonFile" : "directory-drivers.examples.task_system-Debug-d163a0370ecd96424eb0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system"
+				},
+				{
+					"build" : "drivers/examples/task_system/mutex",
+					"jsonFile" : "directory-drivers.examples.task_system.mutex-Debug-87e7c017d53bb254d525.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/mutex",
+					"targetIndexes" : 
+					[
+						32,
+						36,
+						37
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system/queue",
+					"jsonFile" : "directory-drivers.examples.task_system.queue-Debug-c7795df4e4a0b14e7a4f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/queue",
+					"targetIndexes" : 
+					[
+						38
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system/task",
+					"jsonFile" : "directory-drivers.examples.task_system.task-Debug-9fa18ab1e986cbab6b10.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/task",
+					"targetIndexes" : 
+					[
+						39,
+						40
+					]
+				},
+				{
+					"build" : "drivers/examples/uart",
+					"childIndexes" : 
+					[
+						15
+					],
+					"jsonFile" : "directory-drivers.examples.uart-Debug-2a517264ecbe4398c329.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/uart"
+				},
+				{
+					"build" : "drivers/examples/uart/hello_world",
+					"jsonFile" : "directory-drivers.examples.uart.hello_world-Debug-9ec1634db7b8ad82075e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 14,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/uart/hello_world",
+					"targetIndexes" : 
+					[
+						41
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15
+					],
+					"name" : "TEST_DRIVER",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33,
+						34,
+						35,
+						36,
+						37,
+						38,
+						39,
+						40,
+						41,
+						42
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Continuous::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Continuous-Debug-0ef670b20646e580942d.json",
+					"name" : "Continuous",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousBuild-Debug-304e6c67fbb77adb9bc8.json",
+					"name" : "ContinuousBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousConfigure-Debug-2f2ead732a7fc2e31387.json",
+					"name" : "ContinuousConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousCoverage-Debug-a10cb1416e6daf9ae12c.json",
+					"name" : "ContinuousCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousMemCheck-Debug-10f3a5f7c06082563020.json",
+					"name" : "ContinuousMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousStart-Debug-1e56a3c5f02af93d7101.json",
+					"name" : "ContinuousStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousSubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousSubmit-Debug-0951a75dc4f552e89639.json",
+					"name" : "ContinuousSubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousTest-Debug-49228f7ef18c0b6035bf.json",
+					"name" : "ContinuousTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousUpdate-Debug-c76d1e6d43c9f5dd2042.json",
+					"name" : "ContinuousUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Experimental::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Experimental-Debug-ffd3a20559dd26717f37.json",
+					"name" : "Experimental",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalBuild-Debug-ea6692a6608e0334a863.json",
+					"name" : "ExperimentalBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalConfigure-Debug-560bab398336699abf40.json",
+					"name" : "ExperimentalConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalCoverage-Debug-69e3bb6b10fbd3300096.json",
+					"name" : "ExperimentalCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalMemCheck-Debug-9620a87e92fd9fe9dedb.json",
+					"name" : "ExperimentalMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalStart-Debug-06473a9c0ec1346e83f1.json",
+					"name" : "ExperimentalStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalSubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalSubmit-Debug-b9df7d9c7e9dec719384.json",
+					"name" : "ExperimentalSubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalTest-Debug-acafea220d497a9ad8b1.json",
+					"name" : "ExperimentalTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalUpdate-Debug-cbf2e780c9e4a397f25c.json",
+					"name" : "ExperimentalUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Nightly::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Nightly-Debug-28bc64cdf625fcfba1d5.json",
+					"name" : "Nightly",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyBuild-Debug-e18d8424d87953a3026c.json",
+					"name" : "NightlyBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyConfigure-Debug-f8f302779eb2168be00c.json",
+					"name" : "NightlyConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyCoverage-Debug-ca89807f7e384d069292.json",
+					"name" : "NightlyCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyMemCheck-Debug-cfa0ee6a02a7153516d6.json",
+					"name" : "NightlyMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyMemoryCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyMemoryCheck-Debug-ffa0b872a0613467e002.json",
+					"name" : "NightlyMemoryCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyStart-Debug-f8c23b035ce1478b43de.json",
+					"name" : "NightlyStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlySubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlySubmit-Debug-8b9020b969dd01e6fe26.json",
+					"name" : "NightlySubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyTest-Debug-82740cc2464e87464e68.json",
+					"name" : "NightlyTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyUpdate-Debug-f774597d7b0f66c7b639.json",
+					"name" : "NightlyUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "TEST_DRIVER::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TEST_DRIVER-Debug-a8936245555975395f1e.json",
+					"name" : "TEST_DRIVER",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "commons::@7ac8c5dc86eb295b9708",
+					"jsonFile" : "target-commons-Debug-3c129ccdc8e7306d0a6a.json",
+					"name" : "commons",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "drivers::@1d7df37e8e284987ec01",
+					"jsonFile" : "target-drivers-Debug-35eae9e89e7b99720e9a.json",
+					"name" : "drivers",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "drv_linux::@a0372350b4b417f56a60",
+					"jsonFile" : "target-drv_linux-Debug-d82f7ed03453d43521a6.json",
+					"name" : "drv_linux",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_atomic_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_atomic_mutex-Debug-69ccf72b50f623f73a2e.json",
+					"name" : "ex_atomic_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "ex_blink::@fcdf364586c9e5d7168a",
+					"jsonFile" : "target-ex_blink-Debug-8380a6f7f246466ed111.json",
+					"name" : "ex_blink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 8,
+					"id" : "ex_blink_read_blink::@2881970478f6b06637b9",
+					"jsonFile" : "target-ex_blink_read_blink-Debug-a6b25bbc1ed487f0c247.json",
+					"name" : "ex_blink_read_blink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 9,
+					"id" : "ex_blink_read_blink_interruption::@25f5b77c9d99d70da007",
+					"jsonFile" : "target-ex_blink_read_blink_interruption-Debug-8626efa05addbc082f48.json",
+					"name" : "ex_blink_read_blink_interruption",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_critical_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_critical_mutex-Debug-40e5255f0da035574526.json",
+					"name" : "ex_critical_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_mutex-Debug-e46af2abeea839764fba.json",
+					"name" : "ex_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 12,
+					"id" : "ex_queue::@327ddfaec794f32baec8",
+					"jsonFile" : "target-ex_queue-Debug-6a3cd2e934414058e0f5.json",
+					"name" : "ex_queue",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "ex_task::@591474879a5ffb64bf8e",
+					"jsonFile" : "target-ex_task-Debug-911182d748eb4ff57199.json",
+					"name" : "ex_task",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "ex_task_multicore::@591474879a5ffb64bf8e",
+					"jsonFile" : "target-ex_task_multicore-Debug-1e8a060157d4991c39dc.json",
+					"name" : "ex_task_multicore",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 15,
+					"id" : "hello_world::@c9f9fba51632e8528755",
+					"jsonFile" : "target-hello_world-Debug-c61022f02b90d205e6d0.json",
+					"name" : "hello_world",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "interfaces::@6ff2676d08d3dbc7a613",
+					"jsonFile" : "target-interfaces-Debug-829d66fb1c95c005f240.json",
+					"name" : "interfaces",
+					"projectIndex" : 0
+				}
+			]
+		},
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"jsonFile" : "directory-.-Release-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28
+					]
+				},
+				{
+					"build" : "commons",
+					"jsonFile" : "directory-commons-Release-2439e3b5517700ece306.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "commons",
+					"targetIndexes" : 
+					[
+						29
+					]
+				},
+				{
+					"build" : "interfaces",
+					"jsonFile" : "directory-interfaces-Release-e847e2b7f463abe3cfcb.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "interfaces",
+					"targetIndexes" : 
+					[
+						42
+					]
+				},
+				{
+					"build" : "drivers",
+					"childIndexes" : 
+					[
+						4,
+						5
+					],
+					"jsonFile" : "directory-drivers-Release-de73785f203206602693.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "drivers",
+					"targetIndexes" : 
+					[
+						30
+					]
+				},
+				{
+					"build" : "drivers/linux",
+					"jsonFile" : "directory-drivers.linux-Release-984134395336431da34d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "drivers/linux",
+					"targetIndexes" : 
+					[
+						31
+					]
+				},
+				{
+					"build" : "drivers/examples",
+					"childIndexes" : 
+					[
+						6,
+						10,
+						14
+					],
+					"jsonFile" : "directory-drivers.examples-Release-8dff8d2efa2ac6e1282b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "drivers/examples"
+				},
+				{
+					"build" : "drivers/examples/dio",
+					"childIndexes" : 
+					[
+						7,
+						8,
+						9
+					],
+					"jsonFile" : "directory-drivers.examples.dio-Release-a6e75fd06ae0fe49e503.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio"
+				},
+				{
+					"build" : "drivers/examples/dio/blink",
+					"jsonFile" : "directory-drivers.examples.dio.blink-Release-11a2fc0b89fc10223146.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink",
+					"targetIndexes" : 
+					[
+						33
+					]
+				},
+				{
+					"build" : "drivers/examples/dio/blink_read_blink",
+					"jsonFile" : "directory-drivers.examples.dio.blink_read_blink-Release-065dc971731650b42ff1.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink_read_blink",
+					"targetIndexes" : 
+					[
+						34
+					]
+				},
+				{
+					"build" : "drivers/examples/dio/blink_read_blink_interruption",
+					"jsonFile" : "directory-drivers.examples.dio.blink_read_blink_interruption-Release-c294e01f3fb644428a76.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink_read_blink_interruption",
+					"targetIndexes" : 
+					[
+						35
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system",
+					"childIndexes" : 
+					[
+						11,
+						12,
+						13
+					],
+					"jsonFile" : "directory-drivers.examples.task_system-Release-d163a0370ecd96424eb0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system"
+				},
+				{
+					"build" : "drivers/examples/task_system/mutex",
+					"jsonFile" : "directory-drivers.examples.task_system.mutex-Release-87e7c017d53bb254d525.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/mutex",
+					"targetIndexes" : 
+					[
+						32,
+						36,
+						37
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system/queue",
+					"jsonFile" : "directory-drivers.examples.task_system.queue-Release-c7795df4e4a0b14e7a4f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/queue",
+					"targetIndexes" : 
+					[
+						38
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system/task",
+					"jsonFile" : "directory-drivers.examples.task_system.task-Release-9fa18ab1e986cbab6b10.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/task",
+					"targetIndexes" : 
+					[
+						39,
+						40
+					]
+				},
+				{
+					"build" : "drivers/examples/uart",
+					"childIndexes" : 
+					[
+						15
+					],
+					"jsonFile" : "directory-drivers.examples.uart-Release-2a517264ecbe4398c329.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/uart"
+				},
+				{
+					"build" : "drivers/examples/uart/hello_world",
+					"jsonFile" : "directory-drivers.examples.uart.hello_world-Release-9ec1634db7b8ad82075e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 14,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/uart/hello_world",
+					"targetIndexes" : 
+					[
+						41
+					]
+				}
+			],
+			"name" : "Release",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15
+					],
+					"name" : "TEST_DRIVER",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33,
+						34,
+						35,
+						36,
+						37,
+						38,
+						39,
+						40,
+						41,
+						42
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Continuous::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Continuous-Release-9f059ac1b4058acef6a1.json",
+					"name" : "Continuous",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousBuild-Release-951ce26c07001f238ec2.json",
+					"name" : "ContinuousBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousConfigure-Release-0a40deb61d7802bb77d5.json",
+					"name" : "ContinuousConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousCoverage-Release-a9912ade8a702dd94154.json",
+					"name" : "ContinuousCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousMemCheck-Release-69cfae55f08dc16c54fe.json",
+					"name" : "ContinuousMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousStart-Release-bd99f4d42c1e9262c31b.json",
+					"name" : "ContinuousStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousSubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousSubmit-Release-8cc3824ce4883fe45d98.json",
+					"name" : "ContinuousSubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousTest-Release-43d993709782e9e481bd.json",
+					"name" : "ContinuousTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousUpdate-Release-48cd8d502947512b5323.json",
+					"name" : "ContinuousUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Experimental::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Experimental-Release-3448041958a598ecbad4.json",
+					"name" : "Experimental",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalBuild-Release-cd7ae8708edb81c08a27.json",
+					"name" : "ExperimentalBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalConfigure-Release-11fdeb7a91eed760a165.json",
+					"name" : "ExperimentalConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalCoverage-Release-ed7ccecd3f2efe8f9f75.json",
+					"name" : "ExperimentalCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalMemCheck-Release-6d288fc24d9582fc4e36.json",
+					"name" : "ExperimentalMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalStart-Release-da2e199c80ae0b633a3f.json",
+					"name" : "ExperimentalStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalSubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalSubmit-Release-3ceaa4203628d8278b6e.json",
+					"name" : "ExperimentalSubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalTest-Release-83c6ba4ef4593bc37dba.json",
+					"name" : "ExperimentalTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalUpdate-Release-7ef12be105f6b16c2843.json",
+					"name" : "ExperimentalUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Nightly::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Nightly-Release-cd41de1cf2e6756f629f.json",
+					"name" : "Nightly",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyBuild-Release-a5d334b91d094d1e2974.json",
+					"name" : "NightlyBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyConfigure-Release-e4d1afbdaf092c831b50.json",
+					"name" : "NightlyConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyCoverage-Release-c550998d081e0508d6a5.json",
+					"name" : "NightlyCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyMemCheck-Release-bcc7bc35e4887a5ab287.json",
+					"name" : "NightlyMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyMemoryCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyMemoryCheck-Release-e5521933184a84c374e8.json",
+					"name" : "NightlyMemoryCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyStart-Release-56ff67008caca931c56a.json",
+					"name" : "NightlyStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlySubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlySubmit-Release-537936a9e5b4a529e896.json",
+					"name" : "NightlySubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyTest-Release-8c8dfeac12045971d0f5.json",
+					"name" : "NightlyTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyUpdate-Release-8923441cf96a967b364d.json",
+					"name" : "NightlyUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "TEST_DRIVER::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TEST_DRIVER-Release-d2e0b874ddf04b37a2be.json",
+					"name" : "TEST_DRIVER",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "commons::@7ac8c5dc86eb295b9708",
+					"jsonFile" : "target-commons-Release-3c129ccdc8e7306d0a6a.json",
+					"name" : "commons",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "drivers::@1d7df37e8e284987ec01",
+					"jsonFile" : "target-drivers-Release-35eae9e89e7b99720e9a.json",
+					"name" : "drivers",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "drv_linux::@a0372350b4b417f56a60",
+					"jsonFile" : "target-drv_linux-Release-d4ceb17810bca5194a24.json",
+					"name" : "drv_linux",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_atomic_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_atomic_mutex-Release-7ae1e29229ac955bb93f.json",
+					"name" : "ex_atomic_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "ex_blink::@fcdf364586c9e5d7168a",
+					"jsonFile" : "target-ex_blink-Release-7042f27de50165dae01f.json",
+					"name" : "ex_blink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 8,
+					"id" : "ex_blink_read_blink::@2881970478f6b06637b9",
+					"jsonFile" : "target-ex_blink_read_blink-Release-938a9fa11681a546432e.json",
+					"name" : "ex_blink_read_blink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 9,
+					"id" : "ex_blink_read_blink_interruption::@25f5b77c9d99d70da007",
+					"jsonFile" : "target-ex_blink_read_blink_interruption-Release-a3039e7f8608cfe7e184.json",
+					"name" : "ex_blink_read_blink_interruption",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_critical_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_critical_mutex-Release-40c553aff296cf0d0a49.json",
+					"name" : "ex_critical_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_mutex-Release-0758c8693bcb51ee0a1a.json",
+					"name" : "ex_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 12,
+					"id" : "ex_queue::@327ddfaec794f32baec8",
+					"jsonFile" : "target-ex_queue-Release-699c4cf85e131e57c5ae.json",
+					"name" : "ex_queue",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "ex_task::@591474879a5ffb64bf8e",
+					"jsonFile" : "target-ex_task-Release-5b7e41d01ca2bd483e0b.json",
+					"name" : "ex_task",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "ex_task_multicore::@591474879a5ffb64bf8e",
+					"jsonFile" : "target-ex_task_multicore-Release-487c6f13efdb9c47b2bd.json",
+					"name" : "ex_task_multicore",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 15,
+					"id" : "hello_world::@c9f9fba51632e8528755",
+					"jsonFile" : "target-hello_world-Release-a3ba371aeb0b29aa03d5.json",
+					"name" : "hello_world",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "interfaces::@6ff2676d08d3dbc7a613",
+					"jsonFile" : "target-interfaces-Release-49b9096acf6b3426a02a.json",
+					"name" : "interfaces",
+					"projectIndex" : 0
+				}
+			]
+		},
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"childIndexes" : 
+					[
+						1,
+						2,
+						3
+					],
+					"jsonFile" : "directory-.-RelWithDebInfo-f5ebdc15457944623624.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28
+					]
+				},
+				{
+					"build" : "commons",
+					"jsonFile" : "directory-commons-RelWithDebInfo-2439e3b5517700ece306.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "commons",
+					"targetIndexes" : 
+					[
+						29
+					]
+				},
+				{
+					"build" : "interfaces",
+					"jsonFile" : "directory-interfaces-RelWithDebInfo-e847e2b7f463abe3cfcb.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "interfaces",
+					"targetIndexes" : 
+					[
+						42
+					]
+				},
+				{
+					"build" : "drivers",
+					"childIndexes" : 
+					[
+						4,
+						5
+					],
+					"jsonFile" : "directory-drivers-RelWithDebInfo-de73785f203206602693.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 0,
+					"projectIndex" : 0,
+					"source" : "drivers",
+					"targetIndexes" : 
+					[
+						30
+					]
+				},
+				{
+					"build" : "drivers/linux",
+					"jsonFile" : "directory-drivers.linux-RelWithDebInfo-984134395336431da34d.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "drivers/linux",
+					"targetIndexes" : 
+					[
+						31
+					]
+				},
+				{
+					"build" : "drivers/examples",
+					"childIndexes" : 
+					[
+						6,
+						10,
+						14
+					],
+					"jsonFile" : "directory-drivers.examples-RelWithDebInfo-8dff8d2efa2ac6e1282b.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 3,
+					"projectIndex" : 0,
+					"source" : "drivers/examples"
+				},
+				{
+					"build" : "drivers/examples/dio",
+					"childIndexes" : 
+					[
+						7,
+						8,
+						9
+					],
+					"jsonFile" : "directory-drivers.examples.dio-RelWithDebInfo-a6e75fd06ae0fe49e503.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio"
+				},
+				{
+					"build" : "drivers/examples/dio/blink",
+					"jsonFile" : "directory-drivers.examples.dio.blink-RelWithDebInfo-11a2fc0b89fc10223146.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink",
+					"targetIndexes" : 
+					[
+						33
+					]
+				},
+				{
+					"build" : "drivers/examples/dio/blink_read_blink",
+					"jsonFile" : "directory-drivers.examples.dio.blink_read_blink-RelWithDebInfo-065dc971731650b42ff1.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink_read_blink",
+					"targetIndexes" : 
+					[
+						34
+					]
+				},
+				{
+					"build" : "drivers/examples/dio/blink_read_blink_interruption",
+					"jsonFile" : "directory-drivers.examples.dio.blink_read_blink_interruption-RelWithDebInfo-c294e01f3fb644428a76.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 6,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/dio/blink_read_blink_interruption",
+					"targetIndexes" : 
+					[
+						35
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system",
+					"childIndexes" : 
+					[
+						11,
+						12,
+						13
+					],
+					"jsonFile" : "directory-drivers.examples.task_system-RelWithDebInfo-d163a0370ecd96424eb0.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system"
+				},
+				{
+					"build" : "drivers/examples/task_system/mutex",
+					"jsonFile" : "directory-drivers.examples.task_system.mutex-RelWithDebInfo-87e7c017d53bb254d525.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/mutex",
+					"targetIndexes" : 
+					[
+						32,
+						36,
+						37
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system/queue",
+					"jsonFile" : "directory-drivers.examples.task_system.queue-RelWithDebInfo-c7795df4e4a0b14e7a4f.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/queue",
+					"targetIndexes" : 
+					[
+						38
+					]
+				},
+				{
+					"build" : "drivers/examples/task_system/task",
+					"jsonFile" : "directory-drivers.examples.task_system.task-RelWithDebInfo-9fa18ab1e986cbab6b10.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 10,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/task_system/task",
+					"targetIndexes" : 
+					[
+						39,
+						40
+					]
+				},
+				{
+					"build" : "drivers/examples/uart",
+					"childIndexes" : 
+					[
+						15
+					],
+					"jsonFile" : "directory-drivers.examples.uart-RelWithDebInfo-2a517264ecbe4398c329.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 5,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/uart"
+				},
+				{
+					"build" : "drivers/examples/uart/hello_world",
+					"jsonFile" : "directory-drivers.examples.uart.hello_world-RelWithDebInfo-9ec1634db7b8ad82075e.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.0.0"
+					},
+					"parentIndex" : 14,
+					"projectIndex" : 0,
+					"source" : "drivers/examples/uart/hello_world",
+					"targetIndexes" : 
+					[
+						41
+					]
+				}
+			],
+			"name" : "RelWithDebInfo",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15
+					],
+					"name" : "TEST_DRIVER",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19,
+						20,
+						21,
+						22,
+						23,
+						24,
+						25,
+						26,
+						27,
+						28,
+						29,
+						30,
+						31,
+						32,
+						33,
+						34,
+						35,
+						36,
+						37,
+						38,
+						39,
+						40,
+						41,
+						42
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "Continuous::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Continuous-RelWithDebInfo-91f0ff309df3029ac1f4.json",
+					"name" : "Continuous",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousBuild-RelWithDebInfo-1cdcb7047213022b747c.json",
+					"name" : "ContinuousBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousConfigure-RelWithDebInfo-19b4604711dbd4102089.json",
+					"name" : "ContinuousConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousCoverage-RelWithDebInfo-e595af4e5a3e63f28c81.json",
+					"name" : "ContinuousCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousMemCheck-RelWithDebInfo-3b84db8affcef1d6a349.json",
+					"name" : "ContinuousMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousStart-RelWithDebInfo-61daa1eb2f23b8dcad05.json",
+					"name" : "ContinuousStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousSubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousSubmit-RelWithDebInfo-59c1eae36bce478374f1.json",
+					"name" : "ContinuousSubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousTest-RelWithDebInfo-c1210258a951d1629186.json",
+					"name" : "ContinuousTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ContinuousUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ContinuousUpdate-RelWithDebInfo-1b49066b000f86ba12aa.json",
+					"name" : "ContinuousUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Experimental::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Experimental-RelWithDebInfo-6d26a9d46a5eebbfff00.json",
+					"name" : "Experimental",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalBuild-RelWithDebInfo-c227b6483eb535e81724.json",
+					"name" : "ExperimentalBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalConfigure-RelWithDebInfo-304354cbb5f9cb9fbaee.json",
+					"name" : "ExperimentalConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalCoverage-RelWithDebInfo-52f2d8c4e6947bf6fff4.json",
+					"name" : "ExperimentalCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalMemCheck-RelWithDebInfo-81e358850aac7369e1a3.json",
+					"name" : "ExperimentalMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalStart-RelWithDebInfo-f1ab32a034f8d091ed55.json",
+					"name" : "ExperimentalStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalSubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalSubmit-RelWithDebInfo-4071e71927f7706452df.json",
+					"name" : "ExperimentalSubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalTest-RelWithDebInfo-b90a19a1554ea4004a72.json",
+					"name" : "ExperimentalTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ExperimentalUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ExperimentalUpdate-RelWithDebInfo-faae364b9250194f772b.json",
+					"name" : "ExperimentalUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "Nightly::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-Nightly-RelWithDebInfo-a7ee477116a400f51973.json",
+					"name" : "Nightly",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyBuild::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyBuild-RelWithDebInfo-af2250347df4e85ef37c.json",
+					"name" : "NightlyBuild",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyConfigure::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyConfigure-RelWithDebInfo-aad2f9737ed224fc6d4a.json",
+					"name" : "NightlyConfigure",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyCoverage::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyCoverage-RelWithDebInfo-d4b483fcf1d77b18d945.json",
+					"name" : "NightlyCoverage",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyMemCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyMemCheck-RelWithDebInfo-b394c5d2055f8090b2d8.json",
+					"name" : "NightlyMemCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyMemoryCheck::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyMemoryCheck-RelWithDebInfo-bec2196e78f186692025.json",
+					"name" : "NightlyMemoryCheck",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyStart::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyStart-RelWithDebInfo-22a403729e14ad325eec.json",
+					"name" : "NightlyStart",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlySubmit::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlySubmit-RelWithDebInfo-624ea0eccbe9db63fae9.json",
+					"name" : "NightlySubmit",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyTest::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyTest-RelWithDebInfo-4e58ec3e832b3f06459d.json",
+					"name" : "NightlyTest",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "NightlyUpdate::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-NightlyUpdate-RelWithDebInfo-53f170b7ff00c7955f46.json",
+					"name" : "NightlyUpdate",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "TEST_DRIVER::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-TEST_DRIVER-RelWithDebInfo-0b15152682c25d38e281.json",
+					"name" : "TEST_DRIVER",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 1,
+					"id" : "commons::@7ac8c5dc86eb295b9708",
+					"jsonFile" : "target-commons-RelWithDebInfo-3c129ccdc8e7306d0a6a.json",
+					"name" : "commons",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 3,
+					"id" : "drivers::@1d7df37e8e284987ec01",
+					"jsonFile" : "target-drivers-RelWithDebInfo-35eae9e89e7b99720e9a.json",
+					"name" : "drivers",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 4,
+					"id" : "drv_linux::@a0372350b4b417f56a60",
+					"jsonFile" : "target-drv_linux-RelWithDebInfo-e2c37cfe0dcd1e5b2f93.json",
+					"name" : "drv_linux",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_atomic_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_atomic_mutex-RelWithDebInfo-73fad542f10fec6bceb3.json",
+					"name" : "ex_atomic_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 7,
+					"id" : "ex_blink::@fcdf364586c9e5d7168a",
+					"jsonFile" : "target-ex_blink-RelWithDebInfo-becf024dde94987935d1.json",
+					"name" : "ex_blink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 8,
+					"id" : "ex_blink_read_blink::@2881970478f6b06637b9",
+					"jsonFile" : "target-ex_blink_read_blink-RelWithDebInfo-60079d25919057dfecce.json",
+					"name" : "ex_blink_read_blink",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 9,
+					"id" : "ex_blink_read_blink_interruption::@25f5b77c9d99d70da007",
+					"jsonFile" : "target-ex_blink_read_blink_interruption-RelWithDebInfo-e724f96f115892e93ac8.json",
+					"name" : "ex_blink_read_blink_interruption",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_critical_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_critical_mutex-RelWithDebInfo-168ad338d575701f513f.json",
+					"name" : "ex_critical_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 11,
+					"id" : "ex_mutex::@40e0656c647b1387881f",
+					"jsonFile" : "target-ex_mutex-RelWithDebInfo-22ff89ccae68654e7ecf.json",
+					"name" : "ex_mutex",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 12,
+					"id" : "ex_queue::@327ddfaec794f32baec8",
+					"jsonFile" : "target-ex_queue-RelWithDebInfo-7b6ed7c1c67bc189a209.json",
+					"name" : "ex_queue",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "ex_task::@591474879a5ffb64bf8e",
+					"jsonFile" : "target-ex_task-RelWithDebInfo-d2536379f32725978d6d.json",
+					"name" : "ex_task",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 13,
+					"id" : "ex_task_multicore::@591474879a5ffb64bf8e",
+					"jsonFile" : "target-ex_task_multicore-RelWithDebInfo-cc5e1206ae3015c8fea4.json",
+					"name" : "ex_task_multicore",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 15,
+					"id" : "hello_world::@c9f9fba51632e8528755",
+					"jsonFile" : "target-hello_world-RelWithDebInfo-78a001b0da08e1bd7848.json",
+					"name" : "hello_world",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 2,
+					"id" : "interfaces::@6ff2676d08d3dbc7a613",
+					"jsonFile" : "target-interfaces-RelWithDebInfo-206231701440644b6aec.json",
+					"name" : "interfaces",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "/home/user/vscode/projects/test_driver/build/linux",
+		"source" : "/home/user/vscode/projects/test_driver"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 4
+	}
+}

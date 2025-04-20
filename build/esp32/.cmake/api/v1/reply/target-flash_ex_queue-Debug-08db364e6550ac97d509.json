@@ -1,0 +1,92 @@
+{
+	"backtrace" : 2,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"_postbuild_task",
+			"add_dependencies"
+		],
+		"files" : 
+		[
+			"cmake/postproject_configuration.cmake",
+			"drivers/examples/task_system/queue/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 1
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 10,
+				"parent" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 29,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 0,
+				"line" : 38,
+				"parent" : 1
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"backtrace" : 3,
+			"id" : "bootloader::@369fc346472189255754"
+		},
+		{
+			"backtrace" : 3,
+			"id" : "ex_queue::@327ddfaec794f32baec8"
+		}
+	],
+	"id" : "flash_ex_queue::@327ddfaec794f32baec8",
+	"name" : "flash_ex_queue",
+	"paths" : 
+	{
+		"build" : "drivers/examples/task_system/queue",
+		"source" : "drivers/examples/task_system/queue"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 2,
+			"isGenerated" : true,
+			"path" : "build/esp32/drivers/examples/task_system/queue/CMakeFiles/flash_ex_queue",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/esp32/drivers/examples/task_system/queue/CMakeFiles/flash_ex_queue.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

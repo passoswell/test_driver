@@ -1,0 +1,82 @@
+{
+	"backtrace" : 3,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"__kconfig_generate_config",
+			"idf_build_process"
+		],
+		"files" : 
+		[
+			"/home/user/esp-idf/esp_idf-src/tools/cmake/kconfig.cmake",
+			"/home/user/esp-idf/esp_idf-src/tools/cmake/build.cmake",
+			"drivers/esp32/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 2
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 21,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 615,
+				"parent" : 1
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 282,
+				"parent" : 2
+			}
+		]
+	},
+	"id" : "save-defconfig::@369fc346472189255754",
+	"name" : "save-defconfig",
+	"paths" : 
+	{
+		"build" : "drivers/esp32",
+		"source" : "drivers/esp32"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 3,
+			"isGenerated" : true,
+			"path" : "build/esp32/drivers/esp32/CMakeFiles/save-defconfig",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/esp32/drivers/esp32/CMakeFiles/save-defconfig.rule",
+			"sourceGroupIndex" : 1
+		}
+	],
+	"type" : "UTILITY"
+}

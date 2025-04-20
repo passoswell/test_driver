@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "drivers/examples/dio/blink_read_blink",
+		"source" : "drivers/examples/dio/blink_read_blink"
+	}
+}

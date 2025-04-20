@@ -1,0 +1,119 @@
+{
+	"backtrace" : 5,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target",
+			"__ldgen_process_template",
+			"target_linker_script",
+			"include"
+		],
+		"files" : 
+		[
+			"/home/user/esp-idf/esp_idf-src/tools/cmake/ldgen.cmake",
+			"/home/user/esp-idf/esp_idf-src/tools/cmake/utilities.cmake",
+			"/home/user/esp-idf/esp_idf-src/components/esp_system/ld/ld.cmake",
+			"/home/user/esp-idf/esp_idf-src/components/esp_system/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 3
+			},
+			{
+				"command" : 3,
+				"file" : 3,
+				"line" : 90,
+				"parent" : 0
+			},
+			{
+				"file" : 2,
+				"parent" : 1
+			},
+			{
+				"command" : 2,
+				"file" : 2,
+				"line" : 50,
+				"parent" : 2
+			},
+			{
+				"command" : 1,
+				"file" : 1,
+				"line" : 148,
+				"parent" : 3
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 77,
+				"parent" : 4
+			}
+		]
+	},
+	"dependencies" : 
+	[
+		{
+			"id" : "__idf_xtensa::@1daaaad7abe597e030f9"
+		}
+	],
+	"id" : "__ldgen_output_sections.ld::@874df54e61e20112dfd4",
+	"name" : "__ldgen_output_sections.ld",
+	"paths" : 
+	{
+		"build" : "esp-idf/esp_system",
+		"source" : "/home/user/esp-idf/esp_idf-src/components/esp_system"
+	},
+	"sourceGroups" : 
+	[
+		{
+			"name" : "",
+			"sourceIndexes" : 
+			[
+				0
+			]
+		},
+		{
+			"name" : "CMake Rules",
+			"sourceIndexes" : 
+			[
+				1,
+				2
+			]
+		},
+		{
+			"name" : "Header Files",
+			"sourceIndexes" : 
+			[
+				3
+			]
+		}
+	],
+	"sources" : 
+	[
+		{
+			"backtrace" : 5,
+			"isGenerated" : true,
+			"path" : "build/esp32/esp-idf/esp_system/CMakeFiles/__ldgen_output_sections.ld",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/esp32/esp-idf/esp_system/CMakeFiles/__ldgen_output_sections.ld.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"isGenerated" : true,
+			"path" : "build/esp32/esp-idf/esp_system/ld/sections.ld.rule",
+			"sourceGroupIndex" : 1
+		},
+		{
+			"backtrace" : 0,
+			"path" : "/home/user/esp-idf/esp_idf-src/components/esp_system/ld/esp32/sections.ld.in",
+			"sourceGroupIndex" : 2
+		}
+	],
+	"type" : "UTILITY"
+}
