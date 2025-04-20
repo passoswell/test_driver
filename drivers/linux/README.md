@@ -65,9 +65,9 @@ The linux peripherals are listed on `/dev` folder. The names are usually compose
     sudo chown root:gpio /dev/gpiochip0 # Change the number of the gpiochip according to your needs
     ```
 
-* Clone the repository
+* Clone the repository (assuming branch v1.0.0)
   ```bash
-  git clone https://github.com/passoswell/test_driver.git
+  git clone -b v1.0.0 https://github.com/passoswell/test_driver.git
   ```
 
 * Enter the project folder

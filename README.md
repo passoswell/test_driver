@@ -26,11 +26,18 @@ Code can be built for the following platforms:
 
 ## Setup
 
+For a more complete information on how to setup and run, visit [this readme file](drivers/linux/README.md).
+
 ### 1 - Download the repository:
+
+* To instal all dependencies, run:
+  ```bash
+  sudo apt update -y && sudo apt upgrade -y && sudo apt install cmake ninja-build build-essential git gpiod libgpiod-dev i2c-tools gdb -y
+  ```
 
 * Clone the repository
 ```bash
-git clone https://github.com/passoswell/test_driver.git
+git clone -b v1.0.0 https://github.com/passoswell/test_driver.git
 ```
 
 * Enter the folder
