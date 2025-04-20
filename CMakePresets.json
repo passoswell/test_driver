@@ -1,9 +1,7 @@
 {
   "version": 4,
   "include": [
-    "cmake_presets/linux_presets.json",
-    "cmake_presets/pipico_presets.json",
-    "cmake_presets/esp32_presets.json"
+    "cmake_presets/linux_presets.json"
   ],
   "configurePresets": [
   ]

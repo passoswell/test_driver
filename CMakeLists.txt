@@ -11,8 +11,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ofast") # Optimize for speed on release configurat
 # Define the directory where external repositories should be cloned
 set(REPO_DIR "${CMAKE_SOURCE_DIR}/external")
 
-include(cmake/GitUtils.cmake)
-
 add_subdirectory(commons)
 add_subdirectory(interfaces)
 add_subdirectory(drivers)
