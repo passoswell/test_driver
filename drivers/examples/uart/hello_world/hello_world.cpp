@@ -47,8 +47,8 @@ AP_MAIN()
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status.success)
   {
+    printf("\r\nERROR %s", status.description);
     AP_EXIT();
-    return status.code; // Should not get here
   }
 
   while(true)
@@ -57,8 +57,8 @@ AP_MAIN()
     status = my_serial.write(message, strlen((char *)message)); // Another write format
     if(!status.success)
     {
+      printf("\r\nERROR %s", status.description);
       AP_EXIT();
-      return status.code; // Should not get here
     }
     my_timer.delay(1); // One second delay
   }
