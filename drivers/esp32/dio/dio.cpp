@@ -12,6 +12,8 @@
 #include "dio.hpp"
 
 #include  "driver/gpio.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 /**
  * @brief Constructor
@@ -22,6 +24,9 @@ DIO::DIO(uint32_t line_offset, uint32_t port)
 {
   m_line_number = line_offset;
   m_value = false;
+  m_obj_task_handle = nullptr;
+  m_dio_event_task_handle = nullptr;
+  m_terminate = false;
 }
 
 /**
@@ -120,6 +125,7 @@ Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
   {
     success = STATUS_DRV_ERR_PARAM;
   }
+
   return success;
 }
 
@@ -128,7 +134,7 @@ Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DIO::read(uint32_t &state)
+Status_t DIO::read(bool &state)
 {
   state = gpio_get_level((gpio_num_t) m_line_number);
   return STATUS_DRV_SUCCESS;
@@ -136,10 +142,10 @@ Status_t DIO::read(uint32_t &state)
 
 /**
  * @brief Write to a digital output pin
- * @param state The state to set in the gpio
+ * @param state The state to set in the dio
  * @return Status_t
  */
-Status_t DIO::write(uint32_t value)
+Status_t DIO::write(bool value)
 {
   esp_err_t esp_err;
   esp_err = gpio_set_level((gpio_num_t) m_line_number, value);
@@ -187,15 +193,18 @@ Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, vo
 Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
 {
   gpio_int_type_t interruption_type;
+  TaskProfile_t parameters;
+  BaseType_t freertos_return;
 
   if(!enable)
   {
     gpio_set_intr_type((gpio_num_t)m_line_number, GPIO_INTR_DISABLE);
     gpio_isr_handler_remove((gpio_num_t)m_line_number);
+    terminateDioEventHandlerTask();
     return STATUS_DRV_SUCCESS;
   }
 
-  // install gpio isr service
+  // install dio isr service
   gpio_install_isr_service(0);
 
   switch(edge)
@@ -214,14 +223,34 @@ Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
       break;
   }
 
-  gpio_set_intr_type((gpio_num_t)m_line_number, interruption_type);
-  gpio_isr_handler_add((gpio_num_t)m_line_number,
-                       [] (void *arg) -> void
-                       {
-                        DIO *self = (DIO *) arg;
-                        self->callback();
-                       },
-                       this);
+
+  if(m_dio_event_task_handle == nullptr)
+  {
+    freertos_return = xTaskCreate(
+      [](void *arg) -> void
+      {
+        DIO *obj = static_cast<DIO*>(arg);
+        obj->dioEventHandlerTask();
+      },
+      nullptr,
+      2 * configMINIMAL_STACK_SIZE,
+      this,
+      configMAX_PRIORITIES - 1,
+      &m_dio_event_task_handle
+    );
+    if(freertos_return != pdTRUE)
+    {
+      m_dio_event_task_handle = nullptr;
+      Status_t status;
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to create dioEventHandlerTask");
+      return status;
+    }else
+    {
+      portYIELD();
+    }
+    gpio_set_intr_type((gpio_num_t)m_line_number, interruption_type);
+    gpio_isr_handler_add((gpio_num_t)m_line_number, callback, this);
+  }
 
   return STATUS_DRV_SUCCESS;
 }
@@ -229,19 +258,79 @@ Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
 /**
  * @brief Callback method, called when a configured edge event occurs
  */
-void DIO::callback(void)
+void DIO::callback(void *arg)
 {
-  DriverEventsList_t edge = EVENT_EDGE_FALLING;
-  uint32_t aux;
-  uint8_t state[1] = {false};
-  if(m_func != nullptr)
+  DIO *obj = (DIO *) arg;
+  BaseType_t should_switch_context = pdFALSE;
+
+  if(obj->m_dio_event_task_handle != nullptr)
   {
-    read(aux);
-    state[0] = aux;
-    if(state[0] > 0) { edge = EVENT_EDGE_RISING;}
-    if(m_func != nullptr)
+    (void) obj->read(obj->m_value);
+    vTaskNotifyGiveFromISR(obj->m_dio_event_task_handle, &should_switch_context);
+    if (should_switch_context == pdTRUE)
     {
-      m_func(STATUS_DRV_SUCCESS, edge, state, m_arg);
+      /*
+       * Calling portYIELD_FROM_ISR is throwing a compiler error,
+       * then calling _frxt_setup_switch directly
+       */
+      _frxt_setup_switch();
     }
   }
+}
+
+/**
+ * @brief Handle dio events
+ */
+void DIO::dioEventHandlerTask(void)
+{
+  DriverEventsList_t edge = EVENT_EDGE_FALLING;
+  uint8_t state[1] = {false};
+
+  while(true)
+  {
+    (void) ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // blocks until notified
+    if(m_terminate)
+    {
+      break;
+    }
+    if(m_func != nullptr)
+    {
+      state[0] = static_cast<uint8_t>(m_value);
+      if(m_value)
+      {
+        edge = EVENT_EDGE_RISING;
+      }else
+      {
+        edge = EVENT_EDGE_FALLING;
+      }
+      if(m_func != nullptr)
+      {
+        m_func(STATUS_DRV_SUCCESS, edge, state, m_arg);
+      }
+    }
+  }
+
+  if(m_obj_task_handle != nullptr)
+  {
+    xTaskNotifyGive(m_obj_task_handle); // signal termination
+  }
+  vTaskDelete(nullptr);
+}
+
+/**
+ * @brief Terminate the task that handle dio events
+ */
+void DIO::terminateDioEventHandlerTask(void)
+{
+  if (m_dio_event_task_handle == nullptr)
+  {
+    return;
+  }
+  m_obj_task_handle = xTaskGetCurrentTaskHandle();
+  m_terminate = true;
+  // signal termination for dioEventHandlerTask
+  xTaskNotifyGive(m_dio_event_task_handle);
+  (void) ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // blocks until notified
+  m_obj_task_handle = nullptr;
+  m_dio_event_task_handle = nullptr;
 }

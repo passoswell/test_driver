@@ -7,7 +7,8 @@ IF(DEFINED USE_ESP32)
   message("Using ESP32")
   include(cmake/esp32_sdk_import.cmake)
   add_definitions(-DUSE_ESP32=1)
-  set(USE_ESP32 TRUE)
+  set(USE_ESP32 $ENV{USE_ESP32})
+  set(ESP_PLATFORM $ENV{ESP_PLATFORM})
 
 ELSEIF(DEFINED USE_PIPICO)
 

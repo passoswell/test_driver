@@ -120,7 +120,7 @@ bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_ar
 FREERTOS_WORKER_TASK_TEMPLATE
 bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_arg, TaskProfile_t parameters)
 {
-  BaseType_t freertos_return;
+  BaseType_t freertos_return, core_affinity;
   TI input_data;
   TO output_data;
 
@@ -140,7 +140,13 @@ bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_ar
   }
 
   m_profile = parameters;
-  m_profile.core_number = m_profile.core_number % configNUMBER_OF_CORES;
+  if(m_profile.core_number < configNUMBER_OF_CORES)
+  {
+    core_affinity = static_cast<BaseType_t>(m_profile.core_number);
+  }else
+  {
+    core_affinity = tskNO_AFFINITY;
+  }
 
   m_terminate = false;
   m_caller_task_handle = nullptr;
@@ -184,7 +190,7 @@ bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_ar
     this,
     m_profile.priority,
     &m_task_handle,
-    m_profile.core_number
+    core_affinity
   );
   return freertos_return == pdPASS;
 }
@@ -243,7 +249,7 @@ bool FREERTOS_WORKER_TASK_CLASS::terminate()
   m_caller_task_handle = xTaskGetCurrentTaskHandle();
   m_terminate = true;
   setInputData(input_data, 0); // Sending dummy input to wake-up worker task
-  ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // blocks until notified
+  (void) ulTaskNotifyTake(pdTRUE, portMAX_DELAY); // blocks until notified
   m_task_handle = nullptr;
   m_pinned_core = 0;
   return true;

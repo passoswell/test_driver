@@ -7,6 +7,14 @@
  *
  * @copyright Copyright (c) 2024
  *
+ * @note Connect a digital input and a digital output together and run the code.
+ * The output can be configure changing the value of "DIO_OUTPUT_LINE_NUMBER",
+ * and "DIO_OUTPUT_CHIP_NUMBER", while the input is configured through
+ * "DIO_INPUT_LINE_NUMBER" and "DIO_INPUT_CHIP_NUMBER". If printf is available,
+ * the state of both input and output is printed through the default serial
+ * port / terminal interface. Else, comment out the calls to printf and
+ * use a debugger and break points.
+ *
  */
 
 #include "drivers.hpp"
@@ -14,10 +22,21 @@
 /**
  * @brief DIO pins
  */
-#define DIO_INPUT_LINE_NUMBER                                                203
-#define DIO_INPUT_CHIP_NUMBER                                                  0
-#define DIO_OUTPUT_LINE_NUMBER                                                 6
-#define DIO_OUTPUT_CHIP_NUMBER                                                 0
+#if defined(USE_LINUX)
+
+constexpr uint32_t DIO_INPUT_LINE_NUMBER = 203;
+constexpr uint32_t DIO_INPUT_CHIP_NUMBER = 0;
+constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 6;
+constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
+
+#elif defined(USE_ESP32)
+
+constexpr uint32_t DIO_INPUT_LINE_NUMBER = 4;
+constexpr uint32_t DIO_INPUT_CHIP_NUMBER = 0;
+constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 2;
+constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
+
+#endif
 
 /**
  * @brief Digital input parameters
@@ -49,46 +68,60 @@ Status_t inputCallback(Status_t status, DriverEventsList_t event, const Buffer_t
 {
   if(status.success)
   {
-    if(event == EVENT_EDGE_BOTH)
+    if(event == EVENT_EDGE_RISING)
     {
-      // printf("Read %u, rising edge, on line #%u\r\n", state, GPIO_INPUT_LINE_NUMBER);
+      printf("Detected rising edge on line #%u\r\n", DIO_INPUT_LINE_NUMBER);
     }else
     {
-      // printf("Read %u, falling edge, on line #%u\r\n", state, GPIO_INPUT_LINE_NUMBER);
+      printf("Detected falling edge on line #%u\r\n", DIO_INPUT_LINE_NUMBER);
     }
   }else
   {
-    // printf("Error reading event on line #%u\r\n", GPIO_INPUT_LINE_NUMBER);
+    printf("Error reading event on line #%u\r\n", DIO_INPUT_LINE_NUMBER);
   }
   return status;
 }
 
 /**
- * @brief Connect the input and output digital pint together and run the code
- *        using break points. If printf is available, uncomment the lines
- *        where a call to it appears
+ * @brief  Blink an LED and read a digital input
  */
 AP_MAIN()
 {
+  Status_t code;
+  SPT my_timer;
   bool input_value, output_value = false;
   DIO input(DIO_INPUT_LINE_NUMBER, DIO_INPUT_CHIP_NUMBER);
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
-  input.configure(g_dio_input_list, g_dio_input_list_size);
-  output.configure(g_dio_output_list, g_dio_output_list_size);
+  code = input.configure(g_dio_input_list, g_dio_input_list_size);
+  if(!code.success)
+  {
+    printf("Failed to configure the digital input\r\n");
+    AP_EXIT();
+  }
+  code = output.configure(g_dio_output_list, g_dio_output_list_size);
+  if(!code.success)
+  {
+    printf("Failed to configure the digital output\r\n");
+    AP_EXIT();
+  }
 
-  input.configure(g_dio_input_list, g_dio_input_list_size);
-  output.configure(g_dio_output_list, g_dio_output_list_size);
-  input.setCallback(EVENT_EDGE_BOTH, inputCallback, nullptr);
+  (void) input.setCallback(EVENT_EDGE_BOTH, inputCallback, nullptr);
+  code = input.enableCallback(true, EVENT_EDGE_BOTH);
+  if(!code.success)
+  {
+    printf("Failed to enable interruption for the digital input\r\n");
+    AP_EXIT();
+  }else
+  {
+    printf("Enabled 'EVENT_EDGE_BOTH' interruption for the digital input\r\n");
+  }
 
   while(true)
   {
-    // printf("Wrote %u on line #%u\r\n", output_value, GPIO_OUTPUT_LINE_NUMBER);
-    for(uint8_t i = 0; i < 5; i++)
-    {
-      sleep(1);
-    }
+    printf("Writing %u on line #%u\r\n", output_value, DIO_OUTPUT_LINE_NUMBER);
+    (void) output.write(output_value);
     output_value = !output_value;
-    output.write(output_value);
+    my_timer.delay(2000);
   }
 }
