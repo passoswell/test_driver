@@ -32,7 +32,7 @@ class SpiBase : public DriverInOutBase
 {
 public:
 
-  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size) = 0;
+  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
   using DriverInOutBase::read;
   virtual Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
@@ -43,7 +43,7 @@ public:
   virtual Status_t transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
   virtual Status_t transfer(Buffer_t rx_data, Buffer_t tx_data, uint32_t timeout = UINT32_MAX) = 0;
 
-  virtual Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
+  virtual Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
 };
 
 #endif /* SPI_BASE_HPP */

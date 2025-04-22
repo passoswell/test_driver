@@ -24,11 +24,12 @@ static speed_t convertSpeed(uint32_t speed);
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
  */
-UART::UART(const void *port_handle)
+UART::UART(const UartHandle_t port_handle)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
-  m_is_async_mode = false;
+  m_is_async_mode_rx = false;
+  m_is_async_mode_tx = false;
 }
 
 /**
@@ -48,13 +49,14 @@ UART::~UART()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status;
   struct termios termios_structure;
   speed_t speed = B1152000;
   uint32_t stop_bits_count = 1;
-  bool use_parity = false, use_hw_flow_ctrl = false, result;
+  bool use_hw_flow_ctrl = false, result;
+  uint32_t parity = PARITY_NONE;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
@@ -69,38 +71,74 @@ Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
         case COMM_PARAM_STOP_BITS:
           if(list[i].value == 2) { stop_bits_count = 2;}
           break;
-        case COMM_USE_HW_PARITY:
-          use_parity = true;
+
+        case COMM_PARAM_PARITY:
+          if(list[i].value == PARITY_NONE) { parity = PARITY_NONE;}
+          if(list[i].value == PARITY_EVEN) { parity = PARITY_EVEN;}
+          if(list[i].value == PARITY_ODD) { parity = PARITY_ODD;}
           break;
-        case COMM_USE_HW_FLOW_CTRL:
-          use_hw_flow_ctrl = true;
-          break;
+
         case COMM_PARAM_BAUD:
           speed = convertSpeed(list[i].value);
           break;
+
         case COMM_PARAM_CLOCK_SPEED:
           speed = convertSpeed(list[i].value);
           break;
+
         case COMM_PARAM_LINE_MODE:
-          if(list[i].value == 0) { use_parity = false; stop_bits_count = 1; use_hw_flow_ctrl = false;}
-          if(list[i].value == 1) { use_parity = true; stop_bits_count = 1; use_hw_flow_ctrl = false;}
-          if(list[i].value == 2) { use_parity = false; stop_bits_count = 2; use_hw_flow_ctrl = false;}
-          if(list[i].value == 3) { use_parity = true; stop_bits_count = 2; use_hw_flow_ctrl = false;}
-          if(list[i].value == 4) { use_parity = false; stop_bits_count = 1; use_hw_flow_ctrl = true;}
-          if(list[i].value == 5) { use_parity = true; stop_bits_count = 1; use_hw_flow_ctrl = true;}
-          if(list[i].value == 6) { use_parity = false; stop_bits_count = 2; use_hw_flow_ctrl = true;}
-          if(list[i].value == 7) { use_parity = true; stop_bits_count = 2; use_hw_flow_ctrl = true;}
+          if((list[i].value & 1) == 1){parity = PARITY_EVEN;}
+          else{parity = PARITY_NONE;}
+
+          if((list[i].value & 2) == 2){stop_bits_count = 2;}
+          else{stop_bits_count = 1;}
+
+          if((list[i].value & 4) == 4){use_hw_flow_ctrl = true;}
+          else{use_hw_flow_ctrl = false;}
           break;
-        case COMM_WORK_ASYNC:
-          m_is_async_mode = (bool) list[i].value;
+
+        case COMM_WORK_ASYNC_RX:
+          m_is_async_mode_rx = (bool) list[i].value;
           break;
+
+        case COMM_WORK_ASYNC_TX:
+          m_is_async_mode_tx = (bool) list[i].value;
+          break;
+
         default:
           break;
       }
     }
   }
 
-  // m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+  if(m_is_async_mode_rx)
+  {
+    result = m_rx_thread_handle.create(UART::readFromThreadBlocking, this, 0);
+    if(!result)
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch UART task for reception.\r\n");
+      return status;
+    }
+  }else
+  {
+    (void) m_rx_thread_handle.terminate();
+  }
+
+  if(m_is_async_mode_tx)
+  {
+    result &= m_tx_thread_handle.create(UART::writeFromThreadBlocking, this, 0);
+    if(!result)
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch UART task for transmission.\r\n");
+      return status;
+    }
+  }else
+  {
+    (void) m_tx_thread_handle.terminate();
+  }
+
+  // For more information on how to configure serial ports:
+  // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
   m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY);
   if (m_linux_handle < 0)
   {
@@ -111,12 +149,19 @@ Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
   cfmakeraw(&termios_structure);
   cfsetispeed(&termios_structure, speed);
   cfsetospeed(&termios_structure, speed);
-  if(use_parity)
-  {
-    termios_structure.c_cflag |= PARENB;
-  }else
+  if(parity == PARITY_NONE)
   {
     termios_structure.c_cflag &= ~PARENB;
+  }else
+  {
+    termios_structure.c_cflag |= PARENB;
+    if(parity == PARITY_ODD)
+    {
+      termios_structure.c_cflag |= PARODD;
+    }else
+    {
+      termios_structure.c_cflag &= ~PARODD;
+    }
   }
   if(use_hw_flow_ctrl)
   {
@@ -132,6 +177,10 @@ Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
   {
     termios_structure.c_cflag |= CSTOPB;
   }
+  termios_structure.c_cflag &= ~CSIZE; // Clear all the size bits
+  termios_structure.c_cflag |= CS8;    // 8 bits per byte (most common)
+  termios_structure.c_cflag |= CREAD;  // Turn on READ
+  termios_structure.c_cflag |= CLOCAL; // Ignore ctrl lines (CLOCAL = 1)
 
   // For more info on how to setup VMIN and VTIME,
   // please refer to http://www.unixwiz.net/techtips/termios-vmin-vtime.html
@@ -140,21 +189,6 @@ Status_t UART::configure(const DriverSettings_t *list, uint8_t list_size)
   tcflush(m_linux_handle, TCIFLUSH);
   tcflush(m_linux_handle, TCIFLUSH);
   tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
-
-  if(m_is_async_mode)
-  {
-    result = m_rx_thread_handle.create(UART::readFromThreadBlocking, this, 0);
-    result &= m_tx_thread_handle.create(UART::writeFromThreadBlocking, this, 0);
-    if(!result)
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch one or more UART tasks.\r\n");
-      return status;
-    }
-  }else
-  {
-    (void) m_rx_thread_handle.terminate();
-    (void) m_tx_thread_handle.terminate();
-  }
 
   m_read_status = STATUS_DRV_IDLE;
   m_write_status = STATUS_DRV_IDLE;
@@ -182,7 +216,7 @@ Status_t UART::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_read_status.success = false;
   m_bytes_read = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx)
   {
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
@@ -226,7 +260,7 @@ Status_t UART::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_write_status.success = false;
   m_bytes_written = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_tx)
   {
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
@@ -257,7 +291,7 @@ Status_t UART::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
  * @param user_arg A argument used as a parameter to the function
  * @return Status_t
  */
-Status_t UART::setCallback(DriverEventsList_t event, DriverCallback_t function, void *user_arg)
+Status_t UART::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
 {
   Status_t status = STATUS_DRV_SUCCESS;
 

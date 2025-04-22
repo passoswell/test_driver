@@ -36,12 +36,19 @@ constexpr uint32_t DIO_INPUT_CHIP_NUMBER = 0;
 constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 2;
 constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
 
+#elif defined(USE_PIPICO)
+
+constexpr uint32_t DIO_INPUT_LINE_NUMBER = 24;
+constexpr uint32_t DIO_INPUT_CHIP_NUMBER = 0;
+constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 25;
+constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
+
 #endif
 
 /**
  * @brief Digital input parameters
  */
-const DriverSettings_t g_dio_input_list[]
+const SettingsList_t g_dio_input_list[]
 {
   ADD_PARAMETER(DIO_LINE_DIRECTION, DIO_DIRECTION_INPUT),
   ADD_PARAMETER(DIO_LINE_DRIVE, DIO_DRIVE_PUSH_PULL),
@@ -52,7 +59,7 @@ uint8_t g_dio_input_list_size = sizeof(g_dio_input_list)/sizeof(g_dio_input_list
 /**
  * @brief Digital output parameters
  */
-const DriverSettings_t g_dio_output_list[]
+const SettingsList_t g_dio_output_list[]
 {
   ADD_PARAMETER(DIO_LINE_DIRECTION, DIO_DIRECTION_OUTPUT),
   ADD_PARAMETER(DIO_LINE_DRIVE, DIO_DRIVE_PUSH_PULL),

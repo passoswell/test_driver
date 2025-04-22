@@ -37,7 +37,7 @@ DriverBase::~DriverBase()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DriverBase::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t DriverBase::configure(const SettingsList_t *list, uint8_t list_size)
 {
   (void) list;
   (void) list_size;
@@ -52,7 +52,7 @@ Status_t DriverBase::configure(const DriverSettings_t *list, uint8_t list_size)
  * @param user_arg A argument used as a parameter to the function
  * @return Status_t
  */
-Status_t DriverBase::setCallback(DriverEventsList_t event, DriverCallback_t function, void *user_arg)
+Status_t DriverBase::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
 {
   (void) event;
   (void) function;
@@ -66,7 +66,7 @@ Status_t DriverBase::setCallback(DriverEventsList_t event, DriverCallback_t func
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DriverBase::enableCallback(bool enable, DriverEventsList_t event)
+Status_t DriverBase::enableCallback(bool enable, EventsList_t event)
 {
   (void) enable;
   (void) event;

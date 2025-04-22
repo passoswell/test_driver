@@ -24,6 +24,7 @@ public:
   Status_t m_write_status;
   DriverCallback_t m_func_tx;
   void *m_arg_tx;
+  bool m_is_async_mode_tx;
 
   DriverOutBase();
   virtual ~DriverOutBase();

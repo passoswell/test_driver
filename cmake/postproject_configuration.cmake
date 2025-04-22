@@ -1,12 +1,3 @@
-# # Add targets to flash on esp32
-# function(add_flashable_target target_name)
-#     add_custom_target(flash_${target_name}
-#         COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/flash.py ${target_name}
-#         COMMENT "Flashing target ${target_name}"
-#         DEPENDS ${target_name}  # Optional: build target before flashing
-#     )
-# endfunction()
-
 
 # Run some postproject task
 function (_postbuild_task A_TARGET)
@@ -40,7 +31,18 @@ function (_postbuild_task A_TARGET)
 
     ELSEIF(DEFINED USE_PIPICO)
 
+        # enable usb output, disable uart output
+        pico_enable_stdio_usb(${A_TARGET} 1)
+        pico_enable_stdio_uart(${A_TARGET} 0)
+
+        # Copy the executable that generates .uf2 file to the correct folder
+        add_custom_command(TARGET ${A_TARGET} POST_BUILD
+            COMMAND cp "${CMAKE_BINARY_DIR}/elf2uf2/Debug/elf2uf2" "${CMAKE_BINARY_DIR}/elf2uf2"
+            )
+
         pico_add_extra_outputs(${A_TARGET})
+
+        # Copy .u2f file to the bin folder
         add_custom_command(TARGET ${A_TARGET} POST_BUILD
             COMMAND mv "${A_TARGET}.uf2" "${CMAKE_BINARY_DIR}/bin"
             )

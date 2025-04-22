@@ -24,6 +24,7 @@ public:
   Status_t m_read_status;
   DriverCallback_t m_func_rx;
   void *m_arg_rx;
+  bool m_is_async_mode_rx;
 
   DriverInBase();
   virtual ~DriverInBase();

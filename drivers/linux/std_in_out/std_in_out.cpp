@@ -55,7 +55,7 @@ StdInOut::~StdInOut()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t StdInOut::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t StdInOut::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status;
 

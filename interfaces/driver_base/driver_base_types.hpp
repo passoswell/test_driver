@@ -65,37 +65,47 @@ typedef enum
   EVENT_READ,
   EVENT_WRITE,
   EVENT_READ_WRITE,
-}DriverEventsList_t;
+}EventsList_t;
+
+typedef enum
+{
+  PARITY_NONE,
+  PARITY_EVEN,
+  PARITY_ODD
+}ParityList_t;
 
 typedef enum
 {
   // DIO parameters
-  DIO_LINE_DIRECTION,
-  DIO_LINE_DRIVE,
-  DIO_LINE_BIAS,
-  DIO_LINE_EDGE,
-  DIO_LINE_INITIAL_VALUE,
-  DIO_LINE_ACTIVE_STATE,
+  DIO_LINE_DIRECTION,           /*!< One of DioDirection_t options */
+  DIO_LINE_DRIVE,               /*!< One of DioDirection_t options */
+  DIO_LINE_BIAS,                /*!< One of DioBias_t options */
+  DIO_LINE_EDGE,                /*!< One of EventsList_t options */
+  DIO_LINE_INITIAL_VALUE,       /*!< true or false, or DioActiveState_t */
+  DIO_LINE_ACTIVE_STATE,        /*!< true or false, or DioActiveState_t */
 
   // Communication peripherals
-  COMM_WORK_ASYNC,
-  COMM_PARAM_BAUD,
-  COMM_PARAM_CLOCK_SPEED,
-  COMM_PARAM_TX_GPIO,
-  COMM_PARAM_RX_GPIO,
-  COMM_PARAM_CK_GPIO,
-  COMM_PARAM_CS_PARAM,
-  COMM_PARAM_CTS_GPIO,
-  COMM_PARAM_RTS_GPIO,
-  COMM_PARAM_STOP_BITS,
+  COMM_WORK_ASYNC_TX,           /*!< true for async, false for sync operation*/
+  COMM_WORK_ASYNC_RX,           /*!< true for async, false for sync operation*/
+  COMM_PARAM_BAUD,              /*!< Bit rate in bits per second*/
+  COMM_PARAM_CLOCK_SPEED,       /*!< Bit rate in Hz */
+
+  COMM_PARAM_TX_DIO,            /*!< DIO number for tx pin */
+  COMM_PARAM_RX_DIO,            /*!< DIO number for rx pin */
+  COMM_PARAM_CK_DIO,            /*!< DIO number for clock pin */
+  COMM_PARAM_CS_DIO,            /*!< DIO number for chip select pin */
+  COMM_PARAM_CS_POLARITY,       /*!< Active level (true or false) */
+  COMM_PARAM_CTS_DIO,           /*!< DIO number for clear to send pin */
+  COMM_PARAM_RTS_DIO,           /*!< DIO number for request to send pin */
+
+  COMM_PARAM_STOP_BITS,         /*!< Number of stop bits */
+  COMM_PARAM_PARITY,            /*!< One of ParityList_t options */
   COMM_PARAM_LINE_MODE,
   COMM_PARAM_START_DELAY_US,
-  COMM_USE_HW_PARITY,
-  COMM_USE_HW_FLOW_CTRL,
   COMM_USE_HW_CRC,
   COMM_USE_HW_CKSUM,
   COMM_USE_PULL_UP,
-} DriverParamList_t;
+} ParametersList_t;
 
 /**
  * @brief Parameter - value pair for configuration
@@ -104,13 +114,13 @@ typedef struct
 {
   uint8_t parameter;
   uint32_t value;
-}DriverSettings_t;
+}SettingsList_t;
 
 /**
  * @brief Macro to make it easy to add configuration parameters to a list
  */
 #define ADD_PARAMETER(parameter, value) {parameter, value}
 
-using DriverCallback_t = std::function<Status_t(Status_t status, DriverEventsList_t event, const Buffer_t data, void *user_arg)>;
+using DriverCallback_t = std::function<Status_t(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg)>;
 
 #endif /* DRIVER_BASE_TYPES_HPP */

@@ -26,7 +26,8 @@ LinuxSerialFile::LinuxSerialFile(const char *port_handle)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
-  m_is_async_mode = false;
+  m_is_async_mode_rx = false;
+  m_is_async_mode_tx = false;
 }
 
 /**
@@ -46,7 +47,7 @@ LinuxSerialFile::~LinuxSerialFile()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t LinuxSerialFile::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status;
   struct termios termios_structure;
@@ -62,13 +63,42 @@ Status_t LinuxSerialFile::configure(const DriverSettings_t *list, uint8_t list_s
     {
       switch(list[i].parameter)
       {
-        case COMM_WORK_ASYNC:
-          m_is_async_mode = (bool) list[i].value;
-          break;
-        default:
-          break;
+      case COMM_WORK_ASYNC_RX:
+        m_is_async_mode_rx = (bool) list[i].value;
+        break;
+      case COMM_WORK_ASYNC_TX:
+        m_is_async_mode_tx = (bool) list[i].value;
+        break;
+      default:
+        break;
       }
     }
+  }
+
+  if(m_is_async_mode_rx)
+  {
+    result = m_rx_thread_handle.create(LinuxSerialFile::readFromThreadBlocking, this, 0);
+    if(!result)
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch LinuxSerialFile task for reading.\r\n");
+      return status;
+    }
+  }else
+  {
+    (void) m_rx_thread_handle.terminate();
+  }
+
+  if(m_is_async_mode_tx)
+  {
+    result &= m_tx_thread_handle.create(LinuxSerialFile::writeFromThreadBlocking, this, 0);
+    if(!result)
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch LinuxSerialFile task for writing.\r\n");
+      return status;
+    }
+  }else
+  {
+    (void) m_tx_thread_handle.terminate();
   }
 
   m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY);
@@ -87,21 +117,6 @@ Status_t LinuxSerialFile::configure(const DriverSettings_t *list, uint8_t list_s
   tcflush(m_linux_handle, TCIFLUSH);
   tcflush(m_linux_handle, TCIFLUSH);
   tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
-
-  if(m_is_async_mode)
-  {
-    result = m_rx_thread_handle.create(LinuxSerialFile::readFromThreadBlocking, this, 0);
-    result &= m_tx_thread_handle.create(LinuxSerialFile::writeFromThreadBlocking, this, 0);
-    if(!result)
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch one or more LinuxSerialFile tasks.\r\n");
-      return status;
-    }
-  }else
-  {
-    (void) m_rx_thread_handle.terminate();
-    (void) m_tx_thread_handle.terminate();
-  }
 
   m_read_status = STATUS_DRV_IDLE;
   m_write_status = STATUS_DRV_IDLE;
@@ -129,7 +144,7 @@ Status_t LinuxSerialFile::read(uint8_t *data, Size_t byte_count, uint32_t timeou
   m_read_status.success = false;
   m_bytes_read = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx)
   {
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
@@ -172,7 +187,7 @@ Status_t LinuxSerialFile::write(uint8_t *data, Size_t byte_count, uint32_t timeo
   m_write_status.success = false;
   m_bytes_written = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_tx)
   {
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
@@ -201,7 +216,7 @@ Status_t LinuxSerialFile::write(uint8_t *data, Size_t byte_count, uint32_t timeo
  * @param user_arg A argument used as a parameter to the callback function
  * @return Status_t
  */
-Status_t LinuxSerialFile::setCallback(DriverEventsList_t event, DriverCallback_t function, void *user_arg)
+Status_t LinuxSerialFile::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
 {
   Status_t status = STATUS_DRV_SUCCESS;
 

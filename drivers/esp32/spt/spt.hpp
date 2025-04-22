@@ -17,7 +17,7 @@
 
 #include "peripherals_base/spt_base.hpp"
 
-class SPT final : public SptBase
+class SPT : public SptBase
 {
 public:
 

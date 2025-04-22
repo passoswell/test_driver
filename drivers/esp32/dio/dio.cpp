@@ -43,7 +43,7 @@ DIO::~DIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t success;
   gpio_config_t settings =
@@ -177,7 +177,7 @@ Status_t DIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, void *user_arg)
+Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *user_arg)
 {
   m_func = function;
   m_arg = user_arg;
@@ -190,7 +190,7 @@ Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, vo
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
+Status_t DIO::enableCallback(bool enable, EventsList_t edge)
 {
   gpio_int_type_t interruption_type;
   TaskProfile_t parameters;
@@ -283,7 +283,7 @@ void DIO::callback(void *arg)
  */
 void DIO::dioEventHandlerTask(void)
 {
-  DriverEventsList_t edge = EVENT_EDGE_FALLING;
+  EventsList_t edge = EVENT_EDGE_FALLING;
   uint8_t state[1] = {false};
 
   while(true)

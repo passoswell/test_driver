@@ -28,7 +28,7 @@ class DioBase : public DriverInOutBase
 {
 public:
 
-  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size) = 0;
+  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
   virtual Status_t read(bool &state) = 0;
 
@@ -36,9 +36,9 @@ public:
 
   virtual Status_t toggle() = 0;
 
-  virtual Status_t setCallback(DriverEventsList_t edge = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
+  virtual Status_t setCallback(EventsList_t edge = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
 
-  virtual Status_t enableCallback(bool enable, DriverEventsList_t event = EVENT_NONE) = 0;
+  virtual Status_t enableCallback(bool enable, EventsList_t event = EVENT_NONE) = 0;
 };
 
 #endif /* DIO_BASE_HPP */

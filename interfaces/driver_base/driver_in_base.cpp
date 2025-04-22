@@ -21,6 +21,7 @@ DriverInBase::DriverInBase()
   m_func_rx = nullptr;
   m_arg_rx = nullptr;
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
+  m_is_async_mode_rx = false;
 }
 
 /**

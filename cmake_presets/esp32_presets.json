@@ -2,11 +2,11 @@
   "version": 4,
   "configurePresets": [
     {
-      "name": "esp32",
+      "name": "esp32_debug",
       "generator": "Ninja",
-      "displayName": "esp32 configuration",
-      "description": "Using compilers: not sure yet",
-      "binaryDir": "${sourceDir}/build/esp32",
+      "displayName": "esp32 debug",
+      "description": "",
+      "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
         "CMAKE_BUILD_TYPE": "Debug",
@@ -21,7 +21,7 @@
     },
     {
       "name": "esp32_release",
-      "inherits": "esp32",
+      "inherits": "esp32_debug",
       "displayName": "esp32 release",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "release"
@@ -30,8 +30,8 @@
   ],
   "buildPresets": [
     {
-      "name": "esp32",
-      "configurePreset": "esp32",
+      "name": "esp32_debug",
+      "configurePreset": "esp32_debug",
       "jobs": 20
     },
     {

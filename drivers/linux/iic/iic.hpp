@@ -20,17 +20,19 @@
 #include "linux/utils/linux_types.hpp"
 #include "linux/task_system/task_system.hpp"
 
+typedef char* I2cHandle_t;
+
 /**
  * @brief Base class for iic drivers
  */
-class IIC final : public IicBase
+class IIC : public IicBase
 {
 public:
-  IIC(const void *port_handle, uint16_t address);
+  IIC(const I2cHandle_t port_handle, uint16_t address = 0);
 
   ~IIC();
 
-  Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  Status_t configure(const SettingsList_t *list, uint8_t list_size);
 
   void setAddress(uint16_t address);
 
@@ -40,9 +42,10 @@ public:
   using DriverInOutBase::write;
   Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
 
-  Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
+  Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
+  I2cHandle_t m_handle;
   Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
   uint16_t m_address;
   int m_linux_handle;

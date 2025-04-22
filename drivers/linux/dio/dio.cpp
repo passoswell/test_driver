@@ -75,7 +75,7 @@ DIO::~DIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t result;
   struct gpiod_line_request_config settings =
@@ -195,7 +195,7 @@ Status_t DIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, void *user_arg)
+Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *user_arg)
 {
   m_func = function;
   m_arg = user_arg;
@@ -208,7 +208,7 @@ Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, vo
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
+Status_t DIO::enableCallback(bool enable, EventsList_t edge)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
   Status_t status = STATUS_DRV_SUCCESS;
@@ -291,7 +291,7 @@ void DIO::readAsyncThread(void)
 {
   struct timespec ts = {0, 100000000};
   struct gpiod_line_event event;
-  DriverEventsList_t edge;
+  EventsList_t edge;
   Status_t status;
   uint8_t state[1];
   int ret;
