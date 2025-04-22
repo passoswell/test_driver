@@ -25,7 +25,7 @@
  * @param port_handle A string containing the path to the peripheral
  * @param address 8 or 10 bits address
  */
-IIC::IIC(const void *port_handle, uint16_t address)
+IIC::IIC(const I2cHandle_t port_handle, uint16_t address)
 {
   m_address = address;
   m_handle = port_handle;
@@ -49,7 +49,7 @@ IIC::~IIC()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status = STATUS_DRV_SUCCESS;
   bool result;
@@ -64,8 +64,11 @@ Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
     {
       switch(list[i].parameter)
       {
-      case COMM_WORK_ASYNC:
-        m_is_async_mode = (bool)list[i].value;
+      case COMM_WORK_ASYNC_RX:
+        m_is_async_mode_rx = (bool)list[i].value;
+        break;
+      case COMM_WORK_ASYNC_TX:
+        m_is_async_mode_tx = (bool)list[i].value;
         break;
       default:
         break;
@@ -73,13 +76,7 @@ Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
     }
   }
 
-  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
-  {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
-    return status;
-  }
-
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx || m_is_async_mode_tx)
   {
     result = m_thread_handle.create(IIC::transferDataAsync, this, 0);
     if(!result)
@@ -90,6 +87,12 @@ Status_t IIC::configure(const DriverSettings_t *list, uint8_t list_size)
   }else
   {
     (void) m_thread_handle.terminate();
+  }
+
+  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+    return status;
   }
 
   m_read_status = STATUS_DRV_IDLE;
@@ -127,7 +130,7 @@ Status_t IIC::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_read_status = STATUS_DRV_RUNNING;
   m_bytes_read = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx)
   {
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
@@ -171,7 +174,7 @@ Status_t IIC::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_write_status = STATUS_DRV_RUNNING;
   m_bytes_written = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_tx)
   {
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
@@ -201,7 +204,7 @@ Status_t IIC::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
  * @param user_arg A argument used as a parameter to the function
  * @return Status_t
  */
-Status_t IIC::setCallback(DriverEventsList_t event, DriverCallback_t function, void *user_arg)
+Status_t IIC::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
 {
   Status_t status = STATUS_DRV_SUCCESS;
 

@@ -25,7 +25,7 @@
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
  */
-SPI::SPI(const void *port_handle)
+SPI::SPI(const SpiHandle_t port_handle)
 {
   m_handle = port_handle;
   m_linux_handle = -1;
@@ -48,7 +48,7 @@ SPI::~SPI()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t SPI::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status = STATUS_DRV_SUCCESS;
   char mode = 0;
@@ -87,13 +87,29 @@ Status_t SPI::configure(const DriverSettings_t *list, uint8_t list_size)
           mode = 0;
         }
         break;
-      case COMM_WORK_ASYNC:
-        m_is_async_mode = (bool)list[i].value;
+      case COMM_WORK_ASYNC_RX:
+        m_is_async_mode_rx = (bool)list[i].value;
+        break;
+      case COMM_WORK_ASYNC_TX:
+        m_is_async_mode_tx = (bool)list[i].value;
         break;
       default:
         break;
       }
     }
+  }
+
+  if(m_is_async_mode_rx || m_is_async_mode_tx)
+  {
+    result = m_thread_handle.create(SPI::transferDataAsync, this, 0);
+    if(!result)
+    {
+      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the spi task.\r\n");
+      return status;
+    }
+  }else
+  {
+    (void) m_thread_handle.terminate();
   }
 
   if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
@@ -123,19 +139,6 @@ Status_t SPI::configure(const DriverSettings_t *list, uint8_t list_size)
     return status;
   }
 
-  if(m_is_async_mode)
-  {
-    result = m_thread_handle.create(SPI::transferDataAsync, this, 0);
-    if(!result)
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the spi task.\r\n");
-      return status;
-    }
-  }else
-  {
-    (void) m_thread_handle.terminate();
-  }
-
   m_read_status = STATUS_DRV_IDLE;
   m_write_status = STATUS_DRV_IDLE;
   return STATUS_DRV_SUCCESS;
@@ -161,7 +164,7 @@ Status_t SPI::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_read_status = STATUS_DRV_RUNNING;
   m_bytes_read = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx)
   {
     data_bundle.rx_buffer = data;
     data_bundle.rx_size = byte_count;
@@ -205,7 +208,7 @@ Status_t SPI::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_write_status = STATUS_DRV_RUNNING;
   m_bytes_written = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_tx)
   {
     data_bundle.rx_buffer = nullptr;
     data_bundle.rx_size = 0;
@@ -252,7 +255,7 @@ Status_t SPI::transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, ui
   m_bytes_read = 0;
   m_bytes_written = 0;
 
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx && m_is_async_mode_tx)
   {
     data_bundle.rx_buffer = rx_data;
     data_bundle.rx_size = byte_count;
@@ -297,7 +300,7 @@ Status_t SPI::transfer(Buffer_t rx_data, Buffer_t tx_data, uint32_t timeout)
  * @param user_arg A argument used as a parameter to the function
  * @return Status_t
  */
-Status_t SPI::setCallback(DriverEventsList_t event, DriverCallback_t function, void *user_arg)
+Status_t SPI::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
 {
   return STATUS_DRV_NOT_IMPLEMENTED;
 }

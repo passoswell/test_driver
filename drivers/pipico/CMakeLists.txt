@@ -4,8 +4,8 @@ pico_sdk_init()
 add_library(drv_pipico STATIC
 dio/dio.cpp
 dio/dio.hpp
-spt/drv_spt.cpp
-spt/drv_spt.hpp
+spt/spt.cpp
+spt/spt.hpp
 )
 
 # pull in common dependencies

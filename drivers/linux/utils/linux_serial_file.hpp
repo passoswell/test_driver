@@ -25,7 +25,7 @@ public:
   LinuxSerialFile(const char *file_name);
   virtual ~LinuxSerialFile();
 
-  Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  Status_t configure(const SettingsList_t *list, uint8_t list_size);
 
   using UartBase::read;
   Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
@@ -33,7 +33,7 @@ public:
   using UartBase::write;
   Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
 
-  Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
+  Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
   Task<DataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_rx_thread_handle;

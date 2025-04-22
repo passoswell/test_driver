@@ -21,6 +21,7 @@ DriverOutBase::DriverOutBase()
   m_func_tx = nullptr;
   m_arg_tx = nullptr;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
+  m_is_async_mode_tx = false;
 }
 
 /**

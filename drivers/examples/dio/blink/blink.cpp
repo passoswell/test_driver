@@ -30,12 +30,17 @@ constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
 constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 2;
 constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
 
+#elif defined(USE_PIPICO)
+
+constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 25;
+constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
+
 #endif
 
 /**
  * @brief LED configuration parameters
  */
-const DriverSettings_t g_dio_output_list[]
+const SettingsList_t g_dio_output_list[]
 {
   ADD_PARAMETER(DIO_LINE_DIRECTION, DIO_DIRECTION_OUTPUT),
   ADD_PARAMETER(DIO_LINE_DRIVE, DIO_DRIVE_PUSH_PULL),

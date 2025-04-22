@@ -14,7 +14,7 @@ IF(DEFINED USE_ESP32)
 ELSEIF(DEFINED USE_PIPICO)
 
   add_subdirectory(pipico)
-  target_link_libraries(drivers drv_pipico)
+  target_link_libraries(drivers INTERFACE drv_pipico)
   message("\r\nLinking pipico drivers because USE_PIPICO is defined\r\n")
 
 ELSEIF(DEFINED USE_LINUX)

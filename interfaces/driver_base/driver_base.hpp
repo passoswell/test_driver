@@ -27,13 +27,13 @@ public:
   virtual ~DriverBase();
 
   // Initialization function
-  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size);
 
   // Callback installation
-  virtual Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
+  virtual Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
   // Enable / disable callback
-  virtual Status_t enableCallback(bool enable, DriverEventsList_t event = EVENT_NONE);
+  virtual Status_t enableCallback(bool enable, EventsList_t event = EVENT_NONE);
 };
 
 #endif /* DRIVER_BASE_HPP */

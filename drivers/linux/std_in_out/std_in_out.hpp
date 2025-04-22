@@ -21,14 +21,14 @@
 /**
  * @brief Gives access to standard io as a serial port
  */
-class StdInOut final : public LinuxSerialFile
+class StdInOut : public LinuxSerialFile
 {
 public:
   StdInOut();
 
   ~StdInOut();
 
-  Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  Status_t configure(const SettingsList_t *list, uint8_t list_size);
 
 private:
   static struct termios m_backup_termios_structure;

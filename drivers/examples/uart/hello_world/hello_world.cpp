@@ -17,7 +17,7 @@ static void errorHandler(Status_t status);
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-void *handle = (void *) "/dev/ttyUSB0";
+UartHandle_t handle = (UartHandle_t)"/dev/ttyUSB0";
 #else
 void *handle = nullptr;
 #endif
@@ -25,11 +25,11 @@ void *handle = nullptr;
 /**
  * @brief Configuration parameters for the uart port
  */
-const DriverSettings_t g_uart_config_list[]
+const SettingsList_t g_uart_config_list[]
 {
   ADD_PARAMETER(COMM_PARAM_BAUD, 115200),
   ADD_PARAMETER(COMM_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
-  ADD_PARAMETER(COMM_WORK_ASYNC, true)
+  ADD_PARAMETER(COMM_WORK_ASYNC_TX, true)
 };
 uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
 

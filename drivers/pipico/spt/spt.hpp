@@ -1,16 +1,16 @@
 /**
  * @file spt.hpp
  * @author your name (you@domain.com)
- * @brief Software Periodic Timer driver for linux
+ * @brief Software Periodic Timer driver for pipico
  * @version 0.1
- * @date 2024-09-14
+ * @date 2024-09-15
  *
  * @copyright Copyright (c) 2024
  *
  */
 
-#ifndef DRIVERS_LINUX_SPT_SPT_HPP
-#define DRIVERS_LINUX_SPT_SPT_HPP
+#ifndef SPT_SPT_HPP
+#define SPT_SPT_HPP
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -26,6 +26,10 @@ public:
   sft_time_us_t getTimeSincePowerOnUs();
 
   void delay(uint32_t duration);
+
+private:
+  uint32_t m_prev_time_ms[3];
+  uint32_t m_seconds_counter;
 };
 
-#endif /* DRIVERS_LINUX_SPT_SPT_HPP */
+#endif /* SPT_SPT_HPP */

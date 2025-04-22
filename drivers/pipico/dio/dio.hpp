@@ -17,7 +17,7 @@
 /**
  * @brief Class that export DIO functionalities
  */
-class DIO final : public DioBase
+class DIO : public DioBase
 {
 public:
   uint32_t m_line_number;
@@ -25,17 +25,17 @@ public:
   DIO(uint32_t line_offsetline_offset, uint32_t port = 0);
   virtual ~DIO();
 
-  Status_t configure(const DriverSettings_t *list, uint8_t list_size);
+  Status_t configure(const SettingsList_t *list, uint8_t list_size);
 
-  Status_t read(uint32_t &state);
+  Status_t read(bool &state);
 
-  Status_t write(uint32_t value);
+  Status_t write(bool value);
 
   Status_t toggle();
 
-  Status_t setCallback(DriverEventsList_t edge = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
+  Status_t setCallback(EventsList_t edge = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
-  Status_t enableCallback(bool enable, DriverEventsList_t edge = EVENT_NONE);
+  Status_t enableCallback(bool enable, EventsList_t edge = EVENT_NONE);
 
 private:
   void *m_line_handle;

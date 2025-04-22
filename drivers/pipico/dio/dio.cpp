@@ -46,7 +46,7 @@ DIO::~DIO()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
+Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t success;
   DioDirection_t line_direction = DIO_DIRECTION_INPUT;
@@ -109,7 +109,7 @@ Status_t DIO::configure(const DriverSettings_t *list, uint8_t list_size)
  * @param state The state of the digital pin
  * @return Status_t
  */
-Status_t DIO::read(uint32_t &state)
+Status_t DIO::read(bool &state)
 {
   state = gpio_get(m_line_number);
   return STATUS_DRV_SUCCESS;
@@ -120,9 +120,9 @@ Status_t DIO::read(uint32_t &state)
  * @param state The state to set in the gpio
  * @return Status_t
  */
-Status_t DIO::write(uint32_t value)
+Status_t DIO::write(bool value)
 {
-  gpio_put(m_line_number, (bool)value);
+  gpio_put(m_line_number, value);
   return STATUS_DRV_SUCCESS;
 }
 
@@ -144,7 +144,7 @@ Status_t DIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, void *user_arg)
+Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *user_arg)
 {
   m_func = function;
   m_arg = user_arg;
@@ -157,7 +157,7 @@ Status_t DIO::setCallback(DriverEventsList_t edge, DriverCallback_t function, vo
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
+Status_t DIO::enableCallback(bool enable, EventsList_t edge)
 {
   uint32_t interruption_type;
 
@@ -219,7 +219,7 @@ Status_t DIO::enableCallback(bool enable, DriverEventsList_t edge)
  */
 void drvDioCallback(uint dio, uint32_t events)
 {
-  DriverEventsList_t edge = EVENT_EDGE_FALLING;
+  EventsList_t edge = EVENT_EDGE_FALLING;
   uint8_t state[1] = {false};
 
   for (auto it = g_dio_ptr.begin(); it != g_dio_ptr.end(); it++)

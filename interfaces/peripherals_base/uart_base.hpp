@@ -32,7 +32,7 @@ class UartBase : public DriverInOutBase
 {
 public:
 
-  virtual Status_t configure(const DriverSettings_t *list, uint8_t list_size) = 0;
+  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
   using DriverInOutBase::read;
   virtual Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
@@ -40,7 +40,7 @@ public:
   using DriverInOutBase::write;
   virtual Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX) = 0;
 
-  virtual Status_t setCallback(DriverEventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
+  virtual Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr) = 0;
 };
 
 #endif /* UART_BASE_HPP */

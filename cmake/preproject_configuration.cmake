@@ -15,6 +15,7 @@ ELSEIF(DEFINED USE_PIPICO)
   message("Using PIPICO")
   # Pull in SDK (must be before project)
   include(cmake/pico_sdk_import.cmake)
+  include(cmake/pico_extras_import_optional.cmake)
   add_definitions(-DUSE_PIPICO=1)
   set(DUSE_PIPICO TRUE)
 
