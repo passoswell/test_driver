@@ -70,16 +70,16 @@ Status_t DriverOutBase::write(uint8_t *data, Size_t byte_count, uint32_t timeout
   return STATUS_DRV_NOT_IMPLEMENTED;
 }
 
-/**
- * @brief Write a certain amount of bytes
- *
- * @param data Buffer and size
- * @return Status_t
- */
-Status_t DriverOutBase::write(Buffer_t data, uint32_t timeout)
-{
-  return write(data.data(), data.size(), timeout);
-}
+// /**
+//  * @brief Write a certain amount of bytes
+//  *
+//  * @param data Buffer and size
+//  * @return Status_t
+//  */
+// Status_t DriverOutBase::write(Buffer_t data, uint32_t timeout)
+// {
+//   return write(data.data(), data.size(), timeout);
+// }
 
 /**
  * @brief Get the number of bytes on the driver's internal write buffer
