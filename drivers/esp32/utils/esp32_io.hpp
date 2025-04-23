@@ -15,6 +15,6 @@
 #include "commons.hpp"
 #include "esp_err.h"
 
-Status_t convertErrnoCode(esp_err_t code);
+Status_t convertErrorCode(esp_err_t code);
 
 #endif /* UTILS_ESP32_IO_HPP */

@@ -136,5 +136,6 @@ constexpr Status_t STATUS_DRV_ERR_NOT_OWNED = {false, SRC_INTERFACE, ERR_NOT_OWN
 constexpr Status_t STATUS_DRV_ERR_PARAM = {false, SRC_DRIVER, ERR_PARAM, (char *)"An unspecified parameter was reported as illegal.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_PARAM_SIZE = {false, SRC_DRIVER, ERR_PARAM_SIZE, (char *)"The size parameter is invalid or out of range.\r\n"};
 constexpr Status_t STATUS_DRV_BAD_HANDLE = {false, SRC_DRIVER, ERR_BAD_HANDLE, (char *)"Invalid handle to the resource.\r\n"};
+constexpr Status_t STATUS_DRV_ERR_FAILED = {false, SRC_DRIVER, ERR_FAILED, (char *)"Operation requested failed.\r\n"};
 
 #endif /* COM_STATUS_HPP_ */

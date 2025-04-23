@@ -17,7 +17,7 @@
  * @param code esp_err_t code
  * @return Status_t
  */
-Status_t convertErrnoCode(esp_err_t code)
+Status_t convertErrorCode(esp_err_t code)
 {
   Status_t status;
 
