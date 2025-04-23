@@ -45,7 +45,7 @@ AP_MAIN()
   Status_t status;
   UART my_serial(handle);
   uint32_t bytes_read = 0, tx_bytes = 0;
-  uint8_t buffer[1024] = {0};
+  uint8_t buffer[2048] = {0};
   uint8_t tx_buffer[100] = {0};
   uint8_t message[] = "\r\nHello world!!!\r\n";
 
@@ -67,7 +67,7 @@ AP_MAIN()
   {
     do
     {
-      status = my_serial.read(buffer, sizeof(buffer), 50);
+      status = my_serial.read(buffer, sizeof(buffer), 20);
       if (!status.success && status.code != ERR_TIMEOUT)
       {
         printf("\r\nERROR from my_serial.read: %s", status.description);

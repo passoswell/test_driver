@@ -44,6 +44,7 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   Status_t status;
   uart_config_t uart_config;
   int rx_pin = 0, tx_pin = 0;
+  int rx_fifo_full_thr = 1;
 
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
@@ -100,19 +101,37 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
     }
   }
 
-  // We won't use a buffer for sending data.
+  // Installing the driver, we won't use a buffer for sending data.
   status = convertErrorCode(uart_driver_install((uart_port_t) m_handle.uart_number, 2048, 0, 0, NULL, 0));
   if(!status.success)
   {
     return status;
   }
+
+  // Configuring the driver
   status = convertErrorCode(uart_param_config((uart_port_t) m_handle.uart_number, &uart_config));
   if(!status.success)
   {
     (void) uart_driver_delete((uart_port_t) m_handle.uart_number);
     return status;
   }
-  // status = convertErrorCode(uart_set_pin((uart_port_t) m_handle.uart_number, 1, 3, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
+
+  // Configuring the threshold level for rx FIFO full interruptions
+  if(uart_config.baud_rate <= 9600)
+  {
+    rx_fifo_full_thr = 1;
+  }else
+  {
+    rx_fifo_full_thr = uart_config.baud_rate / 9600;
+  }
+  status = convertErrorCode(uart_set_rx_full_threshold((uart_port_t) m_handle.uart_number, rx_fifo_full_thr));
+  if(!status.success)
+  {
+    (void) uart_driver_delete((uart_port_t) m_handle.uart_number);
+    return status;
+  }
+
+  // Configuring uart pins
   status = convertErrorCode(uart_set_pin((uart_port_t) m_handle.uart_number, m_handle.tx_pin, m_handle.rx_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
   if(!status.success)
   {
