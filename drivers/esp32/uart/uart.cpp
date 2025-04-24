@@ -9,6 +9,8 @@
  *
  */
 
+#include <string.h>
+
 #include "uart.hpp"
 #include "esp32/utils/esp32_io.hpp"
 #include "freertos/FreeRTOS.h"
@@ -23,6 +25,8 @@
 UART::UART(const UartHandle_t port_handle)
 {
   m_handle = port_handle;
+  m_event_task_handle = nullptr;
+  m_event_queue = nullptr;
 }
 
 /**
@@ -55,6 +59,9 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   uart_config.stop_bits = UART_STOP_BITS_1;
   uart_config.flow_ctrl = UART_HW_FLOWCTRL_DISABLE;
   uart_config.source_clk = UART_SCLK_DEFAULT;
+#if (SOC_UART_LP_NUM >= 1)
+  uart_config.lp_source_clk = LP_UART_SCLK_DEFAULT;
+#endif
   uart_config.rx_flow_ctrl_thresh = 0;//UART_HW_FIFO_LEN(uart_num) - 1;
 
   if(list != nullptr && list_size != 0)
@@ -102,7 +109,7 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   }
 
   // Installing the driver, we won't use a buffer for sending data.
-  status = convertErrorCode(uart_driver_install((uart_port_t) m_handle.uart_number, 2048, 0, 0, NULL, 0));
+  status = convertErrorCode(uart_driver_install((uart_port_t) m_handle.uart_number, 2048, 0, 10, &m_event_queue, 0));
   if(!status.success)
   {
     return status;
@@ -130,6 +137,15 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
     (void) uart_driver_delete((uart_port_t) m_handle.uart_number);
     return status;
   }
+
+  if(m_is_async_mode_rx || m_is_async_mode_tx)
+  {
+    uart_set_rx_timeout((uart_port_t) m_handle.uart_number, 3);
+    // uart_disable_intr_mask();
+    // uart_enable_intr_mask();
+    xTaskCreate([](void *arg) -> void {static_cast<UART*>(arg)->eventTask();}, "uart_event_task", 2048, this, 12, &m_event_task_handle);
+  }
+
 
   // Configuring uart pins
   status = convertErrorCode(uart_set_pin((uart_port_t) m_handle.uart_number, m_handle.tx_pin, m_handle.rx_pin, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE));
@@ -161,19 +177,31 @@ Status_t UART::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_read_status = STATUS_DRV_RUNNING;
   m_read_status.success = false;
   m_bytes_read = 0;
-  int rx_bytes = uart_read_bytes((uart_port_t) m_handle.uart_number, data, byte_count, timeout / portTICK_PERIOD_MS);
-  if (rx_bytes > 0)
+
+  if(m_is_async_mode_rx)
   {
-    m_bytes_read = rx_bytes;
-    m_read_status = STATUS_DRV_SUCCESS;
-  }else if(rx_bytes == 0)
-  {
-    m_read_status = STATUS_DRV_ERR_TIMEOUT;
+    m_rx_mutex.lock();
+    m_rx_data.rx_buffer = data;
+    m_rx_data.rx_size = byte_count;
+    status = STATUS_DRV_SUCCESS;
+    m_rx_mutex.unlock();
   }else
   {
-    m_read_status = STATUS_DRV_ERR_FAILED;
+    int rx_bytes = uart_read_bytes((uart_port_t) m_handle.uart_number, data, byte_count, timeout / portTICK_PERIOD_MS);
+    if (rx_bytes > 0)
+    {
+      m_bytes_read = rx_bytes;
+      m_read_status = STATUS_DRV_SUCCESS;
+    }else if(rx_bytes == 0)
+    {
+      m_read_status = STATUS_DRV_ERR_TIMEOUT;
+    }else
+    {
+      m_read_status = STATUS_DRV_ERR_FAILED;
+    }
+    status = m_read_status;
   }
-  return m_read_status;
+  return status;
 }
 
 /**
@@ -260,4 +288,90 @@ Status_t UART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeou
   if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   return STATUS_DRV_SUCCESS;
+}
+
+void UART::eventTask(void)
+{
+  uart_event_t event;
+  size_t buffered_size;
+  uint8_t rx_state = 0;
+  uint8_t bytes_received = 0;
+  int length = 0;
+
+  while(true)
+  {
+    //Waiting for UART event.
+    if (xQueueReceive(m_event_queue, (void *)&event, (TickType_t)portMAX_DELAY))
+    {
+      switch (event.type)
+      {
+      // Event of UART receiving data
+      /*We'd better handler data event fast, there would be much more data events than
+      other types of events. If we take too much time on data event, the queue might
+      be full.*/
+      case UART_DATA:
+        m_rx_mutex.lock();
+        if(m_rx_data.rx_buffer == nullptr)
+        {
+          printf("\r\nEntered event task, UART_DATA case, buffer is null\r\n");
+          m_rx_mutex.unlock();
+          continue;
+        }
+        uart_get_buffered_data_len((uart_port_t) m_handle.uart_number, (size_t*)&length);
+        if(length == 0)
+        {
+          printf("\r\nEntered event task, UART_DATA case, read zero bytes\r\n");
+          m_rx_mutex.unlock();
+          continue;
+        }
+        printf("\r\nEntered event task, UART_DATA case\r\n");
+        if(length <= m_rx_data.rx_size)
+        {
+          m_bytes_read = length;
+        }else
+        {
+          m_bytes_read = m_rx_data.rx_size;
+        }
+        uart_read_bytes((uart_port_t) m_handle.uart_number, m_rx_data.rx_buffer, m_bytes_read, portMAX_DELAY);
+        m_rx_data.rx_buffer = nullptr;
+        m_rx_data.rx_size = 0;
+        m_read_status = STATUS_DRV_SUCCESS;
+        m_rx_mutex.unlock();
+        break;
+      // Event of HW FIFO overflow detected
+      case UART_FIFO_OVF:
+        // If fifo overflow happened, you should consider adding flow control for your application.
+        // The ISR has already reset the rx FIFO,
+        // As an example, we directly flush the rx buffer here in order to read more data.
+        printf("FIFO overflow\r\n");
+        uart_flush_input((uart_port_t) m_handle.uart_number);
+        xQueueReset(m_event_queue);
+        break;
+      // Event of UART ring buffer full
+      case UART_BUFFER_FULL:
+        // If buffer full happened, you should consider increasing your buffer size
+        // As an example, we directly flush the rx buffer here in order to read more data.
+        printf("Buffer full\r\n");
+        uart_flush_input((uart_port_t) m_handle.uart_number);
+        xQueueReset(m_event_queue);
+        break;
+      // Event of UART RX break detected
+      case UART_BREAK:
+        break;
+      // Event of UART parity check error
+      case UART_PARITY_ERR:
+        break;
+      // Event of UART frame error
+      case UART_FRAME_ERR:
+        break;
+      // UART_PATTERN_DET
+      case UART_PATTERN_DET:
+        break;
+      // Others
+      default:
+        break;
+      }
+    }
+  }
+  vTaskDelete(NULL);
 }

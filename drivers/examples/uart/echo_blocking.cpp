@@ -73,6 +73,10 @@ AP_MAIN()
         printf("\r\nERROR from my_serial.read: %s", status.description);
         AP_EXIT();
       }
+      while(my_serial.getReadStatus().code == OPERATION_RUNNING)
+      {
+        vTaskDelay(1);
+      }
       bytes_read = my_serial.getBytesRead();
     }while(bytes_read == 0);
 

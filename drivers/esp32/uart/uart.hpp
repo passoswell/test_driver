@@ -17,6 +17,10 @@
 #include <stdbool.h>
 
 #include "peripherals_base/uart_base.hpp"
+#include "esp32/task_system/idf_mutex.hpp"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
 
 
 typedef struct
@@ -50,6 +54,10 @@ public:
 private:
   UartHandle_t m_handle;
   bool m_terminate;
+  QueueHandle_t m_event_queue;
+  TaskHandle_t m_event_task_handle;
+  DataBundle_t m_rx_data;
+  Mutex m_rx_mutex;
 
   // Status_t readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);
   // static Status_t readFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
@@ -58,6 +66,8 @@ private:
   // static Status_t writeFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
 
   Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
+
+  void eventTask(void);
 };
 
 
