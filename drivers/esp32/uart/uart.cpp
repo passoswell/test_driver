@@ -123,14 +123,37 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
     return status;
   }
 
-  // Configuring the threshold level for rx FIFO full interruptions
-  if(uart_config.baud_rate <= 9600)
+  uart_set_rx_timeout((uart_port_t) m_handle.uart_number, 1);
+
+
+  if(m_is_async_mode_rx || m_is_async_mode_tx)
   {
-    rx_fifo_full_thr = 1;
+    // Configuring the threshold level for rx FIFO full interruptions
+    int fifo_length = UART_HW_FIFO_LEN((uart_port_t) m_handle.uart_number);
+    if(uart_config.baud_rate > 115200)
+    {
+      if((uart_config.baud_rate / 9600) > fifo_length/2)
+      {
+        rx_fifo_full_thr = fifo_length - (uart_config.baud_rate / 9600);
+      }else
+      {
+        rx_fifo_full_thr = fifo_length/2;
+      }
+    }
+    uart_set_always_rx_timeout((uart_port_t) m_handle.uart_number, true);
+    xTaskCreate([](void *arg) -> void {static_cast<UART*>(arg)->eventTask();}, "uart_event_task", 2048, this, 12, &m_event_task_handle);
   }else
   {
-    rx_fifo_full_thr = uart_config.baud_rate / 9600;
+    // Configuring the threshold level for rx FIFO full interruptions
+    if(uart_config.baud_rate <= 9600)
+    {
+      rx_fifo_full_thr = 1;
+    }else
+    {
+      rx_fifo_full_thr = uart_config.baud_rate / 9600;
+    }
   }
+
   status = convertErrorCode(uart_set_rx_full_threshold((uart_port_t) m_handle.uart_number, rx_fifo_full_thr));
   if(!status.success)
   {
@@ -138,13 +161,6 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
     return status;
   }
 
-  if(m_is_async_mode_rx || m_is_async_mode_tx)
-  {
-    uart_set_rx_timeout((uart_port_t) m_handle.uart_number, 3);
-    // uart_disable_intr_mask();
-    // uart_enable_intr_mask();
-    xTaskCreate([](void *arg) -> void {static_cast<UART*>(arg)->eventTask();}, "uart_event_task", 2048, this, 12, &m_event_task_handle);
-  }
 
 
   // Configuring uart pins
@@ -310,21 +326,26 @@ void UART::eventTask(void)
       other types of events. If we take too much time on data event, the queue might
       be full.*/
       case UART_DATA:
+        if(!event.timeout_flag)
+        {
+          // printf("\r\nEntered event task, UART_DATA case, FIFO filled above threshold\r\n");
+          continue;
+        }
         m_rx_mutex.lock();
         if(m_rx_data.rx_buffer == nullptr)
         {
-          printf("\r\nEntered event task, UART_DATA case, buffer is null\r\n");
+          // printf("\r\nEntered event task, UART_DATA case, buffer is null\r\n");
           m_rx_mutex.unlock();
           continue;
         }
         uart_get_buffered_data_len((uart_port_t) m_handle.uart_number, (size_t*)&length);
         if(length == 0)
         {
-          printf("\r\nEntered event task, UART_DATA case, read zero bytes\r\n");
+          // printf("\r\nEntered event task, UART_DATA case, read zero bytes\r\n");
           m_rx_mutex.unlock();
           continue;
         }
-        printf("\r\nEntered event task, UART_DATA case\r\n");
+        // printf("\r\nEntered event task, UART_DATA case, idle line detected\r\n");
         if(length <= m_rx_data.rx_size)
         {
           m_bytes_read = length;
