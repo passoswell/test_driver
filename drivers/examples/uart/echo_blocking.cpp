@@ -7,6 +7,10 @@
  *
  * @copyright Copyright (c) 2025
  *
+ * @note In this example, a UART port configured by a handle and
+ * g_uart_config_list is used to echo whatever is received through it in
+ * synchronous (blocking) mode.
+ *
  */
 
 #include <string.h>
@@ -37,29 +41,36 @@ const SettingsList_t g_uart_config_list[]
   ADD_PARAMETER(COMM_WORK_ASYNC_RX, false),
   ADD_PARAMETER(COMM_WORK_ASYNC_TX, false)
 };
-uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+const uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+
+static UART g_serial(handle);
+static uint8_t g_rx_buffer[2048] = {0};
+static uint8_t g_tx_buffer[100] = {0};
+static uint8_t MESSAGE_HELLO_WORLD[] = "\r\nHello world!!!\r\n";
 
 
+/**
+ * @brief Example code that echoes what it receives through a UART port
+ */
 AP_MAIN()
 {
   Status_t status;
-  UART my_serial(handle);
+  SPT timer;
   uint32_t bytes_read = 0, tx_bytes = 0;
-  uint8_t buffer[2048] = {0};
-  uint8_t tx_buffer[100] = {0};
-  uint8_t message[] = "\r\nHello world!!!\r\n";
 
-  status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
+  // COnfigure the driver
+  status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status.success)
   {
-    printf("\r\nERROR from my_serial.configure: %s", status.description);
+    printf("\r\nERROR from g_serial.configure: %s", status.description);
     AP_EXIT();
   }
 
-  status = my_serial.write(message, strlen((char *)message));
+  // Write a hello message to the uart
+  status = g_serial.write(MESSAGE_HELLO_WORLD, strlen((char *)MESSAGE_HELLO_WORLD));
   if(!status.success)
   {
-    printf("\r\nERROR from my_serial.write: %s", status.description);
+    printf("\r\nERROR from g_serial.write: %s", status.description);
     AP_EXIT();
   }
 
@@ -67,32 +78,35 @@ AP_MAIN()
   {
     do
     {
-      status = my_serial.read(buffer, sizeof(buffer), 20);
+      // Read data from uart by polling
+      status = g_serial.read(g_rx_buffer, sizeof(g_rx_buffer), 20);
       if (!status.success && status.code != ERR_TIMEOUT)
       {
-        printf("\r\nERROR from my_serial.read: %s", status.description);
+        printf("\r\nERROR from g_serial.read: %s", status.description);
         AP_EXIT();
       }
-      while(my_serial.getReadStatus().code == OPERATION_RUNNING)
+      while(g_serial.getReadStatus().code == OPERATION_RUNNING)
       {
         vTaskDelay(1);
       }
-      bytes_read = my_serial.getBytesRead();
+      bytes_read = g_serial.getBytesRead();
     }while(bytes_read == 0);
 
-    tx_bytes = snprintf((char *)tx_buffer, sizeof(tx_buffer) - 1, "\r\n\r\nRead %u bytes\r\n", bytes_read);
+    // Write to the uart the number of bytes received
+    tx_bytes = snprintf((char *)g_tx_buffer, sizeof(g_tx_buffer) - 1, "\r\n\r\nRead %u bytes\r\n", bytes_read);
 
-    status = my_serial.write(tx_buffer, tx_bytes);
+    status = g_serial.write(g_tx_buffer, tx_bytes);
     if (!status.success)
     {
-      printf("\r\nERROR from my_serial.write: %s", status.description);
+      printf("\r\nERROR from g_serial.write: %s", status.description);
       AP_EXIT();
     }
 
-    status = my_serial.write(buffer, bytes_read);
+    // Write to the uart what was previously received
+    status = g_serial.write(g_rx_buffer, bytes_read);
     if(!status.success)
     {
-      printf("\r\nERROR from my_serial.write: %s", status.description);
+      printf("\r\nERROR from g_serial.write: %s", status.description);
       AP_EXIT();
     }
   }

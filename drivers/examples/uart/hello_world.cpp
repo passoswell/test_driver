@@ -7,6 +7,9 @@
  *
  * @copyright Copyright (c) 2024
  *
+ * @note In this example, a UART port configured by a handle and
+ * g_uart_config_list is used to print a hello world message every second
+ *
  */
 
 #include <string.h>
@@ -36,7 +39,7 @@ const SettingsList_t g_uart_config_list[]
   ADD_PARAMETER(COMM_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
   ADD_PARAMETER(COMM_WORK_ASYNC_TX, false)
 };
-uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+const uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
 
 
 /**
@@ -49,6 +52,7 @@ AP_MAIN()
   uint8_t message[] = "\r\nHello world!!!\r\n";
   Status_t status;
 
+  // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status.success)
   {
@@ -58,6 +62,7 @@ AP_MAIN()
 
   while(true)
   {
+    // Write a hello world message to the uart port
     status = my_serial.write(message, strlen((char *)message));
     if(!status.success)
     {
