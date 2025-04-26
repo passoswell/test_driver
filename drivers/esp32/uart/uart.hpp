@@ -65,6 +65,8 @@ private:
   void rxEventTask(void);
 
   Status_t txMonitorTask(uint8_t data);
+
+  void terminateRxEventTask(void);
 };
 
 
