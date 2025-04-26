@@ -17,7 +17,7 @@
 #include <stdbool.h>
 
 #include "peripherals_base/uart_base.hpp"
-#include "esp32/task_system/idf_mutex.hpp"
+#include "esp32/task_system/task_system.hpp"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
@@ -56,18 +56,15 @@ private:
   bool m_terminate;
   QueueHandle_t m_event_queue;
   TaskHandle_t m_event_task_handle;
-  DataBundle_t m_rx_data;
-  Mutex m_rx_mutex;
-
-  // Status_t readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);
-  // static Status_t readFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
-
-  // Status_t writeBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);
-  // static Status_t writeFromThreadBlocking(DataBundle_t data_bundle, void *user_arg);
+  DataBundle_t m_data;
+  Mutex m_rx_mutex, m_tx_mutex;
+  Task<uint8_t, 1, Status_t, 1> m_tx_monitor_task_handle;
 
   Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
 
-  void eventTask(void);
+  void rxEventTask(void);
+
+  Status_t txMonitorTask(uint8_t data);
 };
 
 

@@ -105,6 +105,9 @@ typedef enum
   COMM_USE_HW_CRC,
   COMM_USE_HW_CKSUM,
   COMM_USE_PULL_UP,
+
+  COMM_PARAM_TASK_PRIORITY,
+  COMM_PARAM_CORE_AFFINITY,
 } ParametersList_t;
 
 /**

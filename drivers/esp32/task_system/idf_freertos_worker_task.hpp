@@ -16,6 +16,21 @@
 #include "task_interface/task_interface.hpp"
 #include "idf_freertos_queue.hpp"
 
+
+/*
+  * Comment found on the implementation of xTaskCreate:
+  * The idf_additions.h has not been included here yet due to inclusion
+  * order. Thus we manually declare the function here.
+  */
+extern BaseType_t xTaskCreatePinnedToCore( TaskFunction_t pxTaskCode,
+  const char * const pcName,
+  const configSTACK_DEPTH_TYPE usStackDepth,
+  void * const pvParameters,
+  UBaseType_t uxPriority,
+  TaskHandle_t * const pvCreatedTask,
+  const BaseType_t xCoreID );
+
+
 /**
  * @brief A wrapper method for creating tasks
  *

@@ -49,6 +49,8 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   uart_config_t uart_config;
   int rx_pin = 0, tx_pin = 0;
   int rx_fifo_full_thr = 1;
+  uint32_t task_priority = 12;
+  uint8_t core_affinity = 1;
 
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
@@ -62,7 +64,7 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
 #if (SOC_UART_LP_NUM >= 1)
   uart_config.lp_source_clk = LP_UART_SCLK_DEFAULT;
 #endif
-  uart_config.rx_flow_ctrl_thresh = 0;//UART_HW_FIFO_LEN(uart_num) - 1;
+  uart_config.rx_flow_ctrl_thresh = 0;
 
   if(list != nullptr && list_size != 0)
   {
@@ -102,13 +104,21 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
           m_is_async_mode_tx = (bool) list[i].value;
           break;
 
+        case COMM_PARAM_TASK_PRIORITY:
+          task_priority = list[i].value;
+          break;
+
+        case COMM_PARAM_CORE_AFFINITY:
+          core_affinity = list[i].value % configNUMBER_OF_CORES;
+          break;
+
         default:
           break;
       }
     }
   }
 
-  // Installing the driver, we won't use a buffer for sending data.
+  (void) uart_driver_delete((uart_port_t) m_handle.uart_number);
   status = convertErrorCode(uart_driver_install((uart_port_t) m_handle.uart_number, 2048, 0, 10, &m_event_queue, 0));
   if(!status.success)
   {
@@ -125,26 +135,42 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
 
   uart_set_rx_timeout((uart_port_t) m_handle.uart_number, 1);
 
-
-  if(m_is_async_mode_rx || m_is_async_mode_tx)
+  if(m_is_async_mode_rx)
   {
     // Configuring the threshold level for rx FIFO full interruptions
-    int fifo_length = UART_HW_FIFO_LEN((uart_port_t) m_handle.uart_number);
-    if(uart_config.baud_rate > 115200)
+    // on async reception mode
+    int fifo_length = UART_HW_FIFO_LEN((uart_port_t)m_handle.uart_number);
+    if (uart_config.baud_rate > 115200)
     {
-      if((uart_config.baud_rate / 9600) > fifo_length/2)
+      if ((uart_config.baud_rate / 9600) > fifo_length / 2)
       {
         rx_fifo_full_thr = fifo_length - (uart_config.baud_rate / 9600);
-      }else
-      {
-        rx_fifo_full_thr = fifo_length/2;
       }
+      else
+      {
+        rx_fifo_full_thr = fifo_length / 2;
+      }
+    }else
+    {
+      rx_fifo_full_thr = fifo_length - 10;
     }
-    uart_set_always_rx_timeout((uart_port_t) m_handle.uart_number, true);
-    xTaskCreate([](void *arg) -> void {static_cast<UART*>(arg)->eventTask();}, "uart_event_task", 2048, this, 12, &m_event_task_handle);
+
+    uart_set_always_rx_timeout((uart_port_t)m_handle.uart_number, true);
+
+    m_rx_mutex.lock();
+    m_func_rx = nullptr;
+    m_arg_rx = nullptr;
+    m_data.rx_buffer = nullptr;
+    m_data.rx_size = 0;
+    if (m_event_task_handle == nullptr)
+    {
+      xTaskCreatePinnedToCore([](void *arg) -> void { static_cast<UART *>(arg)->rxEventTask(); }, "uart_event_task", 2048, this, task_priority, &m_event_task_handle, core_affinity);
+    }
+    m_rx_mutex.unlock();
   }else
   {
     // Configuring the threshold level for rx FIFO full interruptions
+    // on sync reception mode
     if(uart_config.baud_rate <= 9600)
     {
       rx_fifo_full_thr = 1;
@@ -159,6 +185,20 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   {
     (void) uart_driver_delete((uart_port_t) m_handle.uart_number);
     return status;
+  }
+
+  if(m_is_async_mode_tx)
+  {
+    m_tx_mutex.lock();
+    m_func_tx = nullptr;
+    m_arg_tx = nullptr;
+    m_data.tx_buffer = nullptr;
+    m_data.tx_size = 0;
+    m_tx_monitor_task_handle.create([](uint8_t data, void *arg) -> Status_t {return static_cast<UART*>(arg)->txMonitorTask(data);}, this, task_priority);
+    m_tx_mutex.unlock();
+  }else
+  {
+    m_tx_monitor_task_handle.terminate();
   }
 
 
@@ -197,8 +237,8 @@ Status_t UART::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
   if(m_is_async_mode_rx)
   {
     m_rx_mutex.lock();
-    m_rx_data.rx_buffer = data;
-    m_rx_data.rx_size = byte_count;
+    m_data.rx_buffer = data;
+    m_data.rx_size = byte_count;
     status = STATUS_DRV_SUCCESS;
     m_rx_mutex.unlock();
   }else
@@ -229,6 +269,7 @@ Status_t UART::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
  */
 Status_t UART::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
+  int tx_bytes = 0;
   Status_t status;
   status = checkInputs(data, byte_count, timeout);
   if(!status.success) { return status;}
@@ -237,21 +278,43 @@ Status_t UART::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
   m_write_status = STATUS_DRV_RUNNING;
   m_write_status.success = false;
   m_bytes_written = 0;
-  int tx_bytes = uart_write_bytes((uart_port_t) m_handle.uart_number, data, byte_count);
-  if(tx_bytes > 0)
+
+  if(m_is_async_mode_tx)
   {
-    m_bytes_written = tx_bytes;
-    m_write_status = STATUS_DRV_SUCCESS;
+    m_tx_mutex.lock();
+    m_data.tx_buffer = data;
+    m_data.tx_size = byte_count;
+    tx_bytes = uart_write_bytes((uart_port_t) m_handle.uart_number, data, byte_count);
+    if(tx_bytes > 0)
+    {
+      (void) m_tx_monitor_task_handle.getOutputData(status, 0);
+      (void) m_tx_monitor_task_handle.setInputData(data[0], 0);
+      m_bytes_written = tx_bytes;
+      status = STATUS_DRV_SUCCESS;
+    }else
+    {
+      status = STATUS_DRV_ERR_FAILED;
+    }
+    m_tx_mutex.unlock();
   }else
   {
-    m_write_status = STATUS_DRV_ERR_FAILED;
+    tx_bytes = uart_write_bytes((uart_port_t) m_handle.uart_number, data, byte_count);
+    if(tx_bytes > 0)
+    {
+      m_bytes_written = tx_bytes;
+      status = STATUS_DRV_SUCCESS;
+    }else
+    {
+      status = STATUS_DRV_ERR_FAILED;
+    }
+    m_write_status = status;
   }
-  return m_write_status;
+
+  return status;
 }
 
 /**
  * @brief Install a callback function
- *
  * @param event An event to trigger the call
  * @param function A function to call back
  * @param user_arg A argument used as a parameter to the function
@@ -306,7 +369,10 @@ Status_t UART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeou
   return STATUS_DRV_SUCCESS;
 }
 
-void UART::eventTask(void)
+/**
+ * @brief Manages uart reception events coming from an ISR
+ */
+void UART::rxEventTask(void)
 {
   uart_event_t event;
   size_t buffered_size;
@@ -332,7 +398,7 @@ void UART::eventTask(void)
           continue;
         }
         m_rx_mutex.lock();
-        if(m_rx_data.rx_buffer == nullptr)
+        if(m_data.rx_buffer == nullptr)
         {
           // printf("\r\nEntered event task, UART_DATA case, buffer is null\r\n");
           m_rx_mutex.unlock();
@@ -346,18 +412,26 @@ void UART::eventTask(void)
           continue;
         }
         // printf("\r\nEntered event task, UART_DATA case, idle line detected\r\n");
-        if(length <= m_rx_data.rx_size)
+        if(length <= m_data.rx_size)
         {
           m_bytes_read = length;
         }else
         {
-          m_bytes_read = m_rx_data.rx_size;
+          m_bytes_read = m_data.rx_size;
         }
-        uart_read_bytes((uart_port_t) m_handle.uart_number, m_rx_data.rx_buffer, m_bytes_read, portMAX_DELAY);
-        m_rx_data.rx_buffer = nullptr;
-        m_rx_data.rx_size = 0;
+        uart_read_bytes((uart_port_t) m_handle.uart_number, m_data.rx_buffer, m_bytes_read, portMAX_DELAY);
         m_read_status = STATUS_DRV_SUCCESS;
-        m_rx_mutex.unlock();
+        if(m_func_rx != nullptr)
+        {
+          Buffer_t data(m_data.rx_buffer, m_bytes_read);
+          m_data.rx_buffer = nullptr;
+          m_data.rx_size = 0;
+          m_rx_mutex.unlock();
+          m_func_rx(m_read_status, EVENT_WRITE, data, m_arg_rx);
+        }else
+        {
+          m_rx_mutex.unlock();
+        }
         break;
       // Event of HW FIFO overflow detected
       case UART_FIFO_OVF:
@@ -395,4 +469,27 @@ void UART::eventTask(void)
     }
   }
   vTaskDelete(NULL);
+}
+
+/**
+ * @brief Monitors end of transmission of data through uart
+ */
+Status_t UART::txMonitorTask(uint8_t data)
+{
+  Status_t status;
+  status = convertErrorCode(uart_wait_tx_done((uart_port_t) m_handle.uart_number, portMAX_DELAY));
+  m_tx_mutex.lock();
+  m_write_status = STATUS_DRV_SUCCESS;
+  if(m_func_tx != nullptr)
+  {
+    Buffer_t data(m_data.tx_buffer, m_data.tx_size);
+    m_data.tx_buffer = nullptr;
+    m_data.tx_size = 0;
+    m_tx_mutex.unlock();
+    m_func_tx(status, EVENT_WRITE, data, m_arg_tx);
+  }else
+  {
+    m_tx_mutex.unlock();
+  }
+  return status;
 }
