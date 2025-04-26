@@ -426,7 +426,7 @@ Status_t UART::writeBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout,
 
   if(call_back && m_func_tx != nullptr)
   {
-    Buffer_t data_container(data, m_bytes_read);
+    Buffer_t data_container(data, m_bytes_written);
     m_func_tx(status, EVENT_WRITE, data_container, m_arg_tx);
   }
 

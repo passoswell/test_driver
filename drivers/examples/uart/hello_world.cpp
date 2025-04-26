@@ -7,17 +7,25 @@
  *
  * @copyright Copyright (c) 2024
  *
+ * @note In this example, a UART port configured by a handle and
+ * g_uart_config_list is used to print a hello world message every second
+ *
  */
 
 #include <string.h>
 
 #include "drivers.hpp"
 
-static void errorHandler(Status_t status);
-
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
 UartHandle_t handle = (UartHandle_t)"/dev/ttyUSB0";
+#elif defined(USE_ESP32)
+UartHandle_t handle =
+{
+  .uart_number = 0,
+  .rx_pin = 3,
+  .tx_pin = 1,
+};
 #else
 void *handle = nullptr;
 #endif
@@ -29,9 +37,9 @@ const SettingsList_t g_uart_config_list[]
 {
   ADD_PARAMETER(COMM_PARAM_BAUD, 115200),
   ADD_PARAMETER(COMM_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
-  ADD_PARAMETER(COMM_WORK_ASYNC_TX, true)
+  ADD_PARAMETER(COMM_WORK_ASYNC_TX, false)
 };
-uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+const uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
 
 
 /**
@@ -41,24 +49,25 @@ AP_MAIN()
 {
   UART my_serial(handle);
   SPT my_timer(SOFTWARE_TIMER_SECONDS);
-  uint8_t message[] = "Hello world!!!\r\n";
+  uint8_t message[] = "\r\nHello world!!!\r\n";
   Status_t status;
 
+  // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status.success)
   {
+    printf("\r\nERROR from my_serial.configure: %s", status.description);
     AP_EXIT();
-    return status.code; // Should not get here
   }
 
   while(true)
   {
-    // status = my_serial.write(message);
-    status = my_serial.write(message, strlen((char *)message)); // Another write format
+    // Write a hello world message to the uart port
+    status = my_serial.write(message, strlen((char *)message));
     if(!status.success)
     {
+      printf("\r\nERROR from my_serial.write: %s", status.description);
       AP_EXIT();
-      return status.code; // Should not get here
     }
     my_timer.delay(1); // One second delay
   }

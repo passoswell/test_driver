@@ -78,6 +78,7 @@ typedef enum
   ERR_NOT_CONFIGURED                , /*!< Resource isn't properly configured */
   ERR_BUFFER_SIZE                   , /*!< Buffer is smaller than data size   */
   ERR_REGISTER_SIZE                 , /*!< Register is smaller than data size */
+  ERR_NOT_FOUND                     , /*!< Resource requested not found       */
   ERR_DEVICE_NOT_FOUND              , /*!< Device was no found                */
   ERR_WRITE_PROTECTED               , /*!< Device is write protected          */
   ERR_INVALID_FILE_SYSTEM           , /*!< No valid file system found         */
@@ -94,6 +95,12 @@ typedef enum
   ERR_ACKNOWLEDGED                  , /*!< A unexpected NACK was received     */
   ERR_NOT_ACKNOWLEDGED              , /*!< A unexpected ACK was received      */
   ERR_BAD_HANDLE                    , /*!< Invalid handle to the resource     */
+  ERR_FULL                          , /*!< Container is full                  */
+  ERR_EMPTY                         , /*!< Container is empty                 */
+  ERR_MEM_FULL                      , /*!< Memory is full                     */
+  ERR_MEM_EMPTY                     , /*!< Memory is empty                    */
+  ERR_QUEUE_FULL                    , /*!< Queue is full                      */
+  ERR_QUEUE_EMPTY                   , /*!< Queue is empty                     */
 
   ERR_PARAM                 = 0x8080, /*!< Invalid parameter                  */
 
@@ -129,5 +136,6 @@ constexpr Status_t STATUS_DRV_ERR_NOT_OWNED = {false, SRC_INTERFACE, ERR_NOT_OWN
 constexpr Status_t STATUS_DRV_ERR_PARAM = {false, SRC_DRIVER, ERR_PARAM, (char *)"An unspecified parameter was reported as illegal.\r\n"};
 constexpr Status_t STATUS_DRV_ERR_PARAM_SIZE = {false, SRC_DRIVER, ERR_PARAM_SIZE, (char *)"The size parameter is invalid or out of range.\r\n"};
 constexpr Status_t STATUS_DRV_BAD_HANDLE = {false, SRC_DRIVER, ERR_BAD_HANDLE, (char *)"Invalid handle to the resource.\r\n"};
+constexpr Status_t STATUS_DRV_ERR_FAILED = {false, SRC_DRIVER, ERR_FAILED, (char *)"Operation requested failed.\r\n"};
 
 #endif /* COM_STATUS_HPP_ */

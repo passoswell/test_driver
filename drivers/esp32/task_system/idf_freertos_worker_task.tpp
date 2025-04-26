@@ -170,19 +170,6 @@ bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_ar
     }
   }
 
-  /*
-   * Comment found on the implementation of xTaskCreate:
-   * The idf_additions.h has not been included here yet due to inclusion
-   * order. Thus we manually declare the function here.
-   */
-  extern BaseType_t xTaskCreatePinnedToCore( TaskFunction_t pxTaskCode,
-                                             const char * const pcName,
-                                             const configSTACK_DEPTH_TYPE usStackDepth,
-                                             void * const pvParameters,
-                                             UBaseType_t uxPriority,
-                                             TaskHandle_t * const pvCreatedTask,
-                                             const BaseType_t xCoreID );
-
   freertos_return = xTaskCreatePinnedToCore(
     [](void *parameter) -> void {Task *obj = static_cast<Task*>(parameter); obj->run();},
     m_profile.name,

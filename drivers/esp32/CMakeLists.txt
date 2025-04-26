@@ -3,6 +3,11 @@ dio/dio.cpp
 dio/dio.hpp
 spt/spt.cpp
 spt/spt.hpp
+uart/uart.cpp
+uart/uart.hpp
+
+utils/esp32_io.cpp
+utils/esp32_io.hpp
 
 task_system/idf_freertos_queue.hpp
 task_system/idf_freertos_queue.tpp
