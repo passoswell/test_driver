@@ -25,7 +25,7 @@
  * @param port_handle A string containing the path to the peripheral
  * @param address 8 or 10 bits address
  */
-IIC::IIC(const I2cHandle_t port_handle, uint16_t address)
+IIC::IIC(const IicHandle_t port_handle, uint16_t address)
 {
   m_address = address;
   m_handle = port_handle;

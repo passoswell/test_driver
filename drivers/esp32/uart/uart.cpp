@@ -362,7 +362,6 @@ Status_t UART::setCallback(EventsList_t event, DriverCallback_t function, void *
  * @param buffer Data buffer
  * @param size Number of bytes in the data buffer
  * @param timeout Operation timeout value
- * @param key Parameter
  * @return Status_t
  */
 Status_t UART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
