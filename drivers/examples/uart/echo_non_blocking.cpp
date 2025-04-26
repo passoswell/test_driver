@@ -52,6 +52,7 @@ static UART g_serial(handle);
 static uint8_t g_rx_buffer[2048] = {0};
 static uint8_t g_tx_buffer[100] = {0};
 static uint8_t MESSAGE_HELLO_WORLD[] = "\r\nHello world!!!\r\n";
+bool g_error_flag = false;
 
 
 /**
@@ -96,7 +97,11 @@ AP_MAIN()
   while(true)
   {
     // Nothing is done here
-    timer.delay(UINT32_MAX);
+    timer.delay(1000);
+    if(g_error_flag)
+    {
+      break;
+    }
   }
 
   AP_EXIT();
@@ -113,15 +118,16 @@ AP_MAIN()
  */
 Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg)
 {
+  SPT timer;
   static uint32_t counter = 0;
   if(status.success)
   {
-    printf("\r\n\r\n[%03u] From reception callback:  %u bytes received\r\n", counter, data.size_bytes());
+    printf("\r\n\r\n[%03u] From reception callback: %lu bytes received\r\n", counter, data.size_bytes());
 
     // Wait any ongoing transmission to finish
     while (g_serial.getWriteStatus().code == OPERATION_RUNNING)
     {
-      vTaskDelay(1);
+      timer.delay(1);
     }
 
     // Write to the uart the data received
@@ -129,7 +135,7 @@ Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, vo
     if(!status.success)
     {
       printf("\r\nERROR from g_serial.write: %s", status.description);
-      AP_EXIT();
+      g_error_flag = true;
     }
 
     // Start a new async read operation
@@ -137,7 +143,7 @@ Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, vo
     if (!status.success)
     {
       printf("\r\nERROR from g_serial.read: %s", status.description);
-      AP_EXIT();
+      g_error_flag = true;
     }
 
   }else
@@ -162,7 +168,7 @@ Status_t txCallback(Status_t status, EventsList_t event, const Buffer_t data, vo
   static uint32_t counter = 0;
   if(status.success)
   {
-    printf("\r\n\r\n[%03u] From transmission callback:  %u bytes transmitted\r\n", counter, data.size_bytes());
+    printf("\r\n\r\n[%03u] From transmission callback:  %lu bytes transmitted\r\n", counter, data.size_bytes());
   }else
   {
     printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, status.description);

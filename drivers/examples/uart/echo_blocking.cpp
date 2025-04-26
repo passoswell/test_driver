@@ -87,7 +87,7 @@ AP_MAIN()
       }
       while(g_serial.getReadStatus().code == OPERATION_RUNNING)
       {
-        vTaskDelay(1);
+        timer.delay(1);
       }
       bytes_read = g_serial.getBytesRead();
     }while(bytes_read == 0);
