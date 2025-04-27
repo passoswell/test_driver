@@ -14,10 +14,12 @@
 
 #include "peripherals_base/iic_base.hpp"
 
-
+/**
+ * @brief Handle for the ESP IDF port of IIC driver
+ */
 typedef struct
 {
-  uint8_t i2c_number;
+  uint8_t iic_number;
   uint16_t sda_pin;
   uint16_t scl_pin;
 } IicHandle_t;
