@@ -27,6 +27,7 @@ UART::UART(const UartHandle_t port_handle)
   m_handle = port_handle;
   m_event_task_handle = nullptr;
   m_event_queue = nullptr;
+  m_terminate = false;
 }
 
 /**
@@ -34,6 +35,7 @@ UART::UART(const UartHandle_t port_handle)
  */
 UART::~UART()
 {
+  terminateRxEventTask();
   (void) uart_driver_delete((uart_port_t) m_handle.uart_number);
 }
 
@@ -169,6 +171,7 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
     m_rx_mutex.unlock();
   }else
   {
+    terminateRxEventTask();
     // Configuring the threshold level for rx FIFO full interruptions
     // on sync reception mode
     if(uart_config.baud_rate <= 9600)
@@ -359,7 +362,6 @@ Status_t UART::setCallback(EventsList_t event, DriverCallback_t function, void *
  * @param buffer Data buffer
  * @param size Number of bytes in the data buffer
  * @param timeout Operation timeout value
- * @param key Parameter
  * @return Status_t
  */
 Status_t UART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
@@ -385,6 +387,10 @@ void UART::rxEventTask(void)
     //Waiting for UART event.
     if (xQueueReceive(m_event_queue, (void *)&event, (TickType_t)portMAX_DELAY))
     {
+      if(m_terminate)
+      {
+        break;
+      }
       switch (event.type)
       {
       // Event of UART receiving data
@@ -492,4 +498,17 @@ Status_t UART::txMonitorTask(uint8_t data)
     m_tx_mutex.unlock();
   }
   return status;
+}
+
+/**
+ * @brief Send a command for rxEventTask to terminate itself
+ */
+void UART::terminateRxEventTask(void)
+{
+  if(m_event_task_handle != nullptr)
+  {
+    uart_event_t event;
+    m_terminate = true;
+    (void) xQueueSend(m_event_queue, &event, 0);
+  }
 }

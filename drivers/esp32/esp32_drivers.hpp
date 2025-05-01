@@ -18,7 +18,7 @@
 #endif
 
 #if __has_include("esp32/iic/iic.hpp")
-#include "esp32/i2c/iic.hpp"
+#include "esp32/iic/iic.hpp"
 #endif
 
 #if __has_include("esp32/spi/spi.hpp")
