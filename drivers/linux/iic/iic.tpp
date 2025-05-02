@@ -14,32 +14,59 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <string.h>
 
 #include "linux/utils/linux_io.hpp"
 #include "iic_types.hpp"
+
+
+template<IicPeripheral_t PERIPHERAL>
+IicHandle_t IIC<PERIPHERAL>::m_handle = nullptr;
+
+template<IicPeripheral_t PERIPHERAL>
+Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> IIC<PERIPHERAL>::m_thread_handle;
+
+template<IicPeripheral_t PERIPHERAL>
+int IIC<PERIPHERAL>::m_linux_handle = -1;
+
+template<IicPeripheral_t PERIPHERAL>
+std::atomic_uint8_t IIC<PERIPHERAL>::m_instances_counter = ATOMIC_VAR_INIT(0);
 
 
 /**
  * @brief Constructor
  *
  * @param port_handle A string containing the path to the peripheral
- * @param address 8 or 10 bits address
+ * @param address 7 or 10 bits address
  */
-IIC::IIC(const IicHandle_t port_handle, uint16_t address)
+template<IicPeripheral_t PERIPHERAL>
+IIC<PERIPHERAL>::IIC(const IicHandle_t port_handle, uint16_t address)
 {
-  m_address = address;
-  m_handle = port_handle;
-  m_linux_handle = -1;
+  if(port_handle == nullptr)
+  {
+    return;
+  }
+  if(m_handle == nullptr)
+  {
+    m_instances_counter++;
+    m_handle = port_handle;
+    m_address = address;
+  }
 }
 
 /**
  * @brief Destructor
  */
-IIC::~IIC()
+template<IicPeripheral_t PERIPHERAL>
+IIC<PERIPHERAL>::~IIC()
 {
-  if(m_linux_handle >= 0)
+  m_instances_counter--;
+  if(m_instances_counter == 0)
   {
-    (void) close(m_linux_handle);
+    if(m_linux_handle >= 0)
+    {
+      (void) close(m_linux_handle);
+    }
   }
 }
 
@@ -49,9 +76,11 @@ IIC::~IIC()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status = STATUS_DRV_SUCCESS;
+  char file_name[20];
   bool result;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
@@ -89,7 +118,8 @@ Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
     (void) m_thread_handle.terminate();
   }
 
-  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
+  (void) snprintf(file_name, sizeof(file_name)-1, "/dev/i2c-%u", PERIPHERAL);
+  if ((m_linux_handle = open(file_name, O_RDWR)) < 0)
   {
     SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
     return status;
@@ -102,9 +132,10 @@ Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
 
 /**
  * @brief Set a new address of the device
- * @param address 8 or 10 bits new address
+ * @param address 7 or 10 bits new address
  */
-void IIC::setAddress(uint16_t address)
+template<IicPeripheral_t PERIPHERAL>
+void IIC<PERIPHERAL>::setAddress(uint16_t address)
 {
   m_address = address;
 }
@@ -116,7 +147,8 @@ void IIC::setAddress(uint16_t address)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t IIC::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
   Status_t status;
   DataBundle_t data_bundle;
@@ -160,7 +192,8 @@ Status_t IIC::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t IIC::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
 {
   Status_t status;
   DataBundle_t data_bundle;
@@ -204,7 +237,8 @@ Status_t IIC::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
  * @param user_arg A argument used as a parameter to the function
  * @return Status_t
  */
-Status_t IIC::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
 {
   Status_t status = STATUS_DRV_SUCCESS;
 
@@ -242,15 +276,16 @@ Status_t IIC::setCallback(EventsList_t event, DriverCallback_t function, void *u
  * @brief Read data synchronously
  * @param buffer Buffer to store the data
  * @param size Number of bytes to read
- * @param address 8 or 10 bits address of the device
+ * @param address 7 or 10 bits address of the device
  * @return Status_t
  */
-Status_t IIC::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
 {
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
-  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address >> 1) >= 0)
+  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
     byte_count = readSyscall(m_linux_handle, buffer, size);
     m_bytes_read = byte_count > 0 ? byte_count : 0;
@@ -270,15 +305,16 @@ Status_t IIC::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
  * @brief Write data synchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
- * @param address 8 or 10 bits address of the device
+ * @param address 7 or 10 bits address of the device
  * @return Status_t
  */
-Status_t IIC::iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address)
 {
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
-  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address >> 1) >= 0)
+  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
     byte_count = writeSyscall(m_linux_handle, buffer, size);
     if (byte_count != size)
@@ -300,7 +336,8 @@ Status_t IIC::iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address)
  * @param user_arg
  * @return Status_t
  */
-Status_t IIC::transferDataAsync(DataBundle_t data_bundle, void *user_arg)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::transferDataAsync(DataBundle_t data_bundle, void *user_arg)
 {
   Status_t status;
   IIC *obj = static_cast<IIC *>(user_arg);
@@ -341,7 +378,8 @@ Status_t IIC::transferDataAsync(DataBundle_t data_bundle, void *user_arg)
  * @param key Parameter
  * @return Status_t
  */
-Status_t IIC::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
+template<IicPeripheral_t PERIPHERAL>
+Status_t IIC<PERIPHERAL>::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
   if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_BAD_HANDLE;}

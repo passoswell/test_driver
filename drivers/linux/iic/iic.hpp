@@ -15,16 +15,24 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <atomic>
 
 #include "peripherals_base/iic_base.hpp"
 #include "linux/utils/linux_types.hpp"
 #include "linux/task_system/task_system.hpp"
 
+
+typedef uint32_t IicPeripheral_t;
+
 typedef char* IicHandle_t;
+
 
 /**
  * @brief Base class for iic drivers
+ *
+ * @tparam PERIPHERAL
  */
+template<IicPeripheral_t PERIPHERAL>
 class IIC : public IicBase
 {
 public:
@@ -45,10 +53,11 @@ public:
   Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
-  IicHandle_t m_handle;
-  Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
+  static IicHandle_t m_handle;
+  static Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
+  static int m_linux_handle;
+  static std::atomic_uint8_t m_instances_counter;
   uint16_t m_address;
-  int m_linux_handle;
 
   Status_t iicRead(uint8_t *buffer, uint32_t size, uint16_t address);
 
@@ -58,5 +67,7 @@ private:
 
   Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
 };
+
+#include "iic.tpp"
 
 #endif /* DRIVERS_LINUX_IIC_IIC_HPP */

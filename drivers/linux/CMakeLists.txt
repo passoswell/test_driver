@@ -10,7 +10,7 @@ utils/linux_serial_file.cpp
 
 dio/dio.cpp
 dio/dio.hpp
-iic/iic.cpp
+iic/iic.tpp
 iic/iic.hpp
 iic/iic_types.hpp
 spi/spi.cpp

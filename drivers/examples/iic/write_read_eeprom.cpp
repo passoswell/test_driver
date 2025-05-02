@@ -22,7 +22,8 @@
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-UartHandle_t handle = (UartHandle_t)"/dev/i2c-0";
+const IicPeripheral_t g_peripheral = 17;
+IicHandle_t g_handle = (IicHandle_t)"/dev/i2c-17";
 #elif defined(USE_ESP32)
 IicHandle_t handle =
 {
@@ -52,7 +53,7 @@ const uint16_t START_ADDRESS = 0x0000;
 const uint16_t BYTES_TO_WRITE = 512;
 
 
-static IIC g_iic(handle, 0xA0);
+static IIC<g_peripheral> g_iic(g_handle, 0x50);
 static uint8_t g_addr_table[5];
 static uint8_t g_rx_buffer[BYTES_TO_WRITE];
 static uint8_t g_tx_buffer[BYTES_TO_WRITE];
