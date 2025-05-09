@@ -27,10 +27,22 @@ template<IicPeripheral_t PERIPHERAL>
 Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> IIC<PERIPHERAL>::m_thread_handle;
 
 template<IicPeripheral_t PERIPHERAL>
+Mutex IIC<PERIPHERAL>::m_mutex;
+
+template<IicPeripheral_t PERIPHERAL>
 int IIC<PERIPHERAL>::m_linux_handle = -1;
 
 template<IicPeripheral_t PERIPHERAL>
 std::atomic_uint8_t IIC<PERIPHERAL>::m_instances_counter = ATOMIC_VAR_INIT(0);
+
+template<IicPeripheral_t PERIPHERAL>
+bool IIC<PERIPHERAL>::m_is_async_mode_rx = false;
+
+template<IicPeripheral_t PERIPHERAL>
+bool IIC<PERIPHERAL>::m_is_async_mode_tx = false;
+
+template<IicPeripheral_t PERIPHERAL>
+bool IIC<PERIPHERAL>::m_is_initialised = false;
 
 
 /**
@@ -48,10 +60,10 @@ IIC<PERIPHERAL>::IIC(const IicHandle_t port_handle, uint16_t address)
   }
   if(m_handle == nullptr)
   {
-    m_instances_counter++;
     m_handle = port_handle;
-    m_address = address;
   }
+  m_instances_counter++;
+  m_address = address;
 }
 
 /**
@@ -66,6 +78,8 @@ IIC<PERIPHERAL>::~IIC()
     if(m_linux_handle >= 0)
     {
       (void) close(m_linux_handle);
+      m_linux_handle = -1;
+      m_is_initialised = false;
     }
   }
 }
@@ -84,8 +98,17 @@ Status_t IIC<PERIPHERAL>::configure(const SettingsList_t *list, uint8_t list_siz
   bool result;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  m_read_status = STATUS_DRV_NOT_CONFIGURED;
-  m_write_status = STATUS_DRV_NOT_CONFIGURED;
+
+  m_mutex.lock();
+  if(m_is_initialised)
+  {
+    m_mutex.unlock();
+    m_read_status = STATUS_DRV_IDLE;
+    m_write_status = STATUS_DRV_IDLE;
+    return STATUS_DRV_CONFIGURED;
+  }
+  m_is_initialised = true;
+  m_mutex.unlock();
 
   if(list != nullptr && list_size != 0)
   {
@@ -105,22 +128,26 @@ Status_t IIC<PERIPHERAL>::configure(const SettingsList_t *list, uint8_t list_siz
     }
   }
 
+  (void) m_thread_handle.terminate();
   if(m_is_async_mode_rx || m_is_async_mode_tx)
   {
-    result = m_thread_handle.create(IIC::transferDataAsync, this, 0);
+    result = m_thread_handle.create(IIC::transferDataAsync, nullptr, 0);
     if(!result)
     {
+      m_is_initialised = false;
+      m_read_status = STATUS_DRV_NOT_CONFIGURED;
+      m_write_status = STATUS_DRV_NOT_CONFIGURED;
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the IIC task.\r\n");
       return status;
     }
-  }else
-  {
-    (void) m_thread_handle.terminate();
   }
 
   (void) snprintf(file_name, sizeof(file_name)-1, "/dev/i2c-%u", PERIPHERAL);
   if ((m_linux_handle = open(file_name, O_RDWR)) < 0)
   {
+    m_is_initialised = false;
+    m_read_status = STATUS_DRV_NOT_CONFIGURED;
+    m_write_status = STATUS_DRV_NOT_CONFIGURED;
     SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
     return status;
   }
@@ -156,33 +183,34 @@ Status_t IIC<PERIPHERAL>::read(uint8_t *data, Size_t byte_count, uint32_t timeou
 
   status = checkInputs(data, byte_count, timeout);
   if(!status.success) { return status;}
-  if(m_read_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
-  if(m_write_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
-
-  m_read_status = STATUS_DRV_RUNNING;
-  m_bytes_read = 0;
 
   if(m_is_async_mode_rx)
   {
+    m_read_status = STATUS_DRV_RUNNING;
+    m_bytes_read = 0;
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(data_bundle, 0))
+    data_bundle.obj_ptr = this;
+    if(m_thread_handle.setInputData(data_bundle, timeout))
     {
-      return STATUS_DRV_SUCCESS;
+      status = STATUS_DRV_SUCCESS;
     }else
     {
       m_read_status = STATUS_DRV_IDLE;
-      return STATUS_DRV_ERR_BUSY;
+      status = STATUS_DRV_ERR_BUSY;
     }
   }else
   {
+    m_mutex.lock();
+    m_read_status = STATUS_DRV_RUNNING;
+    m_bytes_read = 0;
     status = iicRead(data, byte_count, m_address);
     m_read_status = status;
-    return status;
+    m_mutex.unlock();
   }
 
-  return STATUS_DRV_UNKNOWN_ERROR;
+  return status;
 }
 
 /**
@@ -201,33 +229,35 @@ Status_t IIC<PERIPHERAL>::write(uint8_t *data, Size_t byte_count, uint32_t timeo
 
   status = checkInputs(data, byte_count, timeout);
   if(!status.success) { return status;}
-  if(m_read_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
-  if(m_write_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
 
-  m_write_status = STATUS_DRV_RUNNING;
-  m_bytes_written = 0;
 
   if(m_is_async_mode_tx)
   {
+    m_write_status = STATUS_DRV_RUNNING;
+    m_bytes_written = 0;
     data_bundle.buffer = data;
     data_bundle.size = byte_count;
     data_bundle.timeout = timeout;
-    if(m_thread_handle.setInputData(data_bundle, 0))
+    data_bundle.obj_ptr = this;
+    if(m_thread_handle.setInputData(data_bundle, timeout))
     {
-      return STATUS_DRV_SUCCESS;
+      status = STATUS_DRV_SUCCESS;
     }else
     {
       m_write_status = STATUS_DRV_IDLE;
-      return STATUS_DRV_ERR_BUSY;
+      status = STATUS_DRV_ERR_BUSY;
     }
   }else
   {
+    m_mutex.lock();
+    m_write_status = STATUS_DRV_RUNNING;
+    m_bytes_written = 0;
     status = iicWrite(data, byte_count, m_address);
     m_write_status = status;
-    return status;
+    m_mutex.unlock();
   }
 
-  return STATUS_DRV_UNKNOWN_ERROR;
+  return status;
 }
 
 /**
@@ -289,7 +319,10 @@ Status_t IIC<PERIPHERAL>::iicRead(uint8_t *buffer, uint32_t size, uint16_t addre
   {
     byte_count = readSyscall(m_linux_handle, buffer, size);
     m_bytes_read = byte_count > 0 ? byte_count : 0;
-    if (byte_count != size)
+    if(byte_count < 0)
+    {
+      status = convertErrnoCode(errno);
+    } else if (byte_count != size)
     {
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes transmitted through iic is smaller than the requested.");
     }
@@ -317,7 +350,10 @@ Status_t IIC<PERIPHERAL>::iicWrite(const uint8_t *buffer, uint32_t size, uint16_
   if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
     byte_count = writeSyscall(m_linux_handle, buffer, size);
-    if (byte_count != size)
+    if(byte_count < 0)
+    {
+      status = convertErrnoCode(errno);
+    } else if (byte_count != size)
     {
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through iic is smaller than the requested.");
     }
@@ -340,7 +376,9 @@ template<IicPeripheral_t PERIPHERAL>
 Status_t IIC<PERIPHERAL>::transferDataAsync(DataBundle_t data_bundle, void *user_arg)
 {
   Status_t status;
-  IIC *obj = static_cast<IIC *>(user_arg);
+  IIC *obj = static_cast<IIC *>(data_bundle.obj_ptr);
+  (void) user_arg;
+
   if(obj != nullptr)
   {
 
@@ -381,6 +419,7 @@ Status_t IIC<PERIPHERAL>::transferDataAsync(DataBundle_t data_bundle, void *user
 template<IicPeripheral_t PERIPHERAL>
 Status_t IIC<PERIPHERAL>::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
+  if(!m_is_initialised) {return STATUS_DRV_ERR_PARAM;}
   if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
   if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_BAD_HANDLE;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}

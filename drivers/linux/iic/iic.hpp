@@ -55,8 +55,10 @@ public:
 private:
   static IicHandle_t m_handle;
   static Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
+  static Mutex m_mutex;
   static int m_linux_handle;
   static std::atomic_uint8_t m_instances_counter;
+  static bool m_is_async_mode_rx, m_is_async_mode_tx, m_is_initialised;
   uint16_t m_address;
 
   Status_t iicRead(uint8_t *buffer, uint32_t size, uint16_t address);

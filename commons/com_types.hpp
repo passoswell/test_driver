@@ -27,6 +27,7 @@ using Callback_t = std::function<Status_t(Status_t status, uint8_t event, const 
 
 typedef struct
 {
+  void *obj_ptr;
   uint8_t *buffer;
   uint32_t size;
   uint8_t *rx_buffer;

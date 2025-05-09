@@ -75,6 +75,7 @@ typedef enum
   ERR_LIST_ORDER                    , /*!< List items not following the enum  */
   ERR_NOT_AVAILABLE                 , /*!< Resource not available             */
   ERR_NOT_IMPLEMENTED               , /*!< Function or method not implemented */
+  ERR_CONFIGURED                    , /*!< Resource is properly configured    */
   ERR_NOT_CONFIGURED                , /*!< Resource isn't properly configured */
   ERR_BUFFER_SIZE                   , /*!< Buffer is smaller than data size   */
   ERR_REGISTER_SIZE                 , /*!< Register is smaller than data size */
@@ -125,6 +126,7 @@ constexpr Status_t STATUS_DRV_IDLE = {true, SRC_DRIVER, OPERATION_IDLE, (char *)
 constexpr Status_t STATUS_DRV_RUNNING = {true, SRC_DRIVER, OPERATION_RUNNING, (char *)"The requested operation is on-going, keep calling this method to update the status.\r\n"};
 constexpr Status_t STATUS_DRV_BUSY = {true, SRC_DRIVER, OPERATION_BUSY, (char *)"The resource is busy processing other request.\r\n"};
 constexpr Status_t STATUS_DRV_TIMED_OUT = {true, SRC_DRIVER, OPERATION_TIMED_OUT, (char *)"The request timedout without error.\r\n"};
+constexpr Status_t STATUS_DRV_CONFIGURED = {true, SRC_DRIVER, ERR_CONFIGURED, (char *)"Resource is properly configured.\r\n"};
 
 constexpr Status_t STATUS_DRV_UNKNOWN_ERROR = {false, SRC_DRIVER, ERR_UNKNOWN_ERROR, (char *)"An unknown or unverified error occurred.\r\n"};
 constexpr Status_t STATUS_DRV_NOT_IMPLEMENTED = {false, SRC_DRIVER, ERR_NOT_IMPLEMENTED, (char *)"Method not implemented.\r\n"};
