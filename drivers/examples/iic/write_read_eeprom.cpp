@@ -52,7 +52,7 @@ const uint16_t START_ADDRESS = 0x0000;
 const uint16_t BYTES_TO_WRITE = 512;
 
 
-static IIC g_iic(handle, 0xA0);
+static IIC g_iic(handle, 0x50);
 static uint8_t g_addr_table[5];
 static uint8_t g_rx_buffer[BYTES_TO_WRITE];
 static uint8_t g_tx_buffer[BYTES_TO_WRITE];

@@ -3,6 +3,8 @@ dio/dio.cpp
 dio/dio.hpp
 iic/iic.cpp
 iic/iic.hpp
+spi/spi.cpp
+spi/spi.hpp
 spt/spt.cpp
 spt/spt.hpp
 uart/uart.cpp

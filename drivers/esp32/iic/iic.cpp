@@ -18,12 +18,12 @@
  * @brief Constructor
  *
  * @param port_handle A string containing the path to the peripheral
- * @param address 8 or 10 bits address
+ * @param address 7 or 10 bits address
  */
 IIC::IIC(const IicHandle_t port_handle, uint16_t address)
 {
   m_handle = port_handle;
-  m_address = address >> 1;
+  m_address = address;
 }
 
 /**
@@ -70,7 +70,7 @@ Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
 
 /**
  * @brief Set a new address of the device
- * @param address 8 or 10 bits new address
+ * @param address 7 or 10 bits new address
  */
 void IIC::setAddress(uint16_t address)
 {

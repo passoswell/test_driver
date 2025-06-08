@@ -85,14 +85,18 @@ typedef enum
   DIO_LINE_ACTIVE_STATE,        /*!< true or false, or DioActiveState_t */
 
   // Communication peripherals
+  COMM_WORK_ASYNC,              /*!< true for async, false for sync operation*/
   COMM_WORK_ASYNC_TX,           /*!< true for async, false for sync operation*/
   COMM_WORK_ASYNC_RX,           /*!< true for async, false for sync operation*/
   COMM_PARAM_BAUD,              /*!< Bit rate in bits per second*/
   COMM_PARAM_CLOCK_SPEED,       /*!< Bit rate in Hz */
 
-  COMM_PARAM_TX_DIO,            /*!< DIO number for tx pin */
-  COMM_PARAM_RX_DIO,            /*!< DIO number for rx pin */
-  COMM_PARAM_CK_DIO,            /*!< DIO number for clock pin */
+  COMM_PARAM_TX_DIO_PIN,            /*!< DIO number for tx pin */
+  COMM_PARAM_TX_DIO_PORT,
+  COMM_PARAM_RX_DIO_PIN,            /*!< DIO number for rx pin */
+  COMM_PARAM_RX_DIO_PORT,
+  COMM_PARAM_CK_DIO_PIN,            /*!< DIO number for clock pin */
+  COMM_PARAM_CK_DIO_PORT,
   COMM_PARAM_CS_DIO,            /*!< DIO number for chip select pin */
   COMM_PARAM_CS_POLARITY,       /*!< Active level (true or false) */
   COMM_PARAM_CTS_DIO,           /*!< DIO number for clear to send pin */

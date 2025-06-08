@@ -23,7 +23,7 @@
  * @brief Constructor
  *
  * @param port_handle A string containing the path to the peripheral
- * @param address 8 or 10 bits address
+ * @param address 7 or 10 bits address
  */
 IIC::IIC(const IicHandle_t port_handle, uint16_t address)
 {
@@ -102,7 +102,7 @@ Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
 
 /**
  * @brief Set a new address of the device
- * @param address 8 or 10 bits new address
+ * @param address 7 or 10 bits new address
  */
 void IIC::setAddress(uint16_t address)
 {
@@ -242,7 +242,7 @@ Status_t IIC::setCallback(EventsList_t event, DriverCallback_t function, void *u
  * @brief Read data synchronously
  * @param buffer Buffer to store the data
  * @param size Number of bytes to read
- * @param address 8 or 10 bits address of the device
+ * @param address 7 or 10 bits address of the device
  * @return Status_t
  */
 Status_t IIC::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
@@ -250,7 +250,7 @@ Status_t IIC::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
-  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address >> 1) >= 0)
+  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
     byte_count = readSyscall(m_linux_handle, buffer, size);
     m_bytes_read = byte_count > 0 ? byte_count : 0;
@@ -270,7 +270,7 @@ Status_t IIC::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
  * @brief Write data synchronously
  * @param buffer Buffer where data is stored
  * @param size Number of bytes to write
- * @param address 8 or 10 bits address of the device
+ * @param address 7 or 10 bits address of the device
  * @return Status_t
  */
 Status_t IIC::iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address)
@@ -278,7 +278,7 @@ Status_t IIC::iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address)
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
-  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address >> 1) >= 0)
+  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
     byte_count = writeSyscall(m_linux_handle, buffer, size);
     if (byte_count != size)
