@@ -22,7 +22,7 @@
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-UartHandle_t handle = (UartHandle_t)"/dev/i2c-0";
+IicHandle_t handle = (IicHandle_t)"/dev/i2c-0";
 #elif defined(USE_ESP32)
 IicHandle_t handle =
 {

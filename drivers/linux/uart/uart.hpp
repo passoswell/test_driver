@@ -20,7 +20,7 @@
 #include "linux/task_system/task_system.hpp"
 
 
-typedef char* UartHandle_t;
+typedef uint16_t UartHandle_t;
 
 
 /**
@@ -29,7 +29,7 @@ typedef char* UartHandle_t;
 class UART : public UartBase
 {
 public:
-  UART(const UartHandle_t port_handle);
+  UART(const UartHandle_t port_number);
 
   ~UART();
 
@@ -44,10 +44,10 @@ public:
   Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 protected:
-  UartHandle_t m_handle;
+  UartHandle_t m_port_number;
   Task<DataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_rx_thread_handle;
   Task<DataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_tx_thread_handle;
-  int m_linux_handle;
+  int m_fd;
   bool m_terminate;
 
   Status_t readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);

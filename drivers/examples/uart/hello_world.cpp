@@ -18,7 +18,7 @@
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-UartHandle_t handle = (UartHandle_t)"/dev/ttyUSB0";
+UartHandle_t handle = 100; // /dev/serial100
 #elif defined(USE_ESP32)
 UartHandle_t handle =
 {
@@ -49,8 +49,11 @@ AP_MAIN()
 {
   UART my_serial(handle);
   SPT my_timer(SOFTWARE_TIMER_SECONDS);
-  uint8_t message[] = "\r\nHello world!!!\r\n";
+  uint8_t message[] = "Hello world!!!";
+  uint8_t buffer[100];
   Status_t status;
+  int result;
+  uint32_t counter = 0;
 
   // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
@@ -63,13 +66,20 @@ AP_MAIN()
   while(true)
   {
     // Write a hello world message to the uart port
-    status = my_serial.write(message, strlen((char *)message));
+    result = snprintf((char *)buffer, sizeof(buffer)-1, "[%03u] %s\r\n", counter, message);
+    if(result < 0)
+    {
+      printf("\r\nERROR generating hello world message\r\n");
+      AP_EXIT();
+    }
+    status = my_serial.write(buffer, result);
     if(!status.success)
     {
       printf("\r\nERROR from my_serial.write: %s", status.description);
       AP_EXIT();
     }
     my_timer.delay(1); // One second delay
+    counter++;
   }
 
   AP_EXIT();

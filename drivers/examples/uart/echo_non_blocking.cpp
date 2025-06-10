@@ -19,7 +19,7 @@
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-UartHandle_t handle = (UartHandle_t)"/dev/ttyUSB0";
+UartHandle_t handle = 100; // /dev/serial100
 #elif defined(USE_ESP32)
 UartHandle_t handle =
 {

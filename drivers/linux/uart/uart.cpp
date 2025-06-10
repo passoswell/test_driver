@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
+#include <stdio.h>
 
 #include "linux/utils/linux_io.hpp"
 
@@ -24,10 +25,10 @@ static speed_t convertSpeed(uint32_t speed);
  * @brief Constructor
  * @param port_handle A string containing the path to the peripheral
  */
-UART::UART(const UartHandle_t port_handle)
+UART::UART(const UartHandle_t port_number)
 {
-  m_handle = port_handle;
-  m_linux_handle = -1;
+  m_port_number = port_number;
+  m_fd = -1;
   m_is_async_mode_rx = false;
   m_is_async_mode_tx = false;
 }
@@ -37,9 +38,9 @@ UART::UART(const UartHandle_t port_handle)
  */
 UART::~UART()
 {
-  if(m_linux_handle >= 0)
+  if(m_fd >= 0)
   {
-    (void) close(m_linux_handle);
+    (void) close(m_fd);
   }
 }
 
@@ -57,8 +58,8 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   uint32_t stop_bits_count = 1;
   bool use_hw_flow_ctrl = false, result;
   uint32_t parity = PARITY_NONE;
+  char port_name[100];
 
-  if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
 
@@ -139,13 +140,19 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
 
   // For more information on how to configure serial ports:
   // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
-  m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY);
-  if (m_linux_handle < 0)
+  result = snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", m_port_number);
+  if(result < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file.\r\n");
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to find the file name for uart driver.\r\n");
     return status;
   }
-  tcgetattr(m_linux_handle, &termios_structure);
+  m_fd = open(port_name, O_RDWR | O_NOCTTY);
+  if (m_fd < 0)
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file for uart driver.\r\n");
+    return status;
+  }
+  tcgetattr(m_fd, &termios_structure);
   cfmakeraw(&termios_structure);
   cfsetispeed(&termios_structure, speed);
   cfsetospeed(&termios_structure, speed);
@@ -186,9 +193,9 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   // please refer to http://www.unixwiz.net/techtips/termios-vmin-vtime.html
   termios_structure.c_cc[VMIN] = 0;
   termios_structure.c_cc[VTIME] = 0;
-  tcflush(m_linux_handle, TCIFLUSH);
-  tcflush(m_linux_handle, TCIFLUSH);
-  tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
+  tcflush(m_fd, TCIFLUSH);
+  tcflush(m_fd, TCIFLUSH);
+  tcsetattr(m_fd, TCSANOW, &termios_structure);
 
   m_read_status = STATUS_DRV_IDLE;
   m_write_status = STATUS_DRV_IDLE;
@@ -342,16 +349,16 @@ Status_t UART::readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, 
   if(call_back)
   {
     timeout = 5;
-    bytes_read = readOnTimeoutSyscall(m_linux_handle, data, byte_count, timeout);
+    bytes_read = readOnTimeoutSyscall(m_fd, data, byte_count, timeout);
   }else
   {
     if (timeout == 0)
     {
-      bytes_read = readSyscall(m_linux_handle, data, byte_count);
+      bytes_read = readSyscall(m_fd, data, byte_count);
     }
     else
     {
-      bytes_read = readOnTimeoutSyscall3(m_linux_handle, data, byte_count, timeout);
+      bytes_read = readOnTimeoutSyscall3(m_fd, data, byte_count, timeout);
     }
   }
 
@@ -404,10 +411,10 @@ Status_t UART::writeBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout,
 {
   Status_t status = STATUS_DRV_SUCCESS;
   int bytes_written, drain_status;
-  bytes_written = writeSyscall(m_linux_handle, data, byte_count);
+  bytes_written = writeSyscall(m_fd, data, byte_count);
   if (byte_count >= 0)
   {
-    drain_status = tcdrain(m_linux_handle);
+    drain_status = tcdrain(m_fd);
     if (drain_status < 0)
     {
       status = convertErrnoCode(errno);
@@ -455,7 +462,7 @@ Status_t UART::writeFromThreadBlocking(DataBundle_t data_bundle, void *user_arg)
 Status_t UART::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
   if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_BAD_HANDLE;}
+  if(m_fd < 0) { return STATUS_DRV_BAD_HANDLE;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   return STATUS_DRV_SUCCESS;
 }
