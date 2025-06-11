@@ -1,0 +1,12 @@
+# These rules create symlinks to ttySx (uart), ttyUSBx and ttyACMx devices
+
+# ttySx maps to serialx with at most 3 leading zeros
+SUBSYSTEM=="tty", KERNEL=="ttyS*", PROGRAM="/bin/sh -c 'printf \"%03d\" ${DEVNAME#/dev/ttyS}'", SYMLINK+="serial%c"
+
+# ttyUSBx maps to serialy where y = x + 100
+# SUBSYSTEM=="tty", KERNEL=="ttyUSB*", SYMLINK+="serial1%n"
+SUBSYSTEM=="tty", KERNEL=="ttyUSB*", PROGRAM="/bin/sh -c 'echo $(( ${DEVNAME#/dev/ttyUSB} + 100 ))'", SYMLINK+="serial%c"
+
+# ttyACMx maps to serialy where y = x + 200
+# SUBSYSTEM=="tty", KERNEL=="ttyACM*", SYMLINK+="serial2%n"
+SUBSYSTEM=="tty", KERNEL=="ttyACM*", PROGRAM="/bin/sh -c 'echo $(( ${DEVNAME#/dev/ttyACM} + 200 ))'", SYMLINK+="serial%c"
