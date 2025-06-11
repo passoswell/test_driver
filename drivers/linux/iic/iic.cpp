@@ -25,11 +25,11 @@
  * @param port_handle A string containing the path to the peripheral
  * @param address 7 or 10 bits address
  */
-IIC::IIC(const IicHandle_t port_handle, uint16_t address)
+IIC::IIC(const IicHandle_t port_number, uint16_t address)
 {
   m_address = address;
-  m_handle = port_handle;
-  m_linux_handle = -1;
+  m_port_number = port_number;
+  m_fd = -1;
 }
 
 /**
@@ -37,9 +37,9 @@ IIC::IIC(const IicHandle_t port_handle, uint16_t address)
  */
 IIC::~IIC()
 {
-  if(m_linux_handle >= 0)
+  if(m_fd >= 0)
   {
-    (void) close(m_linux_handle);
+    (void) close(m_fd);
   }
 }
 
@@ -53,8 +53,9 @@ Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
 {
   Status_t status = STATUS_DRV_SUCCESS;
   bool result;
+  char port_name[100];
+  int n_bytes;
 
-  if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
 
@@ -89,7 +90,14 @@ Status_t IIC::configure(const SettingsList_t *list, uint8_t list_size)
     (void) m_thread_handle.terminate();
   }
 
-  if ((m_linux_handle = open((char *)m_handle, O_RDWR)) < 0)
+  n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/i2c-%u", m_port_number);
+  if(n_bytes < 0)
+  {
+    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to find the file name for uart driver.\r\n");
+    return status;
+  }
+  m_fd = open(port_name, O_RDWR);
+  if (m_fd < 0)
   {
     SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
     return status;
@@ -250,9 +258,9 @@ Status_t IIC::iicRead(uint8_t *buffer, uint32_t size, uint16_t address)
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
-  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
+  if (ioctl(m_fd, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
-    byte_count = readSyscall(m_linux_handle, buffer, size);
+    byte_count = readSyscall(m_fd, buffer, size);
     m_bytes_read = byte_count > 0 ? byte_count : 0;
     if (byte_count != size)
     {
@@ -278,9 +286,9 @@ Status_t IIC::iicWrite(const uint8_t *buffer, uint32_t size, uint16_t address)
   Status_t status = STATUS_DRV_SUCCESS;
   int byte_count;
 
-  if (ioctl(m_linux_handle, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
+  if (ioctl(m_fd, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
   {
-    byte_count = writeSyscall(m_linux_handle, buffer, size);
+    byte_count = writeSyscall(m_fd, buffer, size);
     if (byte_count != size)
     {
       SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through iic is smaller than the requested.");
@@ -344,7 +352,7 @@ Status_t IIC::transferDataAsync(DataBundle_t data_bundle, void *user_arg)
 Status_t IIC::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
   if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  if(m_handle == nullptr || m_linux_handle < 0) { return STATUS_DRV_BAD_HANDLE;}
+  if(m_fd < 0) { return STATUS_DRV_BAD_HANDLE;}
   if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
   return STATUS_DRV_SUCCESS;
 }

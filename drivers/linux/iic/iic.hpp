@@ -20,7 +20,7 @@
 #include "linux/utils/linux_types.hpp"
 #include "linux/task_system/task_system.hpp"
 
-typedef char* IicHandle_t;
+typedef uint16_t IicHandle_t;
 
 /**
  * @brief Base class for iic drivers
@@ -28,7 +28,7 @@ typedef char* IicHandle_t;
 class IIC : public IicBase
 {
 public:
-  IIC(const IicHandle_t port_handle, uint16_t address = 0);
+  IIC(const IicHandle_t port_number, uint16_t address = 0);
 
   ~IIC();
 
@@ -45,10 +45,10 @@ public:
   Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
 
 private:
-  IicHandle_t m_handle;
+  IicHandle_t m_port_number;
   Task<DataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
   uint16_t m_address;
-  int m_linux_handle;
+  int m_fd;
 
   Status_t iicRead(uint8_t *buffer, uint32_t size, uint16_t address);
 

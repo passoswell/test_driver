@@ -59,6 +59,7 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
   bool use_hw_flow_ctrl = false, result;
   uint32_t parity = PARITY_NONE;
   char port_name[100];
+  int n_bytes;
 
   m_read_status = STATUS_DRV_NOT_CONFIGURED;
   m_write_status = STATUS_DRV_NOT_CONFIGURED;
@@ -140,8 +141,8 @@ Status_t UART::configure(const SettingsList_t *list, uint8_t list_size)
 
   // For more information on how to configure serial ports:
   // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
-  result = snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", m_port_number);
-  if(result < 0)
+  n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", m_port_number);
+  if(n_bytes < 0)
   {
     SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to find the file name for uart driver.\r\n");
     return status;
