@@ -14,18 +14,15 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <termios.h>
 
 #include "linux/utils/linux_io.hpp"
-
-struct termios StdInOut::m_backup_termios_structure = {};;
-uint32_t StdInOut::m_termios_counter = 0;
 
 /**
 * @brief Constructor
 */
 StdInOut::StdInOut() : LinuxSerialFile(STD_OUT_FILE)
 {
-  // Nothing is done here
 }
 
 /**
@@ -34,44 +31,51 @@ StdInOut::StdInOut() : LinuxSerialFile(STD_OUT_FILE)
 StdInOut::~StdInOut()
 {
   FILE *handle = nullptr;
-  if(m_termios_counter == 1)
+  struct termios backup_termios_structure;
+
+  backup_termios_structure.c_iflag = 27906;
+  backup_termios_structure.c_oflag = 5;
+  backup_termios_structure.c_cflag = 1215;
+  backup_termios_structure.c_lflag = 35387;
+  backup_termios_structure.c_line = 0;
+  for(uint8_t i = 0; i < sizeof(backup_termios_structure.c_cc); i++)
   {
-    handle = fopen("/dev/fd/0", "r+");
-    if(handle != nullptr)
-    {
-      tcsetattr(handle->_fileno, TCSANOW, &m_backup_termios_structure);
-      fclose(handle);
-    }
-    m_termios_counter--;
-  }else if (m_termios_counter > 0)
+    backup_termios_structure.c_cc[i] = 0;
+  }
+  backup_termios_structure.c_cc[0] = 3;
+  backup_termios_structure.c_cc[1] = 28;
+  backup_termios_structure.c_cc[2] = 127;
+  backup_termios_structure.c_cc[3] = 21;
+  backup_termios_structure.c_cc[4] = 4;
+  backup_termios_structure.c_cc[5] = 0;
+  backup_termios_structure.c_cc[6] = 1;
+  backup_termios_structure.c_cc[7] = 0;
+  backup_termios_structure.c_cc[8] = 17;
+  backup_termios_structure.c_cc[9] = 19;
+  backup_termios_structure.c_cc[10] = 26;
+  backup_termios_structure.c_cc[11] = 255;
+  backup_termios_structure.c_cc[12] = 18;
+  backup_termios_structure.c_cc[13] = 15;
+  backup_termios_structure.c_cc[14] = 23;
+  backup_termios_structure.c_cc[15] = 22;
+  backup_termios_structure.c_cc[16] = 255;
+  backup_termios_structure.c_ispeed = 15;
+  backup_termios_structure.c_ospeed = 15;
+
+  handle = fopen("/dev/fd/0", "r+");
+  if(handle != nullptr)
   {
-    m_termios_counter--;
+    tcsetattr(handle->_fileno, TCSANOW, &backup_termios_structure);
+    fclose(handle);
   }
 }
 
 /**
- * @brief Configure a list of parameters
- * @param list List of parameter-value pairs
- * @param list_size Number of parameters on the list
- * @return Status_t
+ * @brief Return a reference to a singleton of the type StdInOut
+ * @return StdInOut&
  */
-Status_t StdInOut::configure(const SettingsList_t *list, uint8_t list_size)
+StdInOut& StdInOut::get_instance()
 {
-  Status_t status;
-
-  if(m_termios_counter == 0)
-  {
-    FILE *handle = fopen("/dev/fd/0", "r+");
-    if(handle == nullptr)
-    {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file.\r\n");
-      return status;
-    }
-    tcgetattr(handle->_fileno, &m_backup_termios_structure);
-    fclose(handle);
-  }
-
-  m_termios_counter++;
-
-  return LinuxSerialFile::configure(list, list_size);
+  static StdInOut instance;
+  return instance;
 }

@@ -15,12 +15,6 @@
 
 #include "hardware/gpio.h"
 
-/**
- * @brief Vector of DIO pointers, used for the interruption callback
- */
-std::vector<DIO*> g_dio_ptr;
-
-void drvDioCallback(uint dio, uint32_t events);
 
 /**
  * @brief Constructor
@@ -30,6 +24,9 @@ DIO::DIO(uint32_t line_offset, uint32_t port)
 {
   m_line_number = line_offset;
   m_line_bias = DIO_BIAS_DISABLED;
+  m_func = nullptr;
+  m_arg = nullptr;
+  m_edge = EVENT_NONE;
 }
 
 /**
@@ -144,10 +141,11 @@ Status_t DIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *user_arg)
+Status_t DIO::setEventCallback(EventsList_t edge, Callback_t function, void *user_arg)
 {
   m_func = function;
   m_arg = user_arg;
+  m_edge = edge;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -157,7 +155,7 @@ Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *us
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DIO::enableCallback(bool enable, EventsList_t edge)
+Status_t DIO::enableInterruption(bool enable)
 {
   uint32_t interruption_type;
 
@@ -165,22 +163,22 @@ Status_t DIO::enableCallback(bool enable, EventsList_t edge)
   {
     gpio_set_irq_enabled(m_line_number, GPIO_IRQ_LEVEL_LOW, false);
 
-    for (auto it = g_dio_ptr.begin(); it != g_dio_ptr.end(); it++)
+    for (auto iterator = m_dio_ptr.begin(); iterator != m_dio_ptr.end(); iterator++)
     {
       DIO *obj;
-      obj = *it;
+      obj = *iterator;
       // if the current index is needed:
-      auto i = std::distance(g_dio_ptr.begin(), it);
+      // auto i = std::distance(m_dio_ptr.begin(), iterator);
       if (obj->m_line_number == m_line_number)
       {
-        g_dio_ptr.erase(it);
+        m_dio_ptr.erase(iterator);
         break;
       }
     }
     return STATUS_DRV_SUCCESS;
   }
 
-  switch(edge)
+  switch(m_edge)
   {
     case EVENT_EDGE_RISING:
       interruption_type = GPIO_IRQ_EDGE_RISE;
@@ -196,7 +194,7 @@ Status_t DIO::enableCallback(bool enable, EventsList_t edge)
       break;
   }
 
-  g_dio_ptr.push_back(this);
+  m_dio_ptr.push_back(this);
   gpio_set_irq_enabled_with_callback(m_line_number, interruption_type, true, &drvDioCallback);
 
   // Setting bias here because pipico disables its configuration when setting interruption
@@ -217,17 +215,17 @@ Status_t DIO::enableCallback(bool enable, EventsList_t edge)
  * @param dio GPIO number
  * @param events A mask with the events that occurred
  */
-void drvDioCallback(uint dio, uint32_t events)
+void drvDioCallback(unsigned int dio, uint32_t events)
 {
   EventsList_t edge = EVENT_EDGE_FALLING;
   uint8_t state[1] = {false};
 
-  for (auto it = g_dio_ptr.begin(); it != g_dio_ptr.end(); it++)
+  for (auto iterator = DIO::m_dio_ptr.begin(); iterator != DIO::m_dio_ptr.end(); iterator++)
   {
     DIO *obj;
-    obj = *it;
+    obj = *iterator;
     // if the current index is needed:
-    auto i = std::distance(g_dio_ptr.begin(), it);
+    // auto i = std::distance(DIO::m_dio_ptr.begin(), iterator);
     if (obj->m_line_number == dio)
     {
       if(obj->m_func != nullptr)

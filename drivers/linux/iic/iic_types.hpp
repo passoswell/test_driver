@@ -42,4 +42,6 @@
 
 #define I2C_SMBUS  0x0720  /* SMBus-level access */
 
+
+
 #endif /* DRIVERS_LINUX_IIC_IIC_TYPES_HPP */

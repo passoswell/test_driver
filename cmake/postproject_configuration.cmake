@@ -17,7 +17,7 @@ function (_postbuild_task A_TARGET)
             )
 
         # Add flashable target
-        add_custom_target(flash_${A_TARGET}
+        add_custom_target(__a_flash_${A_TARGET}
             # COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/flash.py ${A_TARGET}
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
             COMMAND python ${IDF_PATH}/components/esptool_py/esptool/esptool.py -c ${ESP32_TARGET} write_flash --flash_mode dio --flash_freq 80m --flash_size 2MB 0x1000 bootloader/bootloader.bin 0x10000 bin/${A_TARGET}.bin 0x8000 partition_table/partition-table.bin
@@ -26,7 +26,7 @@ function (_postbuild_task A_TARGET)
             USES_TERMINAL
             VERBATIM
             )
-        add_dependencies(flash_${A_TARGET} ${A_TARGET} bootloader)
+        add_dependencies(__a_flash_${A_TARGET} ${A_TARGET} bootloader)
 
 
     ELSEIF(DEFINED USE_PIPICO)

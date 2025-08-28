@@ -22,14 +22,14 @@
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-UartHandle_t handle = (UartHandle_t)"/dev/i2c-0";
+constexpr IicHandle_t handle = 0; // /dev/i2c-0
 #elif defined(USE_ESP32)
-IicHandle_t handle =
-{
-  .iic_number = 0,
-  .sda_pin = 21,
-  .scl_pin = 22,
-};
+constexpr IicHandle_t handle = 0;
+// {
+//   .iic_number = 0,
+//   .sda_pin = 21,
+//   .scl_pin = 22,
+// };
 #else
 void *handle = nullptr;
 #endif
@@ -42,7 +42,9 @@ const SettingsList_t g_iic_config_list[]
   ADD_PARAMETER(COMM_PARAM_CLOCK_SPEED, 100000),
   ADD_PARAMETER(COMM_USE_PULL_UP, true),
   ADD_PARAMETER(COMM_WORK_ASYNC_RX, false),
-  ADD_PARAMETER(COMM_WORK_ASYNC_TX, false)
+  ADD_PARAMETER(COMM_WORK_ASYNC_TX, false),
+  ADD_PARAMETER(COMM_PARAM_SDA_DIO_PIN, 21),
+  ADD_PARAMETER(COMM_PARAM_CS_DIO_PIN, 22),
 };
 const uint8_t g_iic_config_list_size = sizeof(g_iic_config_list)/sizeof(g_iic_config_list[0]);
 
@@ -51,8 +53,8 @@ const uint16_t START_ADDRESS = 0x0000;
 // Number of bytes to write and read
 const uint16_t BYTES_TO_WRITE = 512;
 
-
-static IIC g_iic(handle, 0x50);
+static uint16_t g_eeprom_address = 0x50;
+static IIC<handle> g_iic(g_eeprom_address);
 static uint8_t g_addr_table[5];
 static uint8_t g_rx_buffer[BYTES_TO_WRITE];
 static uint8_t g_tx_buffer[BYTES_TO_WRITE];
@@ -161,21 +163,21 @@ Status_t mem_read(uint16_t address, uint8_t *data, uint16_t size)
   reg_addr_buffer[0] = (address >> 8) & 0x0F;
   reg_addr_buffer[1] = address & 0xFF;
 
-  status = g_iic.write(reg_addr_buffer, 2, 100);
+  status = g_iic.write(reg_addr_buffer, 100);
   if(!status.success)
   {
     printf("\r\nERROR from my_serial.write: %s\r\n", status.description);
     return status;
   }
-  while(!g_iic.getWriteStatus().success);
+  // while(!g_iic.getWriteStatus().success);
 
-  status = g_iic.read(data, size, 100);
+  status = g_iic.read({data, size}, 100);
   if(!status.success)
   {
     printf("\r\nERROR from my_serial.read: %s\r\n", status.description);
     return status;
   }
-  while(!g_iic.getReadStatus().success);
+  // while(!g_iic.getReadStatus().success);
 
   return STATUS_DRV_SUCCESS;
 
@@ -205,13 +207,13 @@ Status_t mem_write(uint16_t address, uint8_t *data, uint16_t size)
 
     memcpy(&buffer[2], data, divisor);
 
-    status = g_iic.write(buffer, divisor + 2, 100);
+    status = g_iic.write({buffer, divisor + 2}, 100);
     if(!status.success)
     {
       printf("\r\nERROR from my_serial.write: %s\r\n", status.description);
       return status;
     }
-    while(!g_iic.getWriteStatus().success);
+    // while(!g_iic.getWriteStatus().success);
     timer.delay(25);
     address += divisor;
     data += divisor;
@@ -224,13 +226,13 @@ Status_t mem_write(uint16_t address, uint8_t *data, uint16_t size)
 
     memcpy(&buffer[2], data, bytes_last_loop);
 
-    status = g_iic.write(buffer, bytes_last_loop + 2, 100);
+    status = g_iic.write({buffer, bytes_last_loop + 2u}, 100);
     if(!status.success)
     {
       printf("\r\nERROR from my_serial.write: %s\r\n", status.description);
       return status;
     }
-    while(!g_iic.getWriteStatus().success);
+    // while(!g_iic.getWriteStatus().success);
     timer.delay(25);
   }
 

@@ -55,7 +55,7 @@ bool Queue<T, SIZE>::put(const T &item, uint32_t timeout)
   {
     return false;
   }
-  return xQueueSendToBack(m_queue, &item, timeout/portTICK_PERIOD_MS) == pdTRUE;
+  return xQueueSend(m_queue, &item, timeout/portTICK_PERIOD_MS) == pdTRUE;
 }
 
 /**

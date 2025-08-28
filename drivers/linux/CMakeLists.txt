@@ -10,16 +10,20 @@ utils/linux_serial_file.cpp
 
 dio/dio.cpp
 dio/dio.hpp
-iic/iic.cpp
+iic/iic_bus.tpp
+iic/iic_bus.hpp
 iic/iic.hpp
 iic/iic_types.hpp
-spi/spi.cpp
+spi/spi_bus.tpp
+spi/spi_bus.hpp
 spi/spi.hpp
 spt/spt.cpp
 spt/spt.hpp
 std_in_out/std_in_out.cpp
 std_in_out/std_in_out.hpp
-uart/uart.cpp
+uart/uart_bus.tpp
+uart/uart_bus.hpp
+uart/uart.tpp
 uart/uart.hpp
 
 task_system/stl_queue.hpp

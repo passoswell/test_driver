@@ -25,6 +25,9 @@ DIO::DIO(uint32_t line_offset, uint32_t port)
   m_obj_task_handle = nullptr;
   m_dio_event_task_handle = nullptr;
   m_terminate = false;
+  m_func = nullptr;
+  m_arg = nullptr;
+  m_edge = EVENT_NONE;
 }
 
 /**
@@ -175,10 +178,11 @@ Status_t DIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *user_arg)
+Status_t DIO::setEventCallback(EventsList_t edge, Callback_t function, void *user_arg)
 {
   m_func = function;
   m_arg = user_arg;
+  m_edge = edge;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -188,7 +192,7 @@ Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *us
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DIO::enableCallback(bool enable, EventsList_t edge)
+Status_t DIO::enableInterruption(bool enable)
 {
   gpio_int_type_t interruption_type;
   TaskProfile_t parameters;
@@ -205,7 +209,7 @@ Status_t DIO::enableCallback(bool enable, EventsList_t edge)
   // install dio isr service
   gpio_install_isr_service(0);
 
-  switch(edge)
+  switch(m_edge)
   {
     case EVENT_EDGE_RISING:
       interruption_type = GPIO_INTR_POSEDGE;

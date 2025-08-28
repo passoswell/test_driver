@@ -22,7 +22,6 @@
 #include <cerrno>
 
 #include "com_types.hpp"
-#include "driver_base/driver_base_types.hpp"
 
 /**
  * @brief Structure to use with nom-blocking threaded data transfer

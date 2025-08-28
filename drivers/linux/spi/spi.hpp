@@ -12,46 +12,98 @@
 #ifndef DRIVERS_LINUX_SPI_SPI_HPP
 #define DRIVERS_LINUX_SPI_SPI_HPP
 
-#include "peripherals_base/spi_base.hpp"
-#include "linux/utils/linux_types.hpp"
-#include "linux/task_system/task_system.hpp"
+#include "linux/spi/spi_bus.hpp"
 
-typedef char* SpiHandle_t;
-
-/**
- * @brief Base class for spi drivers
- */
-class SPI : public SpiBase
+template<SpiHandle_t PORT_NUMBER>
+class SPI : public bSPI
 {
 public:
-  SPI(const SpiHandle_t port_handle);
 
-  ~SPI();
+  SPI(iDIO &cs_pin, bool cs_active_state) : bSPI(IicBus<PORT_NUMBER>::getInstance(), cs_pin, cs_active_state)
+  {
+    ;
+  }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size);
-
-  using DriverInOutBase::read;
-  Status_t read(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
-
-  using DriverInOutBase::write;
-  Status_t write(uint8_t *data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
-
-  Status_t transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, uint32_t timeout = UINT32_MAX);
-  Status_t transfer(Buffer_t rx_data, Buffer_t tx_data, uint32_t timeout = UINT32_MAX);
-
-  Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
-
-private:
-  SpiHandle_t m_handle;
-  Task<DataBundle_t, SPI_QUEUE_SIZE, Status_t, 0> m_thread_handle;
-  int m_linux_handle;
-  uint32_t m_speed;
-
-  Status_t xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
-
-  Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
-
-  static Status_t transferDataAsync(DataBundle_t data_bundle, void *self_ptr);
+  ~SPI() = default;
 };
+
+// #include "peripherals_base/spi_base.hpp"
+// #include "linux/spi/spi_bus.hpp"
+// #include "linux/dio/dio.hpp"
+// #include "linux/utils/linux_types.hpp"
+// #include "linux/task_system/task_system.hpp"
+
+
+// /**
+//  * @brief Base class for spi drivers
+//  */
+// template<SpiHandle_t PORT_NUMBER>
+// class SPI : public SpiBase
+// {
+// public:
+//   SPI(uint32_t cs_line_offset, uint32_t cs_chip_number = 0) :
+//   m_cs(cs_line_offset, cs_chip_number),
+//   m_bus(SpiBus<PORT_NUMBER>::getInstance())
+//   {}
+
+//   ~SPI(){}
+
+//   Status_t configure(const SettingsList_t *list, uint8_t list_size)
+//   {
+//     return m_bus.configure(list, list_size);
+//   }
+
+//   using DriverInOutBase::read;
+//   Status_t read(DrvBuffer_t data, uint32_t timeout = UINT32_MAX)
+//   {
+//     return m_bus.read(m_cs, data, timeout, m_func_rx, m_arg_rx);
+//   }
+
+//   using DriverInOutBase::write;
+//   Status_t write(DrvBuffer_t data, uint32_t timeout = UINT32_MAX)
+//   {
+//     return m_bus.write(m_cs, data, timeout, m_func_tx, m_arg_tx);
+//   }
+
+//   Status_t setCallback(EventsList_t event = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr)
+// {
+//   Status_t status = STATUS_DRV_SUCCESS;
+
+//   switch (event)
+//   {
+//   case EVENT_READ:
+//     if(m_read_status.code != OPERATION_RUNNING)
+//     {
+//       m_func_rx = function;
+//       m_arg_rx = user_arg;
+//     }else
+//     {
+//       status = STATUS_DRV_ERR_BUSY;
+//     }
+//     break;
+//   case EVENT_WRITE:
+//     if (m_write_status.code != OPERATION_RUNNING)
+//     {
+//       m_func_tx = function;
+//       m_arg_tx = user_arg;
+//     }else
+//     {
+//       status = STATUS_DRV_ERR_BUSY;
+//     }
+//     break;
+//   default:
+//     status = STATUS_DRV_ERR_PARAM;
+//     break;
+//   }
+
+//   return status;
+// }
+
+// private:
+//   SpiBus<PORT_NUMBER> &m_bus;
+//   DIO m_cs;
+// };
+
+// // #include "spi.tpp"
 
 #endif /* DRIVERS_LINUX_SPI_SPI_HPP */

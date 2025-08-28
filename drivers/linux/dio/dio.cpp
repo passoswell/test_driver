@@ -32,6 +32,7 @@ DIO::DIO(uint32_t line_offset, uint32_t chip_number)
 
   m_func = nullptr;
   m_arg = nullptr;
+  m_edge = EVENT_NONE;
 
   m_sync.run = false;
   m_sync.terminate = false;
@@ -195,10 +196,11 @@ Status_t DIO::toggle()
  * @param arg A user parameter
  * @return Status_t
  */
-Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *user_arg)
+Status_t DIO::setEventCallback(EventsList_t edge, Callback_t function, void *user_arg)
 {
   m_func = function;
   m_arg = user_arg;
+  m_edge = edge;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -208,7 +210,7 @@ Status_t DIO::setCallback(EventsList_t edge, DriverCallback_t function, void *us
  * @param enable True to enable callback operation
  * @return Status_t
  */
-Status_t DIO::enableCallback(bool enable, EventsList_t edge)
+Status_t DIO::enableInterruption(bool enable)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
   Status_t status = STATUS_DRV_SUCCESS;
@@ -238,7 +240,7 @@ Status_t DIO::enableCallback(bool enable, EventsList_t edge)
     return STATUS_DRV_SUCCESS;
   }
 
-  switch (edge)
+  switch (m_edge)
   {
     case EVENT_EDGE_RISING:
       gpiod_line_release((struct gpiod_line *)m_line_handle);

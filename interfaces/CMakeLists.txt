@@ -1,25 +1,19 @@
 add_library(interfaces STATIC
 interfaces.hpp
-inoutstream/inoutstream_interface_types.hpp
-inoutstream/inoutstream_interface.hpp
-software_timer_interface/software_timer_interface.hpp
 task_interface/task_interface.hpp
 task_interface/queue_interface.hpp
 task_interface/mutex_interface.hpp
 
-driver_base/driver_base.hpp
-driver_base/driver_base.cpp
-driver_base/driver_in_base.hpp
-driver_base/driver_in_base.cpp
-driver_base/driver_out_base.hpp
-driver_base/driver_out_base.cpp
-
-peripherals_base/dio_base.hpp
-peripherals_base/iic_base.hpp
-peripherals_base/spi_base.hpp
+software_timer_interface/software_timer_interface.hpp
 peripherals_base/spt_base.hpp
 peripherals_base/spt_base.cpp
-peripherals_base/uart_base.hpp
+
+peripherals_base/communication_interface.hpp
+
+peripherals_base/dio_interface.hpp
+peripherals_base/iic_interface.hpp
+peripherals_base/spi_interface.hpp
+peripherals_base/uart_interface.hpp
 )
 
 target_link_libraries(interfaces PUBLIC commons)

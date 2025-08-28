@@ -1,13 +1,16 @@
 add_library(drv_esp32 STATIC
 dio/dio.cpp
 dio/dio.hpp
-iic/iic.cpp
 iic/iic.hpp
-spi/spi.cpp
+iic/iic_bus.hpp
+iic/iic_bus.tpp
 spi/spi.hpp
+spi/spi_bus.hpp
+spi/spi_bus.tpp
 spt/spt.cpp
 spt/spt.hpp
-uart/uart.cpp
+uart/uart_bus.hpp
+uart/uart_bus.tpp
 uart/uart.hpp
 
 utils/esp32_io.cpp

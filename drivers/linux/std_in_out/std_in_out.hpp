@@ -24,15 +24,21 @@
 class StdInOut : public LinuxSerialFile
 {
 public:
+
+  static StdInOut& get_instance();
+
+  // A singleton should not be cloneable nor assignable
+  StdInOut(const StdInOut&) = delete;
+  StdInOut(StdInOut&&) = delete;
+  StdInOut& operator=(const StdInOut&) = delete;
+  StdInOut& operator=(StdInOut&&) = delete;
+
+
+private:
+
   StdInOut();
 
   ~StdInOut();
-
-  Status_t configure(const SettingsList_t *list, uint8_t list_size);
-
-private:
-  static struct termios m_backup_termios_structure;
-  static uint32_t m_termios_counter;
 };
 
 #endif /* DRIVERS_LINUX_STD_IN_OUT_STD_IN_OUT_HPP */

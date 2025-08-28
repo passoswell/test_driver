@@ -15,6 +15,8 @@
 #include "task_interface/task_interface.hpp"
 #include "stl_queue.hpp"
 
+constexpr uint32_t TASK_MINIMAL_STACK_SIZE = 0;
+
 /**
  * @brief A wrapper method for creating tasks
  *

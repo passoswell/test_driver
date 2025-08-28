@@ -113,8 +113,8 @@ AP_MAIN()
     AP_EXIT();
   }
 
-  (void) input.setCallback(EVENT_EDGE_BOTH, inputCallback, nullptr);
-  code = input.enableCallback(true, EVENT_EDGE_BOTH);
+  (void) input.setEventCallback(EVENT_EDGE_BOTH, inputCallback, nullptr);
+  code = input.enableInterruption(true);
   if(!code.success)
   {
     printf("Failed to enable interruption for the digital input\r\n");

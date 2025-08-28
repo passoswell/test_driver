@@ -28,6 +28,11 @@ LinuxSerialFile::LinuxSerialFile(const char *port_handle)
   m_linux_handle = -1;
   m_is_async_mode_rx = false;
   m_is_async_mode_tx = false;
+  m_bytes_read = 0;
+  m_func_rx = nullptr;
+  m_func_tx = nullptr;
+  m_arg_rx = nullptr;
+  m_arg_tx = nullptr;
 }
 
 /**
@@ -54,8 +59,6 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
   bool result;
 
   if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  m_read_status = STATUS_DRV_NOT_CONFIGURED;
-  m_write_status = STATUS_DRV_NOT_CONFIGURED;
 
   if(list != nullptr && list_size != 0)
   {
@@ -118,8 +121,6 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
   tcflush(m_linux_handle, TCIFLUSH);
   tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
 
-  m_read_status = STATUS_DRV_IDLE;
-  m_write_status = STATUS_DRV_IDLE;
   return STATUS_DRV_SUCCESS;
 }
 
@@ -130,37 +131,31 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t LinuxSerialFile::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
+Status_t LinuxSerialFile::read(DrvBuffer_t data, uint32_t timeout)
 {
   Status_t status;
   int bytes_read = 0;
-  DataBundle_t data_bundle;
+  DrvDataBundle_t data_bundle;
 
-  status = checkInputs(data, byte_count, timeout, m_handle, m_linux_handle);
+  status = checkInputs(data.data(), data.size_bytes(), timeout, m_handle, m_linux_handle);
   if(!status.success) { return status;}
-  if(m_read_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
 
-  m_read_status = STATUS_DRV_RUNNING;
-  m_read_status.success = false;
   m_bytes_read = 0;
 
   if(m_is_async_mode_rx)
   {
-    data_bundle.buffer = data;
-    data_bundle.size = byte_count;
-    data_bundle.timeout = timeout;
+    data_bundle.rx.data = data;
+    data_bundle.rx.timeout = timeout;
     if(m_rx_thread_handle.setInputData(data_bundle, 0))
     {
       status = STATUS_DRV_SUCCESS;
     }else
     {
-      m_read_status = STATUS_DRV_IDLE;
       status = STATUS_DRV_ERR_BUSY;
     }
   }else
   {
-    status = readBlocking(data, byte_count, timeout, false);
-    m_read_status = status;
+    status = readBlocking(data.data(), data.size_bytes(), timeout, false);
   }
 
   return status;
@@ -173,37 +168,29 @@ Status_t LinuxSerialFile::read(uint8_t *data, Size_t byte_count, uint32_t timeou
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t LinuxSerialFile::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
+Status_t LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
 {
   Status_t status;
   int bytes_written, drain_status;
-  DataBundle_t data_bundle;
+  DrvDataBundle_t data_bundle;
 
-  status = checkInputs(data, byte_count, timeout, m_handle, m_linux_handle);
+  status = checkInputs(data.data(), data.size_bytes(), timeout, m_handle, m_linux_handle);
   if(!status.success) { return status;}
-  if(m_write_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
-
-  m_write_status = STATUS_DRV_RUNNING;
-  m_write_status.success = false;
-  m_bytes_written = 0;
 
   if(m_is_async_mode_tx)
   {
-    data_bundle.buffer = data;
-    data_bundle.size = byte_count;
-    data_bundle.timeout = timeout;
+    data_bundle.tx.data = data;
+    data_bundle.tx.timeout = timeout;
     if(m_tx_thread_handle.setInputData(data_bundle, 0))
     {
       status = STATUS_DRV_SUCCESS;
     }else
     {
-      m_write_status = STATUS_DRV_IDLE;
       status = STATUS_DRV_ERR_BUSY;
     }
   }else
   {
-    status = writeBlocking(data, byte_count, timeout, false);
-    m_write_status = status;
+    status = writeBlocking(data.data(), data.size_bytes(), timeout, false);
   }
 
   return status;
@@ -216,31 +203,19 @@ Status_t LinuxSerialFile::write(uint8_t *data, Size_t byte_count, uint32_t timeo
  * @param user_arg A argument used as a parameter to the callback function
  * @return Status_t
  */
-Status_t LinuxSerialFile::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
+Status_t LinuxSerialFile::setCallback(EventsList_t event, Callback_t function, void *user_arg)
 {
   Status_t status = STATUS_DRV_SUCCESS;
 
   switch (event)
   {
   case EVENT_READ:
-    if(m_read_status.code != OPERATION_RUNNING)
-    {
-      m_func_rx = function;
-      m_arg_rx = user_arg;
-    }else
-    {
-      status = STATUS_DRV_ERR_BUSY;
-    }
+    m_func_rx = function;
+    m_arg_rx = user_arg;
     break;
   case EVENT_WRITE:
-    if (m_write_status.code != OPERATION_RUNNING)
-    {
-      m_func_tx = function;
-      m_arg_tx = user_arg;
-    }else
-    {
-      status = STATUS_DRV_ERR_BUSY;
-    }
+    m_func_tx = function;
+    m_arg_tx = user_arg;
     break;
   default:
     status = STATUS_DRV_ERR_PARAM;
@@ -274,15 +249,14 @@ Status_t LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_
   if(bytes_read < 0)
   {
     status = convertErrnoCode(errno);
-  }else if(bytes_read == 0)
-  {
-    status = STATUS_DRV_TIMED_OUT;
   }else
   {
     m_bytes_read = bytes_read;
+    if(bytes_read == 0)
+    {
+      status = STATUS_DRV_TIMED_OUT;
+    }
   }
-
-  m_read_status = status;
 
   if(call_back && m_func_rx != nullptr)
   {
@@ -299,12 +273,12 @@ Status_t LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_
  * @param self_ptr A pointer to a object of type LinuxSerialFile
  * @return Status_t
  */
-Status_t LinuxSerialFile::readFromThreadBlocking(DataBundle_t data_bundle, void *self_ptr)
+Status_t LinuxSerialFile::readFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr)
 {
   LinuxSerialFile *obj = static_cast<LinuxSerialFile *>(self_ptr);
   if(obj != nullptr)
   {
-    return obj->readBlocking(data_bundle.buffer, data_bundle.size, data_bundle.timeout, true);
+    return obj->readBlocking(data_bundle.rx.data.data(), data_bundle.rx.data.size(), data_bundle.rx.timeout, true);
   }
   return STATUS_DRV_NULL_POINTER;
 }
@@ -329,17 +303,11 @@ Status_t LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32
     {
       status = convertErrnoCode(errno);
     }
-    else
-    {
-      m_bytes_written = bytes_written;
-    }
   }
   else
   {
     status = convertErrnoCode(errno);
   }
-
-  m_write_status = status;
 
   if(call_back && m_func_tx != nullptr)
   {
@@ -356,12 +324,12 @@ Status_t LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32
  * @param self_ptr A pointer to a object of type LinuxSerialFile
  * @return Status_t
  */
-Status_t LinuxSerialFile::writeFromThreadBlocking(DataBundle_t data_bundle, void *self_ptr)
+Status_t LinuxSerialFile::writeFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr)
 {
   LinuxSerialFile *obj = static_cast<LinuxSerialFile *>(self_ptr);
   if(obj != nullptr)
   {
-    return obj->writeBlocking(data_bundle.buffer, data_bundle.size, data_bundle.timeout, true);
+    return obj->writeBlocking(data_bundle.rx.data.data(), data_bundle.rx.data.size(), data_bundle.rx.timeout, true);
   }
   return STATUS_DRV_NULL_POINTER;
 }

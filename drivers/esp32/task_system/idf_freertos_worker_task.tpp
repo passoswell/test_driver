@@ -100,7 +100,7 @@ bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_ar
   freertos_return = xTaskCreate(
     [](void *parameter) -> void {Task *obj = static_cast<Task*>(parameter); obj->run();},
     nullptr,
-    2 * configMINIMAL_STACK_SIZE,
+    TASK_MINIMAL_STACK_SIZE,
     this,
     priority,
     &m_task_handle
@@ -129,14 +129,14 @@ bool FREERTOS_WORKER_TASK_CLASS::create(ThreadFunction_t function, void *user_ar
     return false;
   }
 
-  if(m_profile.priority > configMAX_PRIORITIES)
+  if(m_profile.priority >= configMAX_PRIORITIES)
   {
-    m_profile.priority = configMAX_PRIORITIES;
+    m_profile.priority = configMAX_PRIORITIES - 1;
   }
 
-  if(m_profile.stack_size < configMINIMAL_STACK_SIZE)
+  if(m_profile.stack_size < TASK_MINIMAL_STACK_SIZE)
   {
-    m_profile.stack_size = configMINIMAL_STACK_SIZE;
+    m_profile.stack_size = TASK_MINIMAL_STACK_SIZE;
   }
 
   m_profile = parameters;

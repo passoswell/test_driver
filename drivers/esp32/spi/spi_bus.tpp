@@ -1,42 +1,16 @@
 /**
- * @file spi.cpp
+ * @file spi_bus.tpp
  * @author your name (you@domain.com)
  * @brief
  * @version 0.1
- * @date 2025-05-31
+ * @date 2025-08-23
  *
  * @copyright Copyright (c) 2025
  *
  */
 
-#include "esp32/spi/spi.hpp"
+#include "spi_bus.hpp"
 #include "esp32/utils/esp32_io.hpp"
-
-/**
- * @brief Constructor
- *
- * @param handle SPI number
- * @param cs Chip select object
- * @param cs_active_state State to select the device
- */
-SPI::SPI(const SpiHandle_t handle, DIO &cs, bool cs_active_state) : m_cs(cs)
-{
-  m_handle = handle;
-  m_esp_handle = nullptr;
-  m_cs_active_state = cs_active_state;
-  m_is_async_mode = false;
-}
-
-/**
- * @brief Destructor
- */
-SPI::~SPI()
-{
-  if(m_esp_handle != nullptr)
-  {
-    spi_bus_remove_device(m_esp_handle);
-  }
-}
 
 /**
  * @brief Configure a list of parameters
@@ -45,7 +19,8 @@ SPI::~SPI()
  * @param list_size Number of parameters on the list
  * @return Status_t
  */
-Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
+template<SpiHandle_t PORT_NUMBER>
+Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
   esp_err_t ret;
   spi_bus_config_t bus_parameters;
@@ -67,8 +42,6 @@ Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
   bus_parameters.intr_flags = 0;
   bus_parameters.isr_cpu_id = ESP_INTR_CPU_AFFINITY_AUTO;
 
-  m_read_status = STATUS_DRV_NOT_CONFIGURED;
-  m_write_status = STATUS_DRV_NOT_CONFIGURED;
 
   if(list != nullptr && list_size != 0)
   {
@@ -89,14 +62,11 @@ Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
           mode = 0;
         }
         break;
-      case COMM_WORK_ASYNC:
-        m_is_async_mode = (bool)list[i].value;
-        break;
       case COMM_WORK_ASYNC_RX:
-        m_is_async_mode = (bool)list[i].value;
+        m_is_async_mode_rx = (bool)list[i].value;
         break;
       case COMM_WORK_ASYNC_TX:
-        m_is_async_mode = (bool)list[i].value;
+        m_is_async_mode_tx = (bool)list[i].value;
         break;
       case COMM_PARAM_TX_DIO_PIN:
         bus_parameters.mosi_io_num = list[i].value;
@@ -117,7 +87,7 @@ Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
   }
 
   //Initialize the SPI bus
-  ret = spi_bus_initialize((spi_host_device_t)m_handle, &bus_parameters, SPI_DMA_CH_AUTO);
+  ret = spi_bus_initialize((spi_host_device_t)PORT_NUMBER, &bus_parameters, SPI_DMA_CH_AUTO);
   if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE)
   {
     return convertErrorCode(ret);
@@ -141,7 +111,7 @@ Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
   device_parameters.input_delay_ns = 0; // Leave at 0 unless you know you need a delay
 
   // Attach the EEPROM to the SPI bus
-  ret = spi_bus_add_device((spi_host_device_t)m_handle, &device_parameters, &m_esp_handle);
+  ret = spi_bus_add_device((spi_host_device_t)PORT_NUMBER, &device_parameters, &m_esp_handle);
   if (ret != ESP_OK)
   {
     // cleanup;
@@ -164,22 +134,16 @@ Status_t SPI::configure(const SettingsList_t *list, uint8_t list_size)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t SPI::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
+template<SpiHandle_t PORT_NUMBER>
+Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
 {
-  if(data == nullptr)
-  {
-    return STATUS_DRV_NULL_POINTER;
-  }
-  if(byte_count == 0)
-  {
-    return STATUS_DRV_ERR_PARAM_SIZE;
-  }
-  if(m_is_async_mode)
+  if(m_is_async_mode_rx)
   {
     return STATUS_DRV_NOT_IMPLEMENTED;
   }else
   {
-    return xSpiXfer(nullptr, data, byte_count);
+    m_cs_active_state = cs_active_state;
+    return xSpiXfer(nullptr, data.data(), data.size());
   }
 }
 
@@ -191,83 +155,17 @@ Status_t SPI::read(uint8_t *data, Size_t byte_count, uint32_t timeout)
  * @param timeout Time to wait in milliseconds before returning an error
  * @return Status_t
  */
-Status_t SPI::write(uint8_t *data, Size_t byte_count, uint32_t timeout)
+template<SpiHandle_t PORT_NUMBER>
+Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
 {
-  if(data == nullptr)
-  {
-    return STATUS_DRV_NULL_POINTER;
-  }
-  if(byte_count == 0)
-  {
-    return STATUS_DRV_ERR_PARAM_SIZE;
-  }
-  if(m_is_async_mode)
+  if(m_is_async_mode_tx)
   {
     return STATUS_DRV_NOT_IMPLEMENTED;
   }else
   {
-    return xSpiXfer(data, nullptr, byte_count);
+    m_cs_active_state = cs_active_state;
+    return xSpiXfer(data.data(), nullptr, data.size());
   }
-}
-
-/**
- * @brief Read and write data simultaneously through the bus
- *
- * @param rx_data Buffer to store the data read
- * @param tx_data Buffer where data to write is stored
- * @param byte_count Number of bytes to write and read
- * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
- */
-Status_t SPI::transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, uint32_t timeout)
-{
-  if(rx_data == nullptr || tx_data == nullptr)
-  {
-    return STATUS_DRV_NULL_POINTER;
-  }
-  if(byte_count == 0)
-  {
-    return STATUS_DRV_ERR_PARAM_SIZE;
-  }
-  if(m_is_async_mode)
-  {
-    return STATUS_DRV_NOT_IMPLEMENTED;
-  }else
-  {
-    return xSpiXfer(tx_data, rx_data, byte_count);
-  }
-}
-
-/**
- * @brief Read and write data simultaneously through the bus
- *
- * @param rx_data Buffer to store the data read
- * @param tx_data Buffer where data to write is stored
- * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
- */
-Status_t SPI::transfer(Buffer_t rx_data, Buffer_t tx_data, uint32_t timeout)
-{
-  if(m_is_async_mode)
-  {
-    return STATUS_DRV_NOT_IMPLEMENTED;
-  }else
-  {
-    return xSpiXfer(tx_data.data(), rx_data.data(), tx_data.size_bytes());
-  }
-}
-
-/**
- * @brief Install a callback function
- *
- * @param event An event to trigger the call
- * @param function A function
- * @param user_arg A argument used as a parameter to the function
- * @return Status_t
- */
-Status_t SPI::setCallback(EventsList_t event, DriverCallback_t function, void *user_arg)
-{
-  return STATUS_DRV_NOT_IMPLEMENTED;
 }
 
 /**
@@ -278,7 +176,8 @@ Status_t SPI::setCallback(EventsList_t event, DriverCallback_t function, void *u
  * @param byte_count Number of bytes to write and read
  * @return Status_t
  */
-Status_t SPI::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
+template<SpiHandle_t PORT_NUMBER>
+Status_t SpiBus<PORT_NUMBER>::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
 {
   Status_t status;
   spi_transaction_t trans_desc;
@@ -297,12 +196,13 @@ Status_t SPI::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
  *
  * @param t A pointer to a SPI object
  */
-void SPI::cs_select(spi_transaction_t* t)
+template<SpiHandle_t PORT_NUMBER>
+void SpiBus<PORT_NUMBER>::cs_select(spi_transaction_t* t)
 {
-  SPI *obj = (SPI *) t->user;
+  SpiBus *obj = (SpiBus *) t->user;
   if(obj != nullptr)
   {
-    obj->m_cs.write(obj->m_cs_active_state);
+    obj->m_cs->write(obj->m_cs_active_state);
   }
 }
 
@@ -311,11 +211,12 @@ void SPI::cs_select(spi_transaction_t* t)
  *
  * @param t A pointer to a SPI object
  */
-void SPI::cs_unselect(spi_transaction_t* t)
+template<SpiHandle_t PORT_NUMBER>
+void SpiBus<PORT_NUMBER>::cs_unselect(spi_transaction_t* t)
 {
-  SPI *obj = (SPI *) t->user;
+  SpiBus *obj = (SpiBus *) t->user;
   if(obj != nullptr)
   {
-    obj->m_cs.write(!obj->m_cs_active_state);
+    obj->m_cs->write(!obj->m_cs_active_state);
   }
 }

@@ -12,36 +12,42 @@
 #ifndef DIO_HPP
 #define DIO_HPP
 
-#include "peripherals_base/dio_base.hpp"
+#include "peripherals_base/dio_interface.hpp"
 
 /**
  * @brief Class that export DIO functionalities
  */
-class DIO : public DioBase
+class DIO : public iDIO
 {
 public:
   uint32_t m_line_number;
+  Callback_t m_func;
+  void *m_arg;
+  static std::vector<DIO*> m_dio_ptr; // Vector of DIO pointers, used for the interruption callback
 
   DIO(uint32_t line_offsetline_offset, uint32_t port = 0);
   virtual ~DIO();
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size);
+  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(bool &state);
+  Status_t read(bool &state) override;
 
-  Status_t write(bool value);
+  Status_t write(bool value) override;
 
-  Status_t toggle();
+  Status_t toggle() override;
 
-  Status_t setCallback(EventsList_t edge = EVENT_NONE, DriverCallback_t function = nullptr, void *user_arg = nullptr);
+  Status_t setEventCallback(EventsList_t edge = EVENT_NONE, Callback_t function = nullptr, void *user_arg = nullptr) override;
 
-  Status_t enableCallback(bool enable, EventsList_t edge = EVENT_NONE);
+  Status_t enableInterruption(bool enable) override;
 
 private:
   void *m_line_handle;
   DioBias_t m_line_bias;
   int m_flags;
   bool m_value;
+  EventsList_t m_edge;
+
+  static void drvDioCallback(unsigned int dio, uint32_t events);
 };
 
 #endif /* DIO_HPP */

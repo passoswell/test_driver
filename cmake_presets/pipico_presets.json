@@ -14,8 +14,7 @@
         "PICO_SDK_FETCH_FROM_GIT": "ON",
         "PICO_SDK_FETCH_FROM_GIT_PATH": "~/pipico",
         "PIPICO_VERSION": "1.5.1",
-        "USE_PIPICO": "1",
-        "BUILD_ALL_EXAMPLES": "1"
+        "USE_PIPICO": "1"
       }
     },
     {

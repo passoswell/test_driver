@@ -16,6 +16,7 @@
 #include "task_interface/task_interface.hpp"
 #include "idf_freertos_queue.hpp"
 
+constexpr uint32_t TASK_MINIMAL_STACK_SIZE = 2 * configMINIMAL_STACK_SIZE;
 
 /*
   * Comment found on the implementation of xTaskCreate:

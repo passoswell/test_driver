@@ -18,17 +18,8 @@
 
 // Change the lines bellow with the correct handle for your platform
 #if defined(USE_LINUX)
-UartHandle_t handle = (UartHandle_t)"/dev/ttyUSB0";
-#elif defined(USE_ESP32)
-UartHandle_t handle =
-{
-  .uart_number = 0,
-  .rx_pin = 3,
-  .tx_pin = 1,
-};
-#else
-void *handle = nullptr;
-#endif
+
+constexpr UartHandle_t handle = 100; // /dev/serial100
 
 /**
  * @brief Configuration parameters for the uart port
@@ -37,9 +28,32 @@ const SettingsList_t g_uart_config_list[]
 {
   ADD_PARAMETER(COMM_PARAM_BAUD, 115200),
   ADD_PARAMETER(COMM_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
-  ADD_PARAMETER(COMM_WORK_ASYNC_TX, false)
+  ADD_PARAMETER(COMM_WORK_ASYNC_RX, false),
+  ADD_PARAMETER(COMM_WORK_ASYNC_TX, false),
 };
 const uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+
+#elif defined(USE_ESP32)
+
+constexpr UartHandle_t handle = 0;
+
+/**
+ * @brief Configuration parameters for the uart port
+ */
+const SettingsList_t g_uart_config_list[]
+{
+  ADD_PARAMETER(COMM_PARAM_BAUD, 115200),
+  ADD_PARAMETER(COMM_PARAM_LINE_MODE, 0), /*!< no parity, one stop bit, no hw flow control*/
+  ADD_PARAMETER(COMM_WORK_ASYNC_RX, false),
+  ADD_PARAMETER(COMM_WORK_ASYNC_TX, false),
+  ADD_PARAMETER(COMM_PARAM_RX_DIO_PIN, 3),
+  ADD_PARAMETER(COMM_PARAM_TX_DIO_PIN, 1),
+};
+const uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart_config_list[0]);
+
+#else
+constexpr void *handle = nullptr;
+#endif
 
 
 /**
@@ -47,10 +61,16 @@ const uint8_t g_uart_config_list_size = sizeof(g_uart_config_list)/sizeof(g_uart
  */
 AP_MAIN()
 {
-  UART my_serial(handle);
+  // UartBase &my_serial = UART<handle>::getInstance();
+  UART<handle> my_serial;
   SPT my_timer(SOFTWARE_TIMER_SECONDS);
-  uint8_t message[] = "\r\nHello world!!!\r\n";
+  uint8_t message[] = "Hello world!!!";
+  uint8_t buffer[100];
   Status_t status;
+  int result;
+  uint32_t counter = 0;
+
+  printf("\r\nCode is running\r\n");
 
   // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
@@ -63,13 +83,20 @@ AP_MAIN()
   while(true)
   {
     // Write a hello world message to the uart port
-    status = my_serial.write(message, strlen((char *)message));
+    result = snprintf((char *)buffer, sizeof(buffer)-1, "[%03u] %s\r\n", counter, message);
+    if(result < 0)
+    {
+      printf("\r\nERROR generating hello world message\r\n");
+      AP_EXIT();
+    }
+    status = my_serial.write({buffer, (uint32_t)result});
     if(!status.success)
     {
       printf("\r\nERROR from my_serial.write: %s", status.description);
       AP_EXIT();
     }
     my_timer.delay(1); // One second delay
+    counter++;
   }
 
   AP_EXIT();

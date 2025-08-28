@@ -49,7 +49,7 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
 {
   struct pollfd fds[1];
   if(cnt == 0 || buffer == nullptr) { return 0;}
-  int byte_count = 0, bytes_read = 0, ready;
+  int bytes_available = 0, bytes_read = 0, ready;
 
   // Set up the pollfd structure for UART to check for data to read
   fds[0].fd = fd;
@@ -80,25 +80,25 @@ int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_m
     }else
     {
 
-      byte_count = bytesAvailableSyscall(fd);
-      if (byte_count < 0)
+      bytes_available = bytesAvailableSyscall(fd);
+      if (bytes_available < 0)
       {
         bytes_read = -1;
         break;
-      }else if(byte_count > 0)
+      }else if(bytes_available > 0)
       {
         start = std::chrono::steady_clock::now();
-        if(byte_count > (cnt - bytes_read))
+        if(bytes_available > (cnt - bytes_read))
         {
-          byte_count = cnt - bytes_read;
+          bytes_available = cnt - bytes_read;
         }
-        byte_count = readSyscall(fd, buffer + bytes_read, byte_count);
-        if (byte_count < 0)
+        bytes_available = readSyscall(fd, buffer + bytes_read, bytes_available);
+        if (bytes_available < 0)
         {
           bytes_read = -1;
           break;
         }
-        bytes_read += byte_count;
+        bytes_read += bytes_available;
 
       }
     }
@@ -156,7 +156,7 @@ int readOnTimeoutSyscall3(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_
 {
   struct pollfd fds[1];
   if(cnt == 0 || buffer == nullptr) { return 0;}
-  int byte_count = 0, bytes_read = 0, ready;
+  int bytes_available = 0, bytes_read = 0, ready;
 
   // Set up the pollfd structure for UART to check for data to read
   fds[0].fd = fd;
@@ -178,25 +178,25 @@ int readOnTimeoutSyscall3(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_
       break;
     }else
     {
-      byte_count = bytesAvailableSyscall(fd);
-      if (byte_count < 0)
+      bytes_available = bytesAvailableSyscall(fd);
+      if (bytes_available < 0)
       {
         bytes_read = -1;
         break;
-      }else if(byte_count > 0)
+      }else if(bytes_available > 0)
       {
         start = std::chrono::steady_clock::now();
-        if(byte_count > (cnt - bytes_read))
+        if(bytes_available > (cnt - bytes_read))
         {
-          byte_count = cnt - bytes_read;
+          bytes_available = cnt - bytes_read;
         }
-        byte_count = readSyscall(fd, buffer + bytes_read, byte_count);
-        if (byte_count < 0)
+        bytes_available = readSyscall(fd, buffer + bytes_read, bytes_available);
+        if (bytes_available < 0)
         {
           bytes_read = -1;
           break;
         }
-        bytes_read += byte_count;
+        bytes_read += bytes_available;
       }
     }
     end = std::chrono::steady_clock::now();
@@ -221,16 +221,16 @@ int writeSyscall(int fd, const uint8_t *buffer, size_t cnt)
 }
 
 /**
- * @brief Return the number of bytes available on the reception bufferfer
+ * @brief Return the number of bytes available on the reception buffer
  *
  * @param fd File descriptor
  * @return int
  */
 int bytesAvailableSyscall(int fd)
 {
-  int byte_count;
-  ioctl(fd, FIONREAD, &byte_count);
-  return byte_count;
+  int bytes_available;
+  ioctl(fd, FIONREAD, &bytes_available);
+  return bytes_available;
 }
 
 /**
@@ -245,10 +245,10 @@ int waitOnReceptionTimeoutSyscall(int fd, uint32_t size, uint32_t wait_time)
 {
   uint32_t timeout_counter;
   uint32_t smaller_wait_time = 1;
-  int byte_count;
+  int bytes_available;
 
-  byte_count = bytesAvailableSyscall(fd);
-  if(byte_count >= size) { return byte_count;}
+  bytes_available = bytesAvailableSyscall(fd);
+  if(bytes_available >= size) { return bytes_available;}
 
   timeout_counter = wait_time;
   if(wait_time > 128)
@@ -263,9 +263,9 @@ int waitOnReceptionTimeoutSyscall(int fd, uint32_t size, uint32_t wait_time)
     }
     timeout_counter -= smaller_wait_time;
     std::this_thread::sleep_for(std::chrono::milliseconds(smaller_wait_time));
-    byte_count = bytesAvailableSyscall(fd);
-  } while (byte_count >= 0 && byte_count < size && timeout_counter > 0);
-  return byte_count;
+    bytes_available = bytesAvailableSyscall(fd);
+  } while (bytes_available >= 0 && bytes_available < size && timeout_counter > 0);
+  return bytes_available;
 }
 
 /**
