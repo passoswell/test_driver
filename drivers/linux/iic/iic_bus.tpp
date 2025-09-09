@@ -103,7 +103,7 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
  * @return Status_t
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   IicDataBundle_t data_bundle;
@@ -119,11 +119,9 @@ Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t tim
     data_bundle.rx.data = data;
     data_bundle.rx.address = address;
     data_bundle.rx.timeout = timeout;
-    data_bundle.rx.cb_function = cb_function;
-    data_bundle.rx.cb_arg = cb_arg;
+    data_bundle.rx.event_handle = &event_handler;
     data_bundle.tx.run = false;
-    data_bundle.tx.cb_function = nullptr;
-    data_bundle.tx.cb_arg = nullptr;
+    data_bundle.tx.event_handle = nullptr;
     if(m_thread_handle.setInputData(data_bundle, timeout))
     {
       status = STATUS_DRV_SUCCESS;
@@ -156,7 +154,7 @@ Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t tim
  * @return Status_t
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   IicDataBundle_t data_bundle;
@@ -172,11 +170,9 @@ Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t ti
     data_bundle.tx.data = data;
     data_bundle.tx.address = address;
     data_bundle.tx.timeout = timeout;
-    data_bundle.tx.cb_function = cb_function;
-    data_bundle.tx.cb_arg = cb_arg;
+    data_bundle.tx.event_handle = &event_handler;
     data_bundle.rx.run = false;
-    data_bundle.rx.cb_function = nullptr;
-    data_bundle.rx.cb_arg = nullptr;
+    data_bundle.rx.event_handle = nullptr;
     if(m_thread_handle.setInputData(data_bundle, timeout))
     {
       status = STATUS_DRV_SUCCESS;
@@ -302,18 +298,18 @@ Status_t IicBus<PORT_NUMBER>::asyncTransferThread(IicDataBundle_t data_bundle, v
     if(data_bundle.tx.run)
     {
       status = obj->blockingWrite(data_bundle.tx.data, data_bundle.tx.address);
-      if (data_bundle.tx.cb_function != nullptr)
+      if (data_bundle.tx.event_handle != nullptr)
       {
-        data_bundle.tx.cb_function(status, EVENT_WRITE, data_bundle.tx.data, data_bundle.tx.cb_arg);
+        data_bundle.tx.event_handle->onEvent(status, EVENT_WRITE, data_bundle.tx.data);
       }
     }
 
     if(data_bundle.rx.run)
     {
       status = obj->blockingRead(data_bundle.rx.data, data_bundle.rx.address);
-      if (data_bundle.rx.cb_function != nullptr)
+      if (data_bundle.rx.event_handle != nullptr)
       {
-        data_bundle.rx.cb_function(status, EVENT_READ, data_bundle.rx.data, data_bundle.rx.cb_arg);
+        data_bundle.rx.event_handle->onEvent(status, EVENT_READ, data_bundle.rx.data);
       }
     }
 

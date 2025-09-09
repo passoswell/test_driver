@@ -27,12 +27,11 @@
 #define SPI_QUEUE_SIZE                                                         1
 #endif
 
-typedef uint16_t SpiHandle_t;
-
 template<SpiHandle_t PORT_NUMBER>
-class SpiBus : public iSpiBus
+class SpiBus final: public iSpiBus
 {
 public:
+
   static iSpiBus& getInstance()
   {
     static SpiBus<PORT_NUMBER> instance;
@@ -41,9 +40,9 @@ public:
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   SpiBus(const SpiBus&) = delete;

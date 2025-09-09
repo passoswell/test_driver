@@ -24,14 +24,6 @@ SptBase::SptBase(SoftwareTimerCountUnit_t time_unit)
 }
 
 /**
- * @brief Destructor
- */
-SptBase::~SptBase()
-{
-  // Nothing is done here
-}
-
-/**
  * @brief Start the timer
  * @param duration Time to count
  * @param mode Operation mode
@@ -134,15 +126,6 @@ uint32_t SptBase::getElapsedTime()
       break;
   }
   return time;
-}
-
-/**
- * @brief Get the time since power on in microseconds
- * @return uint32_t
- */
-sft_time_us_t SptBase::getTimeSincePowerOnUs()
-{
-  return 0;
 }
 
 /**

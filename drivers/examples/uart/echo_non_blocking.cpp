@@ -68,6 +68,44 @@ static uint8_t g_tx_buffer[100] = {0};
 static uint8_t MESSAGE_HELLO_WORLD[] = "\r\nHello world!!!\r\n";
 bool g_error_flag = false;
 
+/**
+ * @brief Callback class example for dio events
+ */
+class UartEventHandler final : public iCallback
+{
+public:
+  UartEventHandler() = default;
+
+  ~UartEventHandler() = default;
+
+  // Returns a short string identifying the callback owner
+  std::string name() { return "Uart callback test"; }
+
+  // Called when the asynchronous operation is about to start
+  void onStart() {}
+
+  // Called when an event occur if applicable
+  void onEvent(Status_t status, EventsList_t event, const Buffer_t data)
+  {
+    switch (event)
+    {
+    case EVENT_READ:
+      (void) rxCallback(status, event, data, nullptr);
+      break;
+    case EVENT_WRITE:
+      (void) txCallback(status, event, data, nullptr);
+      break;
+    default:
+      break;
+    }
+  }
+
+  // Called when an event occur if applicable
+  void onEvent(Status_t status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) {};
+
+private:
+  uint32_t m_port, m_pin;
+};
 
 /**
  * @brief Example code that echoes what it receives through a UART port using interruption
@@ -77,6 +115,7 @@ AP_MAIN()
   Status_t status;
   SPT timer;
   uint32_t bytes_read = 0, tx_bytes = 0;
+  UartEventHandler uart_event_handler;
 
   timer.delay(1000);
 
@@ -89,8 +128,8 @@ AP_MAIN()
   }
 
   // Install callback functions for uart events
-  status = g_serial.setCallback(EVENT_READ, rxCallback, nullptr);
-  status = g_serial.setCallback(EVENT_WRITE, txCallback, nullptr);
+  status = g_serial.setCallback(EVENT_READ, uart_event_handler);
+  status = g_serial.setCallback(EVENT_WRITE, uart_event_handler);
 
   // Write a hello message in async mode
   status = g_serial.write(MESSAGE_HELLO_WORLD, strlen((char *)MESSAGE_HELLO_WORLD));

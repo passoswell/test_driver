@@ -30,8 +30,7 @@ DIO::DIO(uint32_t line_offset, uint32_t chip_number)
   m_flags = 0;
   m_value = false;
 
-  m_func = nullptr;
-  m_arg = nullptr;
+  m_event_handler = nullptr;
   m_edge = EVENT_NONE;
 
   m_sync.run = false;
@@ -192,14 +191,12 @@ Status_t DIO::toggle()
  * @brief Install an event callback function
  *
  * @param edge The edge that will trigger the event
- * @param func The callback function
- * @param arg A user parameter
+ * @param event_handler The callback object
  * @return Status_t
  */
-Status_t DIO::setEventCallback(EventsList_t edge, Callback_t function, void *user_arg)
+Status_t DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
-  m_func = function;
-  m_arg = user_arg;
+  m_event_handler = &event_handler;
   m_edge = edge;
   return STATUS_DRV_SUCCESS;
 }
@@ -305,7 +302,7 @@ void DIO::readAsyncThread(void)
     if (ret <= 0) { continue; }
     ret = gpiod_line_event_read((struct gpiod_line *)m_line_handle, &event);
     if (ret < 0) { continue; }
-    if(m_func == nullptr) { continue; }
+    if(m_event_handler == nullptr) { continue; }
     switch(event.event_type)
     {
       case GPIOD_LINE_EVENT_RISING_EDGE:
@@ -324,10 +321,7 @@ void DIO::readAsyncThread(void)
         status = STATUS_DRV_UNKNOWN_ERROR;
         break;
     }
-    if(m_func != nullptr)
-    {
-      m_func(status, edge, state, m_sync.arg);
-    }
+    m_event_handler->onEvent(status, edge, state);
   }
   m_sync.terminate = false;
   m_sync.run = false;

@@ -22,13 +22,15 @@
 /**
  * @brief A mutex based on disabling interruptions for critical sections
  */
-class CriticalMutex : public MutexInterface
+class CriticalMutex final: public MutexInterface
 {
 public:
+
   CriticalMutex()
   {
     portMUX_INITIALIZE(&m_spinlock);
   }
+
   ~CriticalMutex() = default;
 
   // Get the ownership of a mutex or timeout

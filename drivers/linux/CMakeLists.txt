@@ -4,7 +4,6 @@ add_library(drv_linux STATIC
 utils/linux_types.hpp
 utils/linux_io.hpp
 utils/linux_io.cpp
-utils/linux_queue.hpp
 utils/linux_serial_file.hpp
 utils/linux_serial_file.cpp
 
@@ -23,7 +22,6 @@ std_in_out/std_in_out.cpp
 std_in_out/std_in_out.hpp
 uart/uart_bus.tpp
 uart/uart_bus.hpp
-uart/uart.tpp
 uart/uart.hpp
 
 task_system/stl_queue.hpp

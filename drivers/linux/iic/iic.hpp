@@ -19,13 +19,15 @@
 #include "linux/iic/iic_bus.hpp"
 
 template<IicHandle_t PORT_NUMBER>
-class IIC : public bIIC
+class IIC final: public bIIC
 {
 public:
 
   IIC(uint16_t address) : bIIC(IicBus<PORT_NUMBER>::getInstance(), address)
   {
   }
+
+  ~IIC() = default;
 };
 
 #endif /* DRIVERS_LINUX_IIC_IIC_HPP */

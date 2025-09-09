@@ -22,7 +22,9 @@
 class LinuxSerialFile : public iComm
 {
 public:
+
   LinuxSerialFile(const char *file_name);
+
   virtual ~LinuxSerialFile();
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
@@ -31,7 +33,7 @@ public:
 
   Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX) override;
 
-  Status_t setCallback(EventsList_t event = EVENT_NONE, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t setCallback(EventsList_t event, iCallback &event_handler) override;
 
   uint32_t getBytesRead()
   {
@@ -46,8 +48,7 @@ private:
   bool m_terminate;
   bool m_is_async_mode_rx, m_is_async_mode_tx;
   uint32_t m_bytes_read;
-  Callback_t m_func_rx, m_func_tx;
-  void *m_arg_rx, *m_arg_tx;
+  iCallback *m_event_handler_rx, *m_event_handler_tx;
 
   Status_t readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back);
   static Status_t readFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr);

@@ -66,7 +66,8 @@ typedef struct
 class TaskInterface
 {
 public:
-  using ThreadFunction_t = std::function<void(void *user_arg)>;
+  // using ThreadFunction_t = std::function<void(void *user_arg)>;
+
   // // Create a task
   // virtual bool create(ThreadFunction_t function, void *user_arg, uint32_t priority) = 0;
 
@@ -113,7 +114,13 @@ template <typename Derived, typename TI, uint32_t IN_QUEUE_SIZE, typename TO, ui
 class TaskBase : public TaskInterface
 {
 public:
+
+  TaskBase() = default;
+
+  virtual ~TaskBase() = default;
+
   using ThreadFunction_t = std::function<TO(TI &data, void *user_arg)>;
+
   // Create a task
   bool create(ThreadFunction_t function, void *user_arg, uint32_t priority)
   {
@@ -167,14 +174,6 @@ public:
   {
     return static_cast<Derived *>(this)->getOutputData(data, timeout);
   }
-
-  TaskBase() = default;
-
-  virtual ~TaskBase() = default;
-
-  // Prevent copying
-  TaskBase(const TaskBase &) = delete;
-  TaskBase &operator=(const TaskBase &) = delete;
 
 protected:
   // Run the worker function

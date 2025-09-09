@@ -21,7 +21,7 @@
 /**
  * @brief Gives access to standard io as a serial port
  */
-class StdInOut : public LinuxSerialFile
+class StdInOut final: public LinuxSerialFile
 {
 public:
 

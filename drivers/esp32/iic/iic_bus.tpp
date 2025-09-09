@@ -94,7 +94,7 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
 }
 
 template <IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
@@ -115,7 +115,7 @@ Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t tim
 }
 
 template <IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   status = checkInputs(data.data(), data.size_bytes(), timeout);

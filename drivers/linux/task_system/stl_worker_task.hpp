@@ -26,10 +26,12 @@ constexpr uint32_t TASK_MINIMAL_STACK_SIZE = 0;
  * @tparam OUTPUT_SIZE Maximum number of items in the output queue
  */
 template <typename TI, uint32_t INPUT_SIZE, typename TO, uint32_t OUTPUT_SIZE>
-class Task : public TaskBase<Task<TI, INPUT_SIZE, TO, OUTPUT_SIZE>, TI, INPUT_SIZE, TO, OUTPUT_SIZE>
+class Task final: public TaskBase<Task<TI, INPUT_SIZE, TO, OUTPUT_SIZE>, TI, INPUT_SIZE, TO, OUTPUT_SIZE>
 {
 public:
+
   Task() = default;
+
   ~Task();
 
   using ThreadFunction_t = std::function<TO(TI &data, void *user_arg)>;

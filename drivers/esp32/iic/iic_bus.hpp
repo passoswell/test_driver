@@ -22,15 +22,15 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 
-typedef uint16_t IicHandle_t;
 
 /**
  * @brief Interface class for IIC bus
  */
 template<IicHandle_t PORT_NUMBER>
-class IicBus : public iIicBus
+class IicBus final: public iIicBus
 {
 public:
+
   static iIicBus& getInstance()
   {
     static IicBus<PORT_NUMBER> instance;
@@ -39,9 +39,9 @@ public:
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(uint16_t address, Buffer_t data, uint32_t timeout = UINT32_MAX, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(uint16_t address, Buffer_t data, uint32_t timeout = UINT32_MAX, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   IicBus(const IicBus&) = delete;

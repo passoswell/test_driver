@@ -21,9 +21,10 @@
 /**
  * @brief Mutex implementation
  */
-class Mutex : public MutexInterface
+class Mutex final: public MutexInterface
 {
 public:
+
   Mutex()
   {
     m_mutex = xSemaphoreCreateMutex();

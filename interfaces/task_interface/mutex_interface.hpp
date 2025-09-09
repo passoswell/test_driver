@@ -21,6 +21,8 @@
 class MutexInterface
 {
 public:
+  MutexInterface() = default;
+
   virtual ~MutexInterface() = default;
 
   // Lock the mutex, waits up to timeout_ms milliseconds

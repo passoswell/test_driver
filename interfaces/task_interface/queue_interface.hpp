@@ -26,6 +26,11 @@ class QueueInterface
 {
 public:
 
+  QueueInterface() = default;
+
+  // Virtual destructor
+  virtual ~QueueInterface() = default;
+
   // Enqueue data, timeout in milliseconds
   bool put(const T &item, uint32_t timeout = UINT32_MAX)
   {
@@ -49,15 +54,6 @@ public:
   {
     return static_cast<Derived*>(this)->getActualSize();
   }
-
-  QueueInterface() = default;
-
-  // Virtual destructor
-  virtual ~QueueInterface() = default;
-
-  // Prevent copying
-  QueueInterface(const QueueInterface&) = delete;
-  QueueInterface& operator=(const QueueInterface&) = delete;
 
 };
 

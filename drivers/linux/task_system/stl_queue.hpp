@@ -26,10 +26,12 @@
  * @tparam SIZE Maximum number of items the queue can hold
  */
 template <typename T, uint32_t SIZE>
-class Queue : public QueueInterface<Queue<T, SIZE>, T>
+class Queue final: public QueueInterface<Queue<T, SIZE>, T>
 {
 public:
+
   Queue() = default;
+
   ~Queue() = default;
 
   // Enqueue data, timeout in milliseconds

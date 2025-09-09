@@ -17,11 +17,13 @@
 
 #include "peripherals_base/spt_base.hpp"
 
-class SPT : public SptBase
+class SPT final: public SptBase
 {
 public:
 
   SPT(SoftwareTimerCountUnit_t time_unit = SOFTWARE_TIMER_MILLISECONDS);
+
+  ~SPT() = default;
 
   sft_time_us_t getTimeSincePowerOnUs();
 

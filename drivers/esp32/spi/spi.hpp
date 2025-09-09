@@ -15,7 +15,7 @@
 #include "esp32/spi/spi_bus.hpp"
 
 template<SpiHandle_t PORT_NUMBER>
-class SPI : public bSPI
+class SPI final: public bSPI
 {
 public:
 

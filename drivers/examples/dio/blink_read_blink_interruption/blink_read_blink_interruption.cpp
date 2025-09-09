@@ -69,25 +69,46 @@ const SettingsList_t g_dio_output_list[]
 uint8_t g_dio_output_list_size = sizeof(g_dio_output_list)/sizeof(g_dio_output_list[0]);
 
 /**
- * @brief Callback function for dio events
+ * @brief Callback class example for dio events
  */
-Status_t inputCallback(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg)
+class DioInputCallback final : public iCallback
 {
-  if(status.success)
+public:
+
+  DioInputCallback(uint32_t pin, uint32_t port) : m_pin(pin), m_port(port) {}
+
+  ~DioInputCallback() = default;
+
+  // Returns a short string identifying the callback owner
+  std::string name(){ return "Input callback test";}
+
+  // Called when the asynchronous operation is about to start
+  void onStart(){}
+
+  // Called when an event occur if applicable
+  void onEvent(Status_t status, EventsList_t event, const Buffer_t data)
   {
-    if(event == EVENT_EDGE_RISING)
+    if(status.success)
     {
-      printf("Detected rising edge on line #%u\r\n", DIO_INPUT_LINE_NUMBER);
+      if(event == EVENT_EDGE_RISING)
+      {
+        printf("Detected rising edge on line #%u\r\n", m_pin);
+      }else
+      {
+        printf("Detected falling edge on line #%u\r\n", m_pin);
+      }
     }else
     {
-      printf("Detected falling edge on line #%u\r\n", DIO_INPUT_LINE_NUMBER);
+      printf("Error reading event on line #%u\r\n", m_pin);
     }
-  }else
-  {
-    printf("Error reading event on line #%u\r\n", DIO_INPUT_LINE_NUMBER);
   }
-  return status;
-}
+
+  // Called when an event occur if applicable
+  void onEvent(Status_t status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data){};
+
+private:
+  uint32_t m_port, m_pin;
+};
 
 /**
  * @brief  Blink an LED and read a digital input
@@ -98,6 +119,7 @@ AP_MAIN()
   SPT my_timer;
   bool input_value, output_value = false;
   DIO input(DIO_INPUT_LINE_NUMBER, DIO_INPUT_CHIP_NUMBER);
+  DioInputCallback dio_input_event_handler(DIO_INPUT_LINE_NUMBER, DIO_INPUT_CHIP_NUMBER);
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
   code = input.configure(g_dio_input_list, g_dio_input_list_size);
@@ -113,7 +135,7 @@ AP_MAIN()
     AP_EXIT();
   }
 
-  (void) input.setEventCallback(EVENT_EDGE_BOTH, inputCallback, nullptr);
+  (void) input.setEventCallback(EVENT_EDGE_BOTH, dio_input_event_handler);
   code = input.enableInterruption(true);
   if(!code.success)
   {

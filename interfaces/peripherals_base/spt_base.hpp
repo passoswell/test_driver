@@ -25,7 +25,7 @@ public:
 
   SptBase(SoftwareTimerCountUnit_t time_unit = SOFTWARE_TIMER_MILLISECONDS);
 
-  virtual ~SptBase();
+  virtual ~SptBase() = default;
 
   void start(uint32_t duration, SoftwareTimerMode_t mode = SOFTWARE_TIMER_ONE_SHOT);
 
@@ -37,7 +37,7 @@ public:
 
   uint32_t getElapsedTime();
 
-  virtual sft_time_us_t getTimeSincePowerOnUs();
+  virtual sft_time_us_t getTimeSincePowerOnUs() = 0;
 
   virtual void delay(uint32_t duration);
 };

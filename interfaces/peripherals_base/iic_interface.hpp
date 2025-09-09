@@ -20,14 +20,15 @@
 #include "peripherals_base/communication_interface.hpp"
 
 
+typedef uint16_t IicHandle_t;
+
 typedef struct
 {
   bool run;
   DrvBuffer_t data;
   uint32_t timeout;
   uint16_t address;
-  Callback_t cb_function;
-  void *cb_arg;
+  iCallback *event_handle;
 } IicDataBundle2_t;
 
 typedef struct
@@ -44,11 +45,15 @@ class iIicBus
 {
 public:
 
+  iIicBus() = default;
+
+  virtual ~iIicBus() = default;
+
   virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t read(uint16_t address, Buffer_t data, uint32_t timeout = UINT32_MAX, Callback_t cb_function = nullptr, void *cb_arg = nullptr) = 0;
+  virtual Status_t read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 
-  virtual Status_t write(uint16_t address, Buffer_t data, uint32_t timeout = UINT32_MAX, Callback_t cb_function = nullptr, void *cb_arg = nullptr) = 0;
+  virtual Status_t write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 };
 
 /**
@@ -57,6 +62,10 @@ public:
 class iIIC : public iComm
 {
 public:
+
+  iIIC() = default;
+
+  virtual ~iIIC() = default;
 
 };
 
@@ -68,12 +77,9 @@ class bIIC : public iIIC
 public:
 
   bIIC(iIicBus &bus, uint16_t address) :
-  m_bus(bus), m_address(address)
+  m_bus(bus), m_address(address),
+  m_cb_function_rx(nullptr), m_cb_function_tx(nullptr)
   {
-    m_cb_function_rx = nullptr;
-    m_cb_function_tx = nullptr;
-    m_cb_arg_rx = nullptr;
-    m_cb_arg_tx = nullptr;
   }
 
   virtual ~bIIC() = default;
@@ -85,26 +91,24 @@ public:
 
   virtual Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
-    return m_bus.read(m_address, data, timeout, m_cb_function_rx, m_cb_arg_rx);
+    return m_bus.read(m_address, data, timeout, *m_cb_function_rx);
   }
 
   virtual Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
-    return m_bus.write(m_address, data, timeout, m_cb_function_tx, m_cb_arg_tx);
+    return m_bus.write(m_address, data, timeout, *m_cb_function_tx);
   }
 
-  virtual Status_t setCallback(EventsList_t event = EVENT_NONE, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override
+  virtual Status_t setCallback(EventsList_t event, iCallback &event_handler) override
   {
     Status_t status = STATUS_DRV_SUCCESS;
     switch(event)
     {
     case EVENT_READ:
-      m_cb_function_rx = cb_function;
-      m_cb_arg_rx = cb_arg;
+      m_cb_function_rx = &event_handler;
       break;
     case EVENT_WRITE:
-      m_cb_function_tx = cb_function;
-      m_cb_arg_tx = cb_arg;
+      m_cb_function_tx = &event_handler;
       break;
     default:
       status = STATUS_DRV_ERR_PARAM;
@@ -116,8 +120,7 @@ public:
 protected:
   iIicBus &m_bus;
   uint16_t m_address;
-  Callback_t m_cb_function_rx, m_cb_function_tx;
-  void *m_cb_arg_rx, *m_cb_arg_tx;
+  iCallback *m_cb_function_rx, *m_cb_function_tx;
 };
 
 #endif /* PERIPHERALS_BASE_IIC_INTERFACE_HPP */

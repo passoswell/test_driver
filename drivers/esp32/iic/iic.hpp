@@ -15,7 +15,7 @@
 #include "esp32/iic/iic_bus.hpp"
 
 template<IicHandle_t PORT_NUMBER>
-class IIC : public bIIC
+class IIC final: public bIIC
 {
 public:
 

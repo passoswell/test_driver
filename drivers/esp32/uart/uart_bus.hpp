@@ -23,14 +23,11 @@
 #include "freertos/queue.h"
 
 
-typedef uint16_t UartHandle_t;
-
-
 /**
  * @brief Class that implements UART communication
  */
 template<UartHandle_t PORT_NUMBER>
-class UartBus : public iUartBus
+class UartBus final: public iUartBus
 {
 public:
 
@@ -42,9 +39,9 @@ public:
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg) override;
+  Status_t read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg) override;
+  Status_t write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   uint32_t getBytesAvailable() override;
 

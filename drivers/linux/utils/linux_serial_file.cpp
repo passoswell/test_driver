@@ -29,10 +29,8 @@ LinuxSerialFile::LinuxSerialFile(const char *port_handle)
   m_is_async_mode_rx = false;
   m_is_async_mode_tx = false;
   m_bytes_read = 0;
-  m_func_rx = nullptr;
-  m_func_tx = nullptr;
-  m_arg_rx = nullptr;
-  m_arg_tx = nullptr;
+  m_event_handler_rx = nullptr;
+  m_event_handler_tx = nullptr;
 }
 
 /**
@@ -203,19 +201,17 @@ Status_t LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
  * @param user_arg A argument used as a parameter to the callback function
  * @return Status_t
  */
-Status_t LinuxSerialFile::setCallback(EventsList_t event, Callback_t function, void *user_arg)
+Status_t LinuxSerialFile::setCallback(EventsList_t event, iCallback &event_handler)
 {
   Status_t status = STATUS_DRV_SUCCESS;
 
   switch (event)
   {
   case EVENT_READ:
-    m_func_rx = function;
-    m_arg_rx = user_arg;
+    m_event_handler_rx = &event_handler;
     break;
   case EVENT_WRITE:
-    m_func_tx = function;
-    m_arg_tx = user_arg;
+    m_event_handler_tx = &event_handler;
     break;
   default:
     status = STATUS_DRV_ERR_PARAM;
@@ -258,10 +254,10 @@ Status_t LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_
     }
   }
 
-  if(call_back && m_func_rx != nullptr)
+  if(call_back && m_event_handler_rx != nullptr)
   {
     Buffer_t data_container(data, m_bytes_read);
-    m_func_rx(status, EVENT_READ, data_container, m_arg_rx);
+    m_event_handler_rx->onEvent(status, EVENT_READ, data_container);
   }
 
   return status;
@@ -309,10 +305,10 @@ Status_t LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32
     status = convertErrnoCode(errno);
   }
 
-  if(call_back && m_func_tx != nullptr)
+  if(call_back && m_event_handler_tx != nullptr)
   {
     Buffer_t data_container(data, m_bytes_read);
-    m_func_tx(status, EVENT_WRITE, data_container, m_arg_tx);
+    m_event_handler_tx->onEvent(status, EVENT_WRITE, data_container);
   }
 
   return status;

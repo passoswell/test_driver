@@ -21,9 +21,12 @@
 /**
  * @brief Mutex implementation
  */
-class Mutex : public MutexInterface
+class Mutex final: public MutexInterface
 {
 public:
+
+  Mutex() = default;
+
   ~Mutex() = default;
 
   // Get the ownership of a mutex or timeout

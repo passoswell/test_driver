@@ -17,16 +17,16 @@
 /**
  * @brief Class that export DIO functionalities
  */
-class DIO : public iDIO
+class DIO final: public iDIO
 {
 public:
   uint32_t m_line_number;
-  Callback_t m_func;
-  void *m_arg;
+  iCallback *m_event_handler;
   static std::vector<DIO*> m_dio_ptr; // Vector of DIO pointers, used for the interruption callback
 
   DIO(uint32_t line_offsetline_offset, uint32_t port = 0);
-  virtual ~DIO();
+
+  ~DIO();
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
@@ -36,7 +36,7 @@ public:
 
   Status_t toggle() override;
 
-  Status_t setEventCallback(EventsList_t edge = EVENT_NONE, Callback_t function = nullptr, void *user_arg = nullptr) override;
+  Status_t setEventCallback(EventsList_t edge, iCallback &event_handler) override;
 
   Status_t enableInterruption(bool enable) override;
 

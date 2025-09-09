@@ -43,7 +43,9 @@ class SoftwareTimerInterface
 {
 public:
 
-  virtual ~SoftwareTimerInterface(){};
+  SoftwareTimerInterface() = default;
+
+  virtual ~SoftwareTimerInterface() = default;
 
   // Start the timer
   virtual void start(uint32_t duration, SoftwareTimerMode_t mode = SOFTWARE_TIMER_ONE_SHOT) = 0;

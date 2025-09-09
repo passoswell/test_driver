@@ -9,6 +9,8 @@ peripherals_base/spt_base.hpp
 peripherals_base/spt_base.cpp
 
 peripherals_base/communication_interface.hpp
+peripherals_base/callback_interface.hpp
+peripherals_base/event_interface.hpp
 
 peripherals_base/dio_interface.hpp
 peripherals_base/iic_interface.hpp

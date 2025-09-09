@@ -21,13 +21,15 @@
 #include "peripherals_base/communication_interface.hpp"
 
 
+typedef uint16_t SpiHandle_t;
+
 typedef struct
 {
   bool run;
   DrvBuffer_t data;
   uint32_t timeout;
   iDIO *cs_pin;
-  Callback_t cb_function;
+  iCallback *event_handler;
   void *cb_arg;
 } SpiDataBundle2_t;
 
@@ -45,11 +47,15 @@ class iSpiBus
 {
 public:
 
+  iSpiBus() = default;
+
+  virtual ~iSpiBus() = default;
+
   virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg) = 0;
+  virtual Status_t read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 
-  virtual Status_t write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg) = 0;
+  virtual Status_t write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 };
 
 /**
@@ -58,6 +64,10 @@ public:
 class iSPI : public iComm
 {
 public:
+
+  iSPI() = default;
+
+  virtual ~iSPI() = default;
 
 };
 
@@ -69,12 +79,9 @@ class bSPI : public iSPI
 public:
 
   bSPI(iSpiBus &bus, iDIO &cs_pin, bool cs_active_state) :
-  m_bus(bus), m_cs_pin(cs_pin), m_cs_active_state(cs_active_state)
+  m_bus(bus), m_cs_pin(cs_pin), m_cs_active_state(cs_active_state),
+  m_cb_function_rx(nullptr), m_cb_function_tx(nullptr)
   {
-    m_cb_function_rx = nullptr;
-    m_cb_function_tx = nullptr;
-    m_cb_arg_rx = nullptr;
-    m_cb_arg_tx = nullptr;
   }
 
   virtual ~bSPI() = default;
@@ -86,26 +93,24 @@ public:
 
   virtual Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
-    return m_bus.read(m_cs_pin, m_cs_active_state, data, timeout, m_cb_function_rx, m_cb_arg_rx);
+    return m_bus.read(m_cs_pin, m_cs_active_state, data, timeout, *m_cb_function_rx);
   }
 
   virtual Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
-    return m_bus.write(m_cs_pin, m_cs_active_state, data, timeout, m_cb_function_tx, m_cb_arg_tx);
+    return m_bus.write(m_cs_pin, m_cs_active_state, data, timeout, *m_cb_function_tx);
   }
 
-  virtual Status_t setCallback(EventsList_t event = EVENT_NONE, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override
+  virtual Status_t setCallback(EventsList_t event, iCallback &event_handler) override
   {
     Status_t status = STATUS_DRV_SUCCESS;
     switch(event)
     {
     case EVENT_READ:
-      m_cb_function_rx = cb_function;
-      m_cb_arg_rx = cb_arg;
+      m_cb_function_rx = &event_handler;
       break;
     case EVENT_WRITE:
-      m_cb_function_tx = cb_function;
-      m_cb_arg_tx = cb_arg;
+      m_cb_function_tx = &event_handler;
       break;
     default:
       status = STATUS_DRV_ERR_PARAM;
@@ -118,8 +123,7 @@ protected:
   iSpiBus &m_bus;
   iDIO &m_cs_pin;
   bool m_cs_active_state;
-  Callback_t m_cb_function_rx, m_cb_function_tx;
-  void *m_cb_arg_rx, *m_cb_arg_tx;
+  iCallback *m_cb_function_rx, *m_cb_function_tx;
 };
 
 

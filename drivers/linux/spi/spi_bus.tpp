@@ -157,7 +157,7 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
  * @return Status_t
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   SpiDataBundle_t data_bundle;
@@ -171,8 +171,7 @@ Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t 
     data_bundle.rx.run = true;
     data_bundle.rx.data = data;
     data_bundle.rx.cs_pin = &cs_pin;
-    data_bundle.rx.cb_function = cb_function;
-    data_bundle.rx.cb_arg = cb_arg;
+    data_bundle.rx.event_handler = &event_handler;
     data_bundle.rx.timeout = timeout;
     data_bundle.tx.run = false;
     if(m_thread_handle.setInputData(data_bundle, 0))
@@ -198,7 +197,7 @@ Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t 
  * @return Status_t
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   SpiDataBundle_t data_bundle;
@@ -212,8 +211,7 @@ Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t
     data_bundle.tx.run = true;
     data_bundle.tx.data = data;
     data_bundle.tx.cs_pin = &cs_pin;
-    data_bundle.tx.cb_function = cb_function;
-    data_bundle.tx.cb_arg = cb_arg;
+    data_bundle.tx.event_handler = &event_handler;
     data_bundle.tx.timeout = timeout;
     data_bundle.rx.run = false;
     if(m_thread_handle.setInputData(data_bundle, 0))
@@ -351,17 +349,17 @@ Status_t SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, v
     if (data_bundle.rx.run)
     {
       status = obj->blockingTransfer(nullptr, data_bundle.rx.data.data(), data_bundle.rx.data.size_bytes());
-      if (data_bundle.rx.cb_function != nullptr)
+      if (data_bundle.rx.event_handler != nullptr)
       {
-        data_bundle.rx.cb_function(status, EVENT_READ, data_bundle.rx.data, data_bundle.rx.cb_arg);
+        data_bundle.rx.event_handler->onEvent(status, EVENT_READ, data_bundle.rx.data);
       }
     }
     if (data_bundle.tx.run)
     {
       status = obj->blockingTransfer(data_bundle.tx.data.data(), nullptr, data_bundle.tx.data.size_bytes());
-      if (data_bundle.tx.cb_function != nullptr)
+      if (data_bundle.tx.event_handler != nullptr)
       {
-        data_bundle.tx.cb_function(status, EVENT_READ, data_bundle.tx.data, data_bundle.tx.cb_arg);
+        data_bundle.tx.event_handler->onEvent(status, EVENT_READ, data_bundle.tx.data);
       }
     }
   }

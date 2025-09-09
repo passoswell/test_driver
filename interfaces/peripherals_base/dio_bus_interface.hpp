@@ -17,6 +17,7 @@
 #include <stdbool.h>
 
 #include "commons.hpp"
+#include "peripherals_base/callback_interface.hpp"
 
 
 /**
@@ -25,6 +26,10 @@
 class DioBusInterface
 {
 public:
+
+  DioBusInterface() = default;
+
+  virtual ~DioBusInterface() = default;
 
   virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
@@ -38,7 +43,7 @@ public:
 
   virtual Status_t toggle(uint32_t pin_mask) = 0;
 
-  virtual Status_t setEventCallback(uint32_t pin, EventsList_t edge, Callback_t cb_function, void *cb_arg) = 0;
+  virtual Status_t setEventCallback(uint32_t pin, EventsList_t edge, iCallback &event_handler) = 0;
 
   virtual Status_t enableEventCallback(uint32_t pin, bool enable) = 0;
 };

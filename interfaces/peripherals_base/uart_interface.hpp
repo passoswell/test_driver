@@ -21,14 +21,15 @@
 #include "peripherals_base/communication_interface.hpp"
 
 
+typedef uint16_t UartHandle_t;
+
 typedef struct
 {
   bool run;
   DrvBuffer_t data;
   uint32_t timeout;
   iDIO *rs485_pin;
-  Callback_t cb_function;
-  void *cb_arg;
+  iCallback *event_handler;
 } UartDataBundle2_t;
 
 typedef struct
@@ -45,11 +46,15 @@ class iUartBus
 {
 public:
 
+  iUartBus() = default;
+
+  virtual ~iUartBus() = default;
+
   virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg) = 0;
+  virtual Status_t read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 
-  virtual Status_t write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg) = 0;
+  virtual Status_t write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 
   virtual uint32_t getBytesAvailable() = 0;
 
@@ -62,6 +67,10 @@ public:
 class iUART : public iComm
 {
 public:
+
+  iUART() = default;
+
+  virtual ~iUART() = default;
 
   virtual uint32_t getBytesRead() = 0;
 };
@@ -77,8 +86,6 @@ public:
   m_bus(bus), m_rs485_pin(rs485_pin),
   m_cb_function_rx(nullptr), m_cb_function_tx(nullptr)
   {
-    m_cb_arg_rx = nullptr;
-    m_cb_arg_tx = nullptr;
   }
 
   virtual ~bUART() = default;
@@ -90,12 +97,12 @@ public:
 
   virtual Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
-    return m_bus.read(m_rs485_pin, data, timeout, m_cb_function_rx, m_cb_arg_rx);
+    return m_bus.read(m_rs485_pin, data, timeout, *m_cb_function_rx);
   }
 
   virtual Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
-    return m_bus.write(m_rs485_pin, data, timeout, m_cb_function_tx, m_cb_arg_tx);
+    return m_bus.write(m_rs485_pin, data, timeout, *m_cb_function_tx);
   }
 
   virtual uint32_t getBytesRead() override
@@ -103,18 +110,16 @@ public:
     return m_bus.getBytesRead();
   }
 
-  virtual Status_t setCallback(EventsList_t event = EVENT_NONE, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override
+  virtual Status_t setCallback(EventsList_t event, iCallback &event_handler) override
   {
     Status_t status = STATUS_DRV_SUCCESS;
     switch(event)
     {
     case EVENT_READ:
-      m_cb_function_rx = cb_function;
-      m_cb_arg_rx = cb_arg;
+      m_cb_function_rx = &event_handler;
       break;
     case EVENT_WRITE:
-      m_cb_function_tx = cb_function;
-      m_cb_arg_tx = cb_arg;
+      m_cb_function_tx = &event_handler;
       break;
     default:
       status = STATUS_DRV_ERR_PARAM;
@@ -126,8 +131,7 @@ public:
 protected:
   iUartBus &m_bus;
   iDIO &m_rs485_pin;
-  Callback_t m_cb_function_rx, m_cb_function_tx;
-  void *m_cb_arg_rx, *m_cb_arg_tx;
+  iCallback *m_cb_function_rx, *m_cb_function_tx;
 };
 
 

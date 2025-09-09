@@ -23,13 +23,15 @@
 /**
  * @brief A mutex based on an atomic variable
  */
-class AtomicMutex : public MutexInterface
+class AtomicMutex final: public MutexInterface
 {
 public:
+
   AtomicMutex()
   {
     m_flag.clear();
   }
+
   ~AtomicMutex() = default;
 
   // Get the ownership of a mutex or timeout

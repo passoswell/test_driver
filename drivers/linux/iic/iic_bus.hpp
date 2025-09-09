@@ -29,12 +29,11 @@
 #define IIC_QUEUE_SIZE                                                         1
 #endif
 
-typedef uint16_t IicHandle_t;
-
 template<IicHandle_t PORT_NUMBER>
-class IicBus : public iIicBus
+class IicBus final: public iIicBus
 {
 public:
+
   static iIicBus& getInstance()
   {
     static IicBus<PORT_NUMBER> instance;
@@ -43,9 +42,9 @@ public:
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(uint16_t address, Buffer_t data, uint32_t timeout = UINT32_MAX, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(uint16_t address, Buffer_t data, uint32_t timeout = UINT32_MAX, Callback_t cb_function = nullptr, void *cb_arg = nullptr) override;
+  Status_t write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   IicBus(const IicBus&) = delete;

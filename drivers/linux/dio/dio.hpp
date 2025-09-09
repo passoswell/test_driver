@@ -18,12 +18,13 @@
 /**
  * @brief Class that export DIO functionalities
  */
-class DIO : public iDIO
+class DIO final: public iDIO
 {
 public:
 
   DIO(uint32_t line_offset, uint32_t chip_number = 0);
-  virtual ~DIO();
+
+  ~DIO();
 
   Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
 
@@ -33,7 +34,7 @@ public:
 
   Status_t toggle() override;
 
-  Status_t setEventCallback(EventsList_t edge = EVENT_NONE, Callback_t function = nullptr, void *user_arg = nullptr) override;
+  Status_t setEventCallback(EventsList_t edge, iCallback &event_handler) override;
 
   Status_t enableInterruption(bool enable) override;
 
@@ -45,8 +46,7 @@ private:
   UtilsInOutSync_t m_sync;
   int m_flags;
   bool m_value;
-  Callback_t m_func;
-  void *m_arg;
+  iCallback *m_event_handler;
   EventsList_t m_edge;
 
   void readAsyncThread(void);

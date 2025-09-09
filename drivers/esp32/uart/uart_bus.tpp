@@ -245,7 +245,7 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
  * @return Status_t
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   Status_t status;
   UartDataBundle_t data_bundle;
@@ -261,8 +261,7 @@ Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t tim
     data_bundle.rx.data = data;
     data_bundle.rx.timeout = timeout;
     data_bundle.rx.rs485_pin = &rs485_pin;
-    data_bundle.rx.cb_function = cb_function;
-    data_bundle.rx.cb_arg = cb_arg;
+    data_bundle.rx.event_handler = &event_handler;
     m_rx_monitor_task_handle.getOutputData(status, 0);
     if (m_rx_monitor_task_handle.setInputData(data_bundle, timeout))
     {
@@ -286,7 +285,7 @@ Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t tim
  * @return Status_t
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, Callback_t cb_function, void *cb_arg)
+Status_t UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   int tx_bytes = 0;
   Status_t status;
@@ -301,8 +300,7 @@ Status_t UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t ti
     data_bundle.tx.data = data;
     data_bundle.tx.timeout = timeout;
     data_bundle.tx.rs485_pin = &rs485_pin;
-    data_bundle.tx.cb_function = cb_function;
-    data_bundle.tx.cb_arg = cb_arg;
+    data_bundle.tx.event_handler = &event_handler;
     m_tx_monitor_task_handle.getOutputData(status, 0);
     if (m_tx_monitor_task_handle.setInputData(data_bundle, timeout))
     {
@@ -403,9 +401,9 @@ Status_t UartBus<PORT_NUMBER>::rxMonitorTask(UartDataBundle_t data_bundle)
       }
 
       status = blockingRead({data_bundle.rx.data.data(), bytes_read}, data_bundle.rx.timeout);
-      if (data_bundle.rx.cb_function != nullptr)
+      if (data_bundle.rx.event_handler != nullptr)
       {
-        data_bundle.rx.cb_function(status, EVENT_WRITE, {data_bundle.rx.data.data(), m_bytes_read}, data_bundle.rx.cb_arg);
+        data_bundle.rx.event_handler->onEvent(status, EVENT_WRITE, {data_bundle.rx.data.data(), m_bytes_read});
       }
       data_bundle.rx.run = false;
       break;
@@ -475,9 +473,9 @@ Status_t UartBus<PORT_NUMBER>::txMonitorTask(UartDataBundle_t data_bundle)
 {
   Status_t status;
   status = blockingWrite(data_bundle.tx.data, data_bundle.tx.timeout, true);
-  if(data_bundle.tx.cb_function != nullptr)
+  if(data_bundle.tx.event_handler != nullptr)
   {
-    data_bundle.tx.cb_function(status, EVENT_WRITE, data_bundle.tx.data, data_bundle.tx.cb_arg);
+    data_bundle.tx.event_handler->onEvent(status, EVENT_WRITE, data_bundle.tx.data);
   }
   return status;
 }

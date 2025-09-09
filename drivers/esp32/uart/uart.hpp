@@ -19,13 +19,15 @@
 #include "esp32/uart/uart_bus.hpp"
 
 template<UartHandle_t PORT_NUMBER>
-class UART : public bUART
+class UART final: public bUART
 {
 public:
 
   UART(iDIO *rs485_pin = nullptr) : bUART(UartBus<PORT_NUMBER>::getInstance(), *rs485_pin)
   {
   }
+
+  ~UART() = default;
 };
 
 #endif /* UART_UART_HPP */

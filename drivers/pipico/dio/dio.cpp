@@ -24,8 +24,7 @@ DIO::DIO(uint32_t line_offset, uint32_t port)
 {
   m_line_number = line_offset;
   m_line_bias = DIO_BIAS_DISABLED;
-  m_func = nullptr;
-  m_arg = nullptr;
+  m_event_handler = nullptr;
   m_edge = EVENT_NONE;
 }
 
@@ -137,14 +136,12 @@ Status_t DIO::toggle()
  * @brief Install an event callback function
  *
  * @param edge The edge that will trigger the event
- * @param func The callback function
- * @param arg A user parameter
+ * @param event_handler The callback object
  * @return Status_t
  */
-Status_t DIO::setEventCallback(EventsList_t edge, Callback_t function, void *user_arg)
+Status_t DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
-  m_func = function;
-  m_arg = user_arg;
+  m_event_handler = &event_handler;
   m_edge = edge;
   return STATUS_DRV_SUCCESS;
 }
@@ -228,14 +225,14 @@ void drvDioCallback(unsigned int dio, uint32_t events)
     // auto i = std::distance(DIO::m_dio_ptr.begin(), iterator);
     if (obj->m_line_number == dio)
     {
-      if(obj->m_func != nullptr)
+      if(obj->m_event_handler != nullptr)
       {
         if(events & GPIO_IRQ_EDGE_RISE)
         {
           edge = EVENT_EDGE_RISING;
           state[0] = true;
         }
-        obj->m_func(STATUS_DRV_SUCCESS, edge, state, obj->m_arg);
+        obj->m_event_handler->onEvent(STATUS_DRV_SUCCESS, edge, state);
       }
       break;
     }

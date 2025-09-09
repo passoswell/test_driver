@@ -25,8 +25,7 @@ DIO::DIO(uint32_t line_offset, uint32_t port)
   m_obj_task_handle = nullptr;
   m_dio_event_task_handle = nullptr;
   m_terminate = false;
-  m_func = nullptr;
-  m_arg = nullptr;
+  m_event_handler = nullptr;
   m_edge = EVENT_NONE;
 }
 
@@ -174,14 +173,12 @@ Status_t DIO::toggle()
  * @brief Install an event callback function
  *
  * @param edge The edge that will trigger the event
- * @param func The callback function
- * @param arg A user parameter
+ * @param event_handler The callback object
  * @return Status_t
  */
-Status_t DIO::setEventCallback(EventsList_t edge, Callback_t function, void *user_arg)
+Status_t DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
-  m_func = function;
-  m_arg = user_arg;
+  m_event_handler = &event_handler;
   m_edge = edge;
   return STATUS_DRV_SUCCESS;
 }
@@ -295,7 +292,7 @@ void DIO::dioEventHandlerTask(void)
     {
       break;
     }
-    if(m_func != nullptr)
+    if(m_event_handler != nullptr)
     {
       state[0] = static_cast<uint8_t>(m_value);
       if(m_value)
@@ -305,10 +302,7 @@ void DIO::dioEventHandlerTask(void)
       {
         edge = EVENT_EDGE_FALLING;
       }
-      if(m_func != nullptr)
-      {
-        m_func(STATUS_DRV_SUCCESS, edge, state, m_arg);
-      }
+      m_event_handler->onEvent(STATUS_DRV_SUCCESS, edge, state);
     }
   }
 

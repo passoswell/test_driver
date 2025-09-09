@@ -17,6 +17,7 @@
 #include <stdbool.h>
 
 #include "commons.hpp"
+#include "peripherals_base/callback_interface.hpp"
 
 
 /**
@@ -26,6 +27,10 @@ class iDIO
 {
 public:
 
+  iDIO() = default;
+
+  virtual ~iDIO() = default;
+
   virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
   virtual Status_t read(bool &state) = 0;
@@ -34,7 +39,7 @@ public:
 
   virtual Status_t toggle() = 0;
 
-  virtual Status_t setEventCallback(EventsList_t edge, Callback_t cb_function, void *cb_arg) = 0;
+  virtual Status_t setEventCallback(EventsList_t edge, iCallback &event_handler) = 0;
 
   virtual Status_t enableInterruption(bool enable) = 0;
 };

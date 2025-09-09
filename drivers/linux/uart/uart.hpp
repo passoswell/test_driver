@@ -18,13 +18,15 @@
 #include "linux/uart/uart_bus.hpp"
 
 template<UartHandle_t PORT_NUMBER>
-class UART : public bUART
+class UART final: public bUART
 {
 public:
 
   UART(iDIO *rs485_pin = nullptr) : bUART(UartBus<PORT_NUMBER>::getInstance(), *rs485_pin)
   {
   }
+
+  ~UART() = default;
 };
 
 #endif /* DRIVERS_LINUX_UART_UART_HPP */
