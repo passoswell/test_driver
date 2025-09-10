@@ -15,13 +15,82 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <system_error>
 
 #include "commons.hpp"
 #include "peripherals_base/communication_interface.hpp"
 
 
+/**
+ * @brief Error codes for IIC peripherals
+ */
+enum class IicErrorCode
+{
+  kSuccess = 0,
+  kInvalidParameter,
+  kTimedOut,                /*!< Operation took more time than expected */
+  kAddressNotAcknowledged,  /*!< The address was not acknowledged */
+  kBusy,                    /*!< Bus already in use by another controller */
+  kBusError,                /*!< Some device needs fault recovery */
+  kArbitrationLost,         /*!< Multi-master arbitration lost */
+};
+
+/**
+ * @brief IIC error codes category
+ */
+class IicErrorCategory : public std::error_category
+{
+public:
+  // Get the error category's name
+  const char* name() const noexcept override { return "i2c_interface"; }
+
+  // Get the error's helper message
+  std::string message(int error_value) const override
+  {
+    switch (static_cast<IicErrorCode>(error_value))
+    {
+      case IicErrorCode::kSuccess: return "Success";
+      case IicErrorCode::kInvalidParameter: return "Invalid input parameter";
+      case IicErrorCode::kTimedOut: return "Operation took more time than expected";
+      case IicErrorCode::kAddressNotAcknowledged: return "The address was not acknowledged";
+      case IicErrorCode::kBusy: return "Bus already in use by another controller";
+      case IicErrorCode::kBusError: return "Some device or the peripheral needs fault recovery";
+      case IicErrorCode::kArbitrationLost: return "Multi-master arbitration lost";
+      default: return "Unknown IIC error";
+    }
+  }
+
+  // Get an instance of the error category
+  static inline const std::error_category& getCategory()
+  {
+  static IicErrorCategory instance;
+  return instance;
+  }
+};
+
+/**
+ * @brief Function overload, convert enum class into an std::error_code
+ *
+ * @param error_code A value from enum IicErrorCode
+ * @return std::error_code
+ */
+inline std::error_code make_error_code(IicErrorCode error_code)
+{
+  return {static_cast<int>(error_code), IicErrorCategory::getCategory()};
+}
+
+// Specializing the standard type trait
+namespace std
+{
+  template<> struct is_error_code_enum<IicErrorCode> : true_type {};
+}
+
+// Type definition for IIC port number
 typedef uint16_t IicHandle_t;
 
+/**
+ * @brief Data used during asynchronous IIC transfers
+ */
 typedef struct
 {
   bool run;
@@ -31,12 +100,14 @@ typedef struct
   iCallback *event_handle;
 } IicDataBundle2_t;
 
+/**
+ * @brief Data used during asynchronous IIC transfers
+ */
 typedef struct
 {
   IicDataBundle2_t rx;
   IicDataBundle2_t tx;
 } IicDataBundle_t;
-
 
 /**
  * @brief Interface class for IIC bus
