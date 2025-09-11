@@ -1,4 +1,5 @@
 add_library(commons INTERFACE
+com_error_code.hpp
 com_status.hpp
 com_types.hpp
 commons.hpp

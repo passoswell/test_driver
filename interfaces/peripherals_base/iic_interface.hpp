@@ -15,7 +15,6 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <system_error>
 
 #include "commons.hpp"
 #include "peripherals_base/communication_interface.hpp"
@@ -38,14 +37,14 @@ enum class IicErrorCode
 /**
  * @brief IIC error codes category
  */
-class IicErrorCategory : public std::error_category
+class IicErrorCategory : public ErrorCategory
 {
 public:
   // Get the error category's name
-  const char* name() const noexcept override { return "i2c_interface"; }
+  constexpr std::string_view name() const noexcept override { return "i2c_interface"; }
 
   // Get the error's helper message
-  std::string message(int error_value) const override
+  constexpr std::string_view message(int error_value) const noexcept override
   {
     switch (static_cast<IicErrorCode>(error_value))
     {
@@ -61,7 +60,7 @@ public:
   }
 
   // Get an instance of the error category
-  static inline const std::error_category& getCategory()
+  static inline const ErrorCategory& getCategory()
   {
   static IicErrorCategory instance;
   return instance;
@@ -74,18 +73,21 @@ public:
  * @param error_code A value from enum IicErrorCode
  * @return std::error_code
  */
-inline std::error_code make_error_code(IicErrorCode error_code)
+inline ErrorCode make_error_code(IicErrorCode error_code)
 {
   return {static_cast<int>(error_code), IicErrorCategory::getCategory()};
 }
 
-// Specializing the standard type trait
-namespace std
-{
-  template<> struct is_error_code_enum<IicErrorCode> : true_type {};
-}
+/**
+ * @brief Specializing ErrorCode to use the specialized make_error_code's definition above
+ */
+template <>
+struct is_error_enum<IicErrorCode> : std::true_type {};
 
-// Type definition for IIC port number
+
+/**
+ * @brief Type definition for IIC port number
+ */
 typedef uint16_t IicHandle_t;
 
 /**
