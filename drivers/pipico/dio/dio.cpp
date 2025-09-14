@@ -40,11 +40,11 @@ DIO::~DIO()
  * @brief Configure a list of parameters
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  Status_t success;
+  ErrorCode success;
   DioDirection_t line_direction = DIO_DIRECTION_INPUT;
   DioDrive_t line_drive = DIO_DRIVE_PUSH_PULL;
   DioBias_t line_bias = DIO_BIAS_DISABLED;
@@ -62,7 +62,7 @@ Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
           break;
         case DIO_LINE_DRIVE:
           if(list[i].value == DIO_DRIVE_PUSH_PULL){ line_drive = DIO_DRIVE_PUSH_PULL;}
-          if(list[i].value == DIO_DRIVE_OPEN_DRAIN){ return STATUS_DRV_ERR_PARAM;}
+          if(list[i].value == DIO_DRIVE_OPEN_DRAIN){ return DioErrorCode::kInvalidParameter;}
           break;
         case DIO_LINE_BIAS:
           if(list[i].value == DIO_BIAS_DISABLED) { line_bias = DIO_BIAS_DISABLED;}
@@ -97,39 +97,39 @@ Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
   }
 
   m_line_bias = line_bias;
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Read from a digital pin
  * @param state The state of the digital pin
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::read(bool &state)
+ErrorCode DIO::read(bool &state)
 {
   state = gpio_get(m_line_number);
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Write to a digital output pin
  * @param state The state to set in the gpio
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::write(bool value)
+ErrorCode DIO::write(bool value)
 {
   gpio_put(m_line_number, value);
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Toggle the state of a digital output
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::toggle()
+ErrorCode DIO::toggle()
 {
   gpio_xor_mask(1 << m_line_number);
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
@@ -137,22 +137,22 @@ Status_t DIO::toggle()
  *
  * @param edge The edge that will trigger the event
  * @param event_handler The callback object
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
+ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
   m_event_handler = &event_handler;
   m_edge = edge;
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Enable or disable callback operation
  *
  * @param enable True to enable callback operation
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::enableInterruption(bool enable)
+ErrorCode DIO::enableInterruption(bool enable)
 {
   uint32_t interruption_type;
 
@@ -172,7 +172,7 @@ Status_t DIO::enableInterruption(bool enable)
         break;
       }
     }
-    return STATUS_DRV_SUCCESS;
+    return DioErrorCode::kSuccess;
   }
 
   switch(m_edge)
@@ -187,7 +187,7 @@ Status_t DIO::enableInterruption(bool enable)
       interruption_type = GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL;
       break;
     default:
-      return STATUS_DRV_ERR_PARAM;
+      return DioErrorCode::kInvalidParameter;
       break;
   }
 
@@ -203,7 +203,7 @@ Status_t DIO::enableInterruption(bool enable)
     gpio_pull_down(m_line_number);
   }
 
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
@@ -232,7 +232,7 @@ void drvDioCallback(unsigned int dio, uint32_t events)
           edge = EVENT_EDGE_RISING;
           state[0] = true;
         }
-        obj->m_event_handler->onEvent(STATUS_DRV_SUCCESS, edge, state);
+        obj->m_event_handler->onEvent(DioErrorCode::kSuccess, edge, state);
       }
       break;
     }
