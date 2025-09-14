@@ -17,12 +17,13 @@
  *
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  esp_err_t ret;
+  ErrorCode status = SpiErrorCode::kSuccess;
+  esp_err_t esp_error;
   spi_bus_config_t bus_parameters;
   spi_device_interface_config_t device_parameters;
   int mode = 0, max_baud = 1000000;
@@ -83,14 +84,16 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
     }
   }else
   {
-    return STATUS_DRV_ERR_PARAM;
+    return SpiErrorCode::kInvalidParameter;
   }
 
   //Initialize the SPI bus
-  ret = spi_bus_initialize((spi_host_device_t)PORT_NUMBER, &bus_parameters, SPI_DMA_CH_AUTO);
-  if (ret != ESP_OK && ret != ESP_ERR_INVALID_STATE)
+  esp_error = spi_bus_initialize((spi_host_device_t)PORT_NUMBER, &bus_parameters, SPI_DMA_CH_AUTO);
+  if (esp_error != ESP_OK && esp_error != ESP_ERR_INVALID_STATE)
   {
-    return convertErrorCode(ret);
+    status = SpiErrorCode::kFailed;
+    status.setMessage( getErrorMessage(esp_error));
+    return status;
   }
 
   // Configuring the device
@@ -111,8 +114,8 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
   device_parameters.input_delay_ns = 0; // Leave at 0 unless you know you need a delay
 
   // Attach the EEPROM to the SPI bus
-  ret = spi_bus_add_device((spi_host_device_t)PORT_NUMBER, &device_parameters, &m_esp_handle);
-  if (ret != ESP_OK)
+  esp_error = spi_bus_add_device((spi_host_device_t)PORT_NUMBER, &device_parameters, &m_esp_handle);
+  if (esp_error != ESP_OK)
   {
     // cleanup;
     if (m_esp_handle)
@@ -120,10 +123,12 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
       spi_bus_remove_device(m_esp_handle);
       m_esp_handle = NULL;
     }
-    return convertErrorCode(ret);
+    status = SpiErrorCode::kFailed;
+    status.setMessage( getErrorMessage(esp_error));
+    return status;
   }
 
-  return STATUS_DRV_SUCCESS;
+  return SpiErrorCode::kSuccess;
 }
 
 /**
@@ -132,14 +137,14 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
  * @param data Buffer to store the data
  * @param byte_count Number of bytes to read
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   if(m_is_async_mode_rx)
   {
-    return STATUS_DRV_NOT_IMPLEMENTED;
+    return SpiErrorCode::kNotImplemented;
   }else
   {
     m_cs_active_state = cs_active_state;
@@ -153,14 +158,14 @@ Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t 
  * @param data Buffer where data is stored
  * @param byte_count Number of bytes to write
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
   if(m_is_async_mode_tx)
   {
-    return STATUS_DRV_NOT_IMPLEMENTED;
+    return SpiErrorCode::kNotImplemented;
   }else
   {
     m_cs_active_state = cs_active_state;
@@ -174,21 +179,30 @@ Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t
  * @param txBuf Buffer where data to write is stored
  * @param rxBuf Buffer to store the data read
  * @param byte_count Number of bytes to write and read
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
+ErrorCode SpiBus<PORT_NUMBER>::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
 {
-  Status_t status;
+  ErrorCode status = SpiErrorCode::kSuccess;
+  esp_err_t esp_error = ESP_OK;
   spi_transaction_t trans_desc;
-  esp_err_t ret;
   trans_desc.flags = 0;
   trans_desc.length = 8 * byte_count;
   trans_desc.rx_buffer = rxBuf;
   trans_desc.rxlength = trans_desc.length;
   trans_desc.tx_buffer = txBuf;
   trans_desc.user = this;
-  return convertErrorCode(spi_device_polling_transmit(m_esp_handle, &trans_desc));
+  esp_error = spi_device_polling_transmit(m_esp_handle, &trans_desc);
+  if(esp_error == ESP_OK)
+  {
+    status = SpiErrorCode::kSuccess;
+  }else
+  {
+    status = SpiErrorCode::kFailed;
+    status.setMessage(getErrorMessage(esp_error));
+  }
+  return status;
 }
 
 /**

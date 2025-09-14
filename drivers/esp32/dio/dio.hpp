@@ -26,17 +26,17 @@ public:
 
   ~DIO();
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(bool &state) override;
+  ErrorCode read(bool &state) override;
 
-  Status_t write(bool value) override;
+  ErrorCode write(bool value) override;
 
-  Status_t toggle() override;
+  ErrorCode toggle() override;
 
-  Status_t setEventCallback(EventsList_t edge, iCallback &event_handler) override;
+  ErrorCode setEventCallback(EventsList_t edge, iCallback &event_handler) override;
 
-  Status_t enableInterruption(bool enable) override;
+  ErrorCode enableInterruption(bool enable) override;
 
 private:
   uint32_t m_line_number;

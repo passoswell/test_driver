@@ -28,6 +28,7 @@ enum class SpiErrorCode
 {
   kSuccess = 0,
   kFailed,
+  kNotImplemented,
   kInvalidParameter,
   kNotConfigured,
   kNullPointer,
@@ -54,6 +55,7 @@ public:
     switch (static_cast<SpiErrorCode>(error_value))
     {
       case SpiErrorCode::kSuccess: return "Success";
+      case SpiErrorCode::kNotImplemented: return "Feature not implemented";
       case SpiErrorCode::kInvalidParameter: return "Invalid input parameter";
       case SpiErrorCode::kNotConfigured: return "Resource is not properly configured";
       case SpiErrorCode::kNullPointer: return "A null pointer was detected";

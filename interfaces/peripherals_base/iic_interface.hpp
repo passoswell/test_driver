@@ -27,6 +27,7 @@ enum class IicErrorCode
 {
   kSuccess = 0,
   kFailed,
+  kNotImplemented,
   kInvalidParameter,
   kNotConfigured,
   kNullPointer,
@@ -53,6 +54,7 @@ public:
     switch (static_cast<IicErrorCode>(error_value))
     {
       case IicErrorCode::kSuccess: return "Success";
+      case IicErrorCode::kNotImplemented: return "Feature not implemented";
       case IicErrorCode::kInvalidParameter: return "Invalid input parameter";
       case IicErrorCode::kNotConfigured: return "Resource is not properly configured";
       case IicErrorCode::kNullPointer: return "A null pointer was detected";

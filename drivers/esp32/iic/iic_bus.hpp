@@ -37,11 +37,11 @@ public:
     return instance;
   }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   IicBus(const IicBus&) = delete;
@@ -57,7 +57,7 @@ private:
 
   ~IicBus() = default;
 
-  Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
+  ErrorCode checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
 };
 
 #include "iic_bus.tpp"

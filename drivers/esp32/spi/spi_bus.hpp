@@ -33,11 +33,11 @@ public:
     return instance;
   }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   SpiBus(const SpiBus&) = delete;
@@ -56,9 +56,9 @@ private:
 
   ~SpiBus() = default;
 
-  Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
+  ErrorCode checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
 
-  Status_t xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
+  ErrorCode xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
 
   static void cs_select(spi_transaction_t* t);
 

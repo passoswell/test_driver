@@ -17,17 +17,18 @@
  * @brief Configure a list of parameters
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  Status_t status;
+  ErrorCode status = IicErrorCode::kSuccess;
+  esp_err_t esp_error = ESP_OK;
   i2c_config_t i2c_config;
 
   if(m_is_configured)
   {
-    return STATUS_DRV_SUCCESS;
+    return IicErrorCode::kSuccess;
   }
 
   i2c_config.mode = I2C_MODE_MASTER;
@@ -77,59 +78,81 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
     }
   }
 
-  status = convertErrorCode( i2c_param_config((i2c_port_t)PORT_NUMBER, &i2c_config) );
-  if(!status.success)
+  esp_error = i2c_param_config((i2c_port_t)PORT_NUMBER, &i2c_config);
+  if(esp_error != ESP_OK)
   {
+    status = IicErrorCode::kFailed;
+    status.setMessage(getErrorMessage(esp_error));
     return status;
   }
 
-  status = convertErrorCode( i2c_driver_install((i2c_port_t)PORT_NUMBER, i2c_config.mode, 0, 0, 0) );
-  if(!status.success)
+  esp_error = i2c_driver_install((i2c_port_t)PORT_NUMBER, i2c_config.mode, 0, 0, 0);
+  if(esp_error != ESP_OK)
   {
+    status = IicErrorCode::kFailed;
+    status.setMessage(getErrorMessage(esp_error));
     return status;
   }
 
   m_is_configured = true;
-  return STATUS_DRV_SUCCESS;
+  return IicErrorCode::kSuccess;
 }
 
 template <IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status = IicErrorCode::kSuccess;
+  esp_err_t esp_error = ESP_OK;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
-  if(!status.success)
+  if(!status)
   {
     return status;
   }
 
   if(m_is_async_mode_rx)
   {
-    status = STATUS_DRV_NOT_IMPLEMENTED;
+    status = IicErrorCode::kNotImplemented;
   }else
   {
-    status = convertErrorCode( i2c_master_read_from_device((i2c_port_t)PORT_NUMBER, address, data.data(), data.size_bytes(), timeout / portTICK_PERIOD_MS) );
+    esp_error = i2c_master_read_from_device((i2c_port_t)PORT_NUMBER, address, data.data(), data.size_bytes(), timeout / portTICK_PERIOD_MS);
+    if(esp_error == ESP_OK)
+    {
+      status = IicErrorCode::kSuccess;
+    }else
+    {
+      status = IicErrorCode::kFailed;
+      status.setMessage(getErrorMessage(esp_error));
+    }
   }
 
   return status;
 }
 
 template <IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status = IicErrorCode::kSuccess;
+  esp_err_t esp_error = ESP_OK;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
-  if(!status.success)
+  if(!status)
   {
     return status;
   }
 
   if(m_is_async_mode_tx)
   {
-    status = STATUS_DRV_NOT_IMPLEMENTED;
+    status = IicErrorCode::kNotImplemented;
   }else
   {
-    status = convertErrorCode(i2c_master_write_to_device((i2c_port_t)PORT_NUMBER, address, data.data(), data.size_bytes(), timeout / portTICK_PERIOD_MS));
+    esp_error = i2c_master_write_to_device((i2c_port_t)PORT_NUMBER, address, data.data(), data.size_bytes(), timeout / portTICK_PERIOD_MS);
+    if(esp_error == ESP_OK)
+    {
+      status = IicErrorCode::kSuccess;
+    }else
+    {
+      status = IicErrorCode::kFailed;
+      status.setMessage(getErrorMessage(esp_error));
+    }
   }
 
   return status;
@@ -140,12 +163,12 @@ Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t ti
  * @param buffer Data buffer
  * @param size Number of bytes in the data buffer
  * @param timeout Operation timeout value
- * @return Status_t
+ * @return ErrorCode
  */
 template <IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
+ErrorCode IicBus<PORT_NUMBER>::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
-  if(buffer == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  if(size == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
-  return STATUS_DRV_SUCCESS;
+  if(buffer == nullptr) { return IicErrorCode::kNullPointer;}
+  if(size == 0) { return IicErrorCode::kInvalidParameter;}
+  return IicErrorCode::kSuccess;
 }

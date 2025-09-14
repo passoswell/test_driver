@@ -41,11 +41,11 @@ DIO::~DIO()
  * @brief Configure a list of parameters
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  Status_t success;
+  ErrorCode success;
   gpio_config_t settings =
   {
     .pin_bit_mask = 0,
@@ -120,10 +120,10 @@ Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
   esp_err |= gpio_config(&settings);
   if(esp_err == ESP_OK)
   {
-    success = STATUS_DRV_SUCCESS;
+    success = DioErrorCode::kSuccess;
   }else
   {
-    success = STATUS_DRV_ERR_PARAM;
+    success = DioErrorCode::kInvalidParameter;
   }
 
   return success;
@@ -132,38 +132,38 @@ Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
 /**
  * @brief Read from a digital pin
  * @param state The state of the digital pin
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::read(bool &state)
+ErrorCode DIO::read(bool &state)
 {
   state = gpio_get_level((gpio_num_t) m_line_number);
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Write to a digital output pin
  * @param state The state to set in the dio
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::write(bool value)
+ErrorCode DIO::write(bool value)
 {
   esp_err_t esp_err;
   esp_err = gpio_set_level((gpio_num_t) m_line_number, value);
   if(esp_err == ESP_OK)
   {
     m_value = (bool) value;
-    return STATUS_DRV_SUCCESS;
+    return DioErrorCode::kSuccess;
   }else
   {
-    return STATUS_DRV_ERR_PARAM;
+    return DioErrorCode::kInvalidParameter;
   }
 }
 
 /**
  * @brief Toggle the state of a digital output
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::toggle()
+ErrorCode DIO::toggle()
 {
   m_value = !m_value;
   return write(m_value);
@@ -174,22 +174,22 @@ Status_t DIO::toggle()
  *
  * @param edge The edge that will trigger the event
  * @param event_handler The callback object
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
+ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
   m_event_handler = &event_handler;
   m_edge = edge;
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Enable or disable callback operation
  *
  * @param enable True to enable callback operation
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::enableInterruption(bool enable)
+ErrorCode DIO::enableInterruption(bool enable)
 {
   gpio_int_type_t interruption_type;
   TaskProfile_t parameters;
@@ -200,7 +200,7 @@ Status_t DIO::enableInterruption(bool enable)
     gpio_set_intr_type((gpio_num_t)m_line_number, GPIO_INTR_DISABLE);
     gpio_isr_handler_remove((gpio_num_t)m_line_number);
     terminateDioEventHandlerTask();
-    return STATUS_DRV_SUCCESS;
+    return DioErrorCode::kSuccess;
   }
 
   // install dio isr service
@@ -218,7 +218,7 @@ Status_t DIO::enableInterruption(bool enable)
       interruption_type = GPIO_INTR_ANYEDGE;
       break;
     default:
-      return STATUS_DRV_ERR_PARAM;
+      return DioErrorCode::kInvalidParameter;
       break;
   }
 
@@ -240,8 +240,8 @@ Status_t DIO::enableInterruption(bool enable)
     if(freertos_return != pdTRUE)
     {
       m_dio_event_task_handle = nullptr;
-      Status_t status;
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to create dioEventHandlerTask");
+      ErrorCode status = DioErrorCode::kFailed;
+      status.setMessage("Failed to create dioEventHandlerTask");
       return status;
     }else
     {
@@ -251,7 +251,7 @@ Status_t DIO::enableInterruption(bool enable)
     gpio_isr_handler_add((gpio_num_t)m_line_number, callback, this);
   }
 
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
@@ -302,7 +302,7 @@ void DIO::dioEventHandlerTask(void)
       {
         edge = EVENT_EDGE_FALLING;
       }
-      m_event_handler->onEvent(STATUS_DRV_SUCCESS, edge, state);
+      m_event_handler->onEvent(DioErrorCode::kSuccess, edge, state);
     }
   }
 

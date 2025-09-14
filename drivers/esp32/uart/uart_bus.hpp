@@ -37,11 +37,11 @@ public:
     return instance;
   }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   uint32_t getBytesAvailable() override;
 
@@ -60,8 +60,8 @@ protected:
   TaskHandle_t m_event_task_handle;
   Mutex m_rx_mutex, m_tx_mutex;
   bool m_is_async_mode_rx, m_is_async_mode_tx;
-  Task<UartDataBundle_t, 1, Status_t, 1> m_tx_monitor_task_handle;
-  Task<UartDataBundle_t, 1, Status_t, 1> m_rx_monitor_task_handle;
+  Task<UartDataBundle_t, 1, ErrorCode, 1> m_tx_monitor_task_handle;
+  Task<UartDataBundle_t, 1, ErrorCode, 1> m_rx_monitor_task_handle;
 
   uint32_t m_bytes_read;
 
@@ -69,15 +69,15 @@ protected:
 
   ~UartBus();
 
-  Status_t checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
+  ErrorCode checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout);
 
-  Status_t rxMonitorTask(UartDataBundle_t data_bundle);
+  ErrorCode rxMonitorTask(UartDataBundle_t data_bundle);
 
-  Status_t blockingRead(Buffer_t data, uint32_t timeout);
+  ErrorCode blockingRead(Buffer_t data, uint32_t timeout);
 
-  Status_t txMonitorTask(UartDataBundle_t data_bundle);
+  ErrorCode txMonitorTask(UartDataBundle_t data_bundle);
 
-  Status_t blockingWrite(Buffer_t data, uint32_t timeout, bool wait_end_of_transmission);
+  ErrorCode blockingWrite(Buffer_t data, uint32_t timeout, bool wait_end_of_transmission);
 
   void terminateRxEventTask(void);
 };
