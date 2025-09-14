@@ -35,11 +35,11 @@ class ErrorCode
 {
 public:
   // Default constructor
-  constexpr ErrorCode() : m_value(0), m_category(nullptr) {}
+  constexpr ErrorCode()
+      : m_value(0), m_category(nullptr), m_custom_message(nullptr) {}
 
-  // Constructor that receives error value and error category
-  constexpr ErrorCode(int value, const ErrorCategory& category)
-    : m_value(value), m_category(&category) {}
+  constexpr ErrorCode(int value, const ErrorCategory &category, const char *custom_message = nullptr)
+      : m_value(value), m_category(&category), m_custom_message(custom_message) {}
 
   // Templated constructor for automatic conversion of enums into ErrorCode
   template <typename Enum,
@@ -48,7 +48,10 @@ public:
     : ErrorCode(make_error_code(error_enum_item)) {}
 
   // Return the error value
-  constexpr int value() const noexcept { return m_value; }
+  constexpr int value() const noexcept
+  {
+    return m_value;
+  }
 
   // Return the error category
   constexpr const ErrorCategory& category() const noexcept
@@ -65,12 +68,28 @@ public:
   // Returns an error message
   std::string_view message() const noexcept
   {
-    return m_category ? m_category->message(m_value) : "No category";
+    if (m_custom_message != nullptr)
+    {
+      return m_custom_message;
+    }else if(m_category != nullptr)
+    {
+      return m_category->message(m_value);
+    }else
+    {
+      return "No category";
+    }
+  }
+
+  // Set a custom error message
+  void setMessage(const std::string_view message)
+  {
+    m_custom_message = message.data();
   }
 
 private:
   int m_value;
   const ErrorCategory* m_category;
+  const char* m_custom_message;
 };
 
 #endif /* COMMONS_COM_ERROR_CODE_HPP */
