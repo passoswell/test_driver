@@ -11,11 +11,13 @@
 
 #include "linux/uart/uart_bus.hpp"
 
+#include <cstdio>
+#include <cstring>
+
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <stdio.h>
 
 #include "linux/utils/linux_io.hpp"
 
@@ -26,13 +28,13 @@ static speed_t convertSpeed(uint32_t speed);
  *
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
   static Mutex mutex;
-  Status_t status;
+  ErrorCode status = UartErrorCode::kSuccess;
   struct termios termios_structure;
   speed_t speed = B1152000;
   uint32_t stop_bits_count = 1;
@@ -45,7 +47,7 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   if(m_is_configured)
   {
     mutex.unlock();
-    return STATUS_DRV_SUCCESS;
+    return UartErrorCode::kSuccess;
   }
 
 
@@ -103,7 +105,8 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     result = m_rx_thread_handle.create(UartBus::asyncReadThread, this, 0);
     if(!result)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch UartBus task for reception.\r\n");
+      status = UartErrorCode::kFailed;
+      status.setMessage("Failed to launch UartBus task for reception");
       mutex.unlock();
       return status;
     }
@@ -117,7 +120,8 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     result = m_tx_thread_handle.create(UartBus::asyncWriteThread, this, 0);
     if(!result)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch UartBus task for transmission.\r\n");
+      status = UartErrorCode::kFailed;
+      status.setMessage("Failed to launch UartBus task for transmission");
       mutex.unlock();
       return status;
     }
@@ -131,14 +135,16 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", PORT_NUMBER);
   if(n_bytes < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to find the file name for UartBus driver.\r\n");
+    status = UartErrorCode::kFailed;
+    status.setMessage("Failed to find the file name for UartBus driver");
     mutex.unlock();
     return status;
   }
   m_fd = open(port_name, O_RDWR | O_NOCTTY);
   if (m_fd < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file for UartBus driver.\r\n");
+    status = UartErrorCode::kFailed;
+    status.setMessage("Failed to open file for UartBus driver");
     mutex.unlock();
     return status;
   }
@@ -195,7 +201,7 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   tcsetattr(m_fd, TCSANOW, &termios_structure);
 
   mutex.unlock();
-  return STATUS_DRV_SUCCESS;
+  return UartErrorCode::kSuccess;
 }
 
 /**
@@ -206,17 +212,17 @@ Status_t UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
  * @param timeout
  * @param cb_function
  * @param cb_arg
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status = UartErrorCode::kSuccess;
   int bytes_read = 0;
   UartDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status.success) { return status;}
+  if(!status) { return status;}
 
 
   if(m_is_async_mode_rx)
@@ -228,10 +234,10 @@ Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t tim
     data_bundle.rx.event_handler = &event_handler;
     if(m_rx_thread_handle.setInputData(data_bundle, timeout))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = UartErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = UartErrorCode::kBusy;
     }
   }else
   {
@@ -241,7 +247,7 @@ Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t tim
       m_rx_mutex.unlock();
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = UartErrorCode::kBusy;
     }
   }
 
@@ -256,17 +262,17 @@ Status_t UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t tim
  * @param timeout
  * @param cb_function
  * @param cb_arg
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status = UartErrorCode::kSuccess;
   int bytes_written, drain_status;
   UartDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status.success) { return status;}
+  if(!status) { return status;}
 
 
   if(m_is_async_mode_tx)
@@ -278,10 +284,10 @@ Status_t UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t ti
     data_bundle.tx.event_handler = &event_handler;
     if(m_tx_thread_handle.setInputData(data_bundle, 0))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = UartErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = UartErrorCode::kBusy;
     }
   }else
   {
@@ -291,7 +297,7 @@ Status_t UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t ti
       m_tx_mutex.unlock();
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = UartErrorCode::kBusy;
     }
   }
 
@@ -352,12 +358,12 @@ UartBus<PORT_NUMBER>::~UartBus()
  * @param byte_count Number of bytes to read
  * @param timeout Time to wait in milliseconds before returning an error
  * @param use_idle_line_detection
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout, bool use_idle_line_detection)
+ErrorCode UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout, bool use_idle_line_detection)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = UartErrorCode::kSuccess;
   int bytes_read = 0;
 
   if(use_idle_line_detection)
@@ -380,13 +386,15 @@ Status_t UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout, 
   if(bytes_read < 0)
   {
     m_bytes_read = 0;
-    status = convertErrnoCode(errno);
+    status = UartErrorCode::kFailed;
+    status.setMessage(std::strerror(errno));
+    return status;
   }else
   {
     m_bytes_read = bytes_read;
     if (bytes_read == 0)
     {
-      status = STATUS_DRV_TIMED_OUT;
+      status = UartErrorCode::kTimedOut;
     }
   }
 
@@ -398,12 +406,12 @@ Status_t UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout, 
  *
  * @param data_bundle Data needed to perform the operation
  * @param user_arg Parameter to be passed to a callback function
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::asyncReadThread(UartDataBundle_t data_bundle, void *user_arg)
+ErrorCode UartBus<PORT_NUMBER>::asyncReadThread(UartDataBundle_t data_bundle, void *user_arg)
 {
-  Status_t status = STATUS_DRV_NULL_POINTER;
+  ErrorCode status = UartErrorCode::kSuccess;
   UartBus *obj = static_cast<UartBus *>(user_arg);
 
   if(obj != nullptr)
@@ -423,22 +431,27 @@ Status_t UartBus<PORT_NUMBER>::asyncReadThread(UartDataBundle_t data_bundle, voi
  * @param data Buffer where data is stored
  * @param byte_count Number of bytes to write
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::blockingWrite(DrvBuffer_t data, uint32_t timeout, bool wait_end_of_transmission)
+ErrorCode UartBus<PORT_NUMBER>::blockingWrite(DrvBuffer_t data, uint32_t timeout, bool wait_end_of_transmission)
 {
+  ErrorCode status = UartErrorCode::kSuccess;
   int bytes_written, drain_status;
   bytes_written = writeSyscall(m_fd, data.data(), data.size_bytes());
   if(bytes_written != data.size_bytes())
   {
-    return convertErrnoCode(errno);
+    status = UartErrorCode::kFailed;
+    status.setMessage(std::strerror(errno));
+    return status;
   }
   if (wait_end_of_transmission)
   {
     drain_status = tcdrain(m_fd); // Wait until all data is written to the port
   }
-  return convertErrnoCode(errno);;
+  status = UartErrorCode::kFailed;
+  status.setMessage(std::strerror(errno));
+  return status;
 }
 
 /**
@@ -446,12 +459,12 @@ Status_t UartBus<PORT_NUMBER>::blockingWrite(DrvBuffer_t data, uint32_t timeout,
  *
  * @param data_bundle Data needed to perform the operation
  * @param user_arg Parameter to be passed to a callback function
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::asyncWriteThread(UartDataBundle_t data_bundle, void *user_arg)
+ErrorCode UartBus<PORT_NUMBER>::asyncWriteThread(UartDataBundle_t data_bundle, void *user_arg)
 {
-  Status_t status = STATUS_DRV_NULL_POINTER;
+  ErrorCode status = UartErrorCode::kSuccess;
   UartBus *obj = static_cast<UartBus *>(user_arg);
 
   if(obj != nullptr)
@@ -472,15 +485,16 @@ Status_t UartBus<PORT_NUMBER>::asyncWriteThread(UartDataBundle_t data_bundle, vo
  * @param size Number of bytes in the data buffer
  * @param timeout Operation timeout value
  * @param key Parameter
- * @return Status_t
+ * @return ErrorCode
  */
 template<UartHandle_t PORT_NUMBER>
-Status_t UartBus<PORT_NUMBER>::checkInputs(const DrvBuffer_t data, uint32_t timeout)
+ErrorCode UartBus<PORT_NUMBER>::checkInputs(const DrvBuffer_t data, uint32_t timeout)
 {
-  if(data.data() == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  if(m_fd < 0) { return STATUS_DRV_BAD_HANDLE;}
-  if(data.size_bytes() == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
-  return STATUS_DRV_SUCCESS;
+  if(!m_is_configured) { return UartErrorCode::kNotConfigured;}
+  if(data.data() == nullptr) { return UartErrorCode::kNullPointer;}
+  if(m_fd < 0) { return UartErrorCode::kBadHandle;}
+  if(data.size_bytes() == 0) { return UartErrorCode::kInvalidParameter;}
+  return UartErrorCode::kSuccess;
 }
 
 /**

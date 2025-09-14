@@ -42,11 +42,11 @@ public:
     return instance;
   }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   uint32_t getBytesAvailable() override;
 
@@ -59,8 +59,8 @@ public:
   UartBus& operator=(UartBus&&) = delete;
 
 protected:
-  Task<UartDataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_rx_thread_handle;
-  Task<UartDataBundle_t, UART_QUEUE_SIZE, Status_t, 0> m_tx_thread_handle;
+  Task<UartDataBundle_t, UART_QUEUE_SIZE, ErrorCode, 0> m_rx_thread_handle;
+  Task<UartDataBundle_t, UART_QUEUE_SIZE, ErrorCode, 0> m_tx_thread_handle;
   Mutex m_rx_mutex, m_tx_mutex;
   bool m_is_async_mode_rx, m_is_async_mode_tx;
   bool m_is_configured;
@@ -71,15 +71,15 @@ protected:
 
   virtual ~UartBus();
 
-  Status_t blockingRead(Buffer_t data, uint32_t timeout, bool use_idle_line_detection);
+  ErrorCode blockingRead(Buffer_t data, uint32_t timeout, bool use_idle_line_detection);
 
-  static Status_t asyncReadThread(UartDataBundle_t data_bundle, void *user_arg);
+  static ErrorCode asyncReadThread(UartDataBundle_t data_bundle, void *user_arg);
 
-  Status_t blockingWrite(Buffer_t data, uint32_t timeout, bool wait_end_of_transmission);
+  ErrorCode blockingWrite(Buffer_t data, uint32_t timeout, bool wait_end_of_transmission);
 
-  static Status_t asyncWriteThread(UartDataBundle_t data_bundle, void *user_arg);
+  static ErrorCode asyncWriteThread(UartDataBundle_t data_bundle, void *user_arg);
 
-  Status_t checkInputs(const Buffer_t data, uint32_t timeout);
+  ErrorCode checkInputs(const Buffer_t data, uint32_t timeout);
 };
 
 #include "uart_bus.tpp"

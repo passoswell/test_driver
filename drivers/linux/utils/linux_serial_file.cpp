@@ -11,6 +11,9 @@
 
  #include "linux/utils/linux_serial_file.hpp"
 
+#include <cstdio>
+#include <cstring>
+
 #include <termios.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -48,15 +51,15 @@ LinuxSerialFile::~LinuxSerialFile()
  * @brief Configure a list of parameters
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  Status_t status;
+  ErrorCode status = SerialFileErrorCode::kSuccess;
   struct termios termios_structure;
   bool result;
 
-  if(m_handle == nullptr) { return STATUS_DRV_NULL_POINTER;}
+  if(m_handle == nullptr) { return SerialFileErrorCode::kNullPointer;}
 
   if(list != nullptr && list_size != 0)
   {
@@ -81,7 +84,8 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
     result = m_rx_thread_handle.create(LinuxSerialFile::readFromThreadBlocking, this, 0);
     if(!result)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch LinuxSerialFile task for reading.\r\n");
+      status = SerialFileErrorCode::kFailed;
+      status.setMessage("Failed to launch LinuxSerialFile task for reading");
       return status;
     }
   }else
@@ -94,7 +98,8 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
     result &= m_tx_thread_handle.create(LinuxSerialFile::writeFromThreadBlocking, this, 0);
     if(!result)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch LinuxSerialFile task for writing.\r\n");
+      status = SerialFileErrorCode::kFailed;
+      status.setMessage("Failed to launch LinuxSerialFile task for writing");
       return status;
     }
   }else
@@ -105,7 +110,8 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
   m_linux_handle = open((char *)m_handle, O_RDWR | O_NOCTTY);
   if (m_linux_handle < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open file.\r\n");
+    status = SerialFileErrorCode::kFailed;
+    status.setMessage("Failed to open file");
     return status;
   }
   tcgetattr(m_linux_handle, &termios_structure);
@@ -119,7 +125,7 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
   tcflush(m_linux_handle, TCIFLUSH);
   tcsetattr(m_linux_handle, TCSANOW, &termios_structure);
 
-  return STATUS_DRV_SUCCESS;
+  return SerialFileErrorCode::kSuccess;
 }
 
 /**
@@ -127,16 +133,16 @@ Status_t LinuxSerialFile::configure(const SettingsList_t *list, uint8_t list_siz
  * @param data Buffer to store the data on reception
  * @param byte_count Number of bytes to read
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::read(DrvBuffer_t data, uint32_t timeout)
+ErrorCode LinuxSerialFile::read(DrvBuffer_t data, uint32_t timeout)
 {
-  Status_t status;
+  ErrorCode status;
   int bytes_read = 0;
   DrvDataBundle_t data_bundle;
 
-  status = checkInputs(data.data(), data.size_bytes(), timeout, m_handle, m_linux_handle);
-  if(!status.success) { return status;}
+  status = checkInputs(data, timeout);
+  if(!status) { return status;}
 
   m_bytes_read = 0;
 
@@ -146,10 +152,10 @@ Status_t LinuxSerialFile::read(DrvBuffer_t data, uint32_t timeout)
     data_bundle.rx.timeout = timeout;
     if(m_rx_thread_handle.setInputData(data_bundle, 0))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = SerialFileErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = SerialFileErrorCode::kBusy;
     }
   }else
   {
@@ -164,16 +170,16 @@ Status_t LinuxSerialFile::read(DrvBuffer_t data, uint32_t timeout)
  * @param data Buffer where data is stored
  * @param byte_count Number of bytes to write
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
+ErrorCode LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
 {
-  Status_t status;
+  ErrorCode status;
   int bytes_written, drain_status;
   DrvDataBundle_t data_bundle;
 
-  status = checkInputs(data.data(), data.size_bytes(), timeout, m_handle, m_linux_handle);
-  if(!status.success) { return status;}
+  status = checkInputs(data, timeout);
+  if(!status) { return status;}
 
   if(m_is_async_mode_tx)
   {
@@ -181,10 +187,10 @@ Status_t LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
     data_bundle.tx.timeout = timeout;
     if(m_tx_thread_handle.setInputData(data_bundle, 0))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = SerialFileErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = SerialFileErrorCode::kBusy;
     }
   }else
   {
@@ -199,11 +205,11 @@ Status_t LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
  * @param event An event to trigger the call
  * @param function A function to call back on the occurrence of the event
  * @param user_arg A argument used as a parameter to the callback function
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::setCallback(EventsList_t event, iCallback &event_handler)
+ErrorCode LinuxSerialFile::setCallback(EventsList_t event, iCallback &event_handler)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = SerialFileErrorCode::kSuccess;
 
   switch (event)
   {
@@ -214,7 +220,7 @@ Status_t LinuxSerialFile::setCallback(EventsList_t event, iCallback &event_handl
     m_event_handler_tx = &event_handler;
     break;
   default:
-    status = STATUS_DRV_ERR_PARAM;
+    status = SerialFileErrorCode::kInvalidParameter;
     break;
   }
 
@@ -227,11 +233,11 @@ Status_t LinuxSerialFile::setCallback(EventsList_t event, iCallback &event_handl
  * @param byte_count Number of bytes to read
  * @param timeout Time to wait in milliseconds before returning an error
  * @param call_back True if should call the callback function
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back)
+ErrorCode LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = SerialFileErrorCode::kSuccess;
   int bytes_read = 0;
   if (timeout == 0)
   {
@@ -244,13 +250,14 @@ Status_t LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_
 
   if(bytes_read < 0)
   {
-    status = convertErrnoCode(errno);
+    status = SerialFileErrorCode::kFailed;
+    status.setMessage(std::strerror(errno));
   }else
   {
     m_bytes_read = bytes_read;
     if(bytes_read == 0)
     {
-      status = STATUS_DRV_TIMED_OUT;
+      status = SerialFileErrorCode::kTimedOut;
     }
   }
 
@@ -267,16 +274,16 @@ Status_t LinuxSerialFile::readBlocking(uint8_t *data, Size_t byte_count, uint32_
  * @brief Thread to perform file read operation in parallel
  * @param data_bundle Data needed to perform the operation
  * @param self_ptr A pointer to a object of type LinuxSerialFile
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::readFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr)
+ErrorCode LinuxSerialFile::readFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr)
 {
   LinuxSerialFile *obj = static_cast<LinuxSerialFile *>(self_ptr);
   if(obj != nullptr)
   {
     return obj->readBlocking(data_bundle.rx.data.data(), data_bundle.rx.data.size(), data_bundle.rx.timeout, true);
   }
-  return STATUS_DRV_NULL_POINTER;
+  return SerialFileErrorCode::kNullPointer;
 }
 
 /**
@@ -285,11 +292,11 @@ Status_t LinuxSerialFile::readFromThreadBlocking(DrvDataBundle_t data_bundle, vo
  * @param byte_count Number of bytes to write
  * @param timeout Time to wait in milliseconds before returning an error
  * @param call_back True if should call the callback function
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back)
+ErrorCode LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32_t timeout, bool call_back)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = SerialFileErrorCode::kSuccess;
   int bytes_written, drain_status;
   bytes_written = writeSyscall(m_linux_handle, data, byte_count);
   if (byte_count >= 0)
@@ -297,12 +304,14 @@ Status_t LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32
     drain_status = tcdrain(m_linux_handle);
     if (drain_status < 0)
     {
-      status = convertErrnoCode(errno);
+      status = SerialFileErrorCode::kFailed;
+      status.setMessage(std::strerror(errno));
     }
   }
   else
   {
-    status = convertErrnoCode(errno);
+    status = SerialFileErrorCode::kFailed;
+    status.setMessage(std::strerror(errno));
   }
 
   if(call_back && m_event_handler_tx != nullptr)
@@ -318,14 +327,31 @@ Status_t LinuxSerialFile::writeBlocking(uint8_t *data, Size_t byte_count, uint32
  * @brief Thread to perform file write operation in parallel
  * @param data_bundle Data needed to perform the operation
  * @param self_ptr A pointer to a object of type LinuxSerialFile
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t LinuxSerialFile::writeFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr)
+ErrorCode LinuxSerialFile::writeFromThreadBlocking(DrvDataBundle_t data_bundle, void *self_ptr)
 {
   LinuxSerialFile *obj = static_cast<LinuxSerialFile *>(self_ptr);
   if(obj != nullptr)
   {
     return obj->writeBlocking(data_bundle.rx.data.data(), data_bundle.rx.data.size(), data_bundle.rx.timeout, true);
   }
-  return STATUS_DRV_NULL_POINTER;
+  return SerialFileErrorCode::kNullPointer;
+}
+
+/**
+ * @brief Verify if the inputs are in ther expected range
+ *
+ * @param buffer Data buffer
+ * @param size Number of bytes in the data buffer
+ * @param timeout Operation timeout value
+ * @param key Parameter
+ * @return ErrorCode
+ */
+ErrorCode LinuxSerialFile::checkInputs(const DrvBuffer_t data, uint32_t timeout)
+{
+  if(data.data() == nullptr) { return SerialFileErrorCode::kNullPointer;}
+  if(m_linux_handle < 0) { return SerialFileErrorCode::kBadHandle;}
+  if(data.size_bytes() == 0) { return SerialFileErrorCode::kInvalidParameter;}
+  return SerialFileErrorCode::kSuccess;
 }

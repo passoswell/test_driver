@@ -73,11 +73,11 @@ DIO::~DIO()
  * @brief Configure a list of parameters
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  Status_t result;
+  ErrorCode result;
   struct gpiod_line_request_config settings =
   {
     .consumer = "my_driver",
@@ -127,20 +127,20 @@ Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
       ret = gpiod_line_request((struct gpiod_line *)m_line_handle, &settings, m_value);
       if (ret >= 0)
       {
-        return STATUS_DRV_SUCCESS;
+        return DioErrorCode::kSuccess;
       }else
       {
-        result = STATUS_DRV_UNKNOWN_ERROR;
+        result = DioErrorCode::kFailed;
         gpiod_line_release((struct gpiod_line *)m_line_handle);
       }
     }else
     {
-      result = STATUS_DRV_UNKNOWN_ERROR;
+      result = DioErrorCode::kFailed;
     }
     gpiod_chip_close((struct gpiod_chip *)m_chip_handle);
   }else
   {
-    result = STATUS_DRV_UNKNOWN_ERROR;
+    result = DioErrorCode::kFailed;
   }
 
   return result;
@@ -149,39 +149,39 @@ Status_t DIO::configure(const SettingsList_t *list, uint8_t list_size)
 /**
  * @brief Read from a digital pin
  * @param state The state of the digital pin
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::read(bool &state)
+ErrorCode DIO::read(bool &state)
 {
   int val;
-  if(m_line_handle == nullptr) return STATUS_DRV_NULL_POINTER;
+  if(m_line_handle == nullptr) return DioErrorCode::kNullPointer;
   val = gpiod_line_get_value((struct gpiod_line *)m_line_handle);
-  if(val < 0) {return STATUS_DRV_UNKNOWN_ERROR;}
+  if(val < 0) {return DioErrorCode::kFailed;}
   if(val == 0){state = false;}
   else {state = true;}
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Write to a digital output pin
  * @param state The state to set in the gpio
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::write(bool value)
+ErrorCode DIO::write(bool value)
 {
   int ret;
-  if(m_line_handle == nullptr) return STATUS_DRV_NULL_POINTER;
+  if(m_line_handle == nullptr) return DioErrorCode::kNullPointer;
   ret = gpiod_line_set_value((struct gpiod_line *)m_line_handle, (int) value);
-  if(ret < 0) {return STATUS_DRV_UNKNOWN_ERROR;}
+  if(ret < 0) {return DioErrorCode::kFailed;}
   m_value = (bool) value;
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Toggle the state of a digital output
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::toggle()
+ErrorCode DIO::toggle()
 {
   m_value = !m_value;
   return write(m_value);
@@ -192,25 +192,25 @@ Status_t DIO::toggle()
  *
  * @param edge The edge that will trigger the event
  * @param event_handler The callback object
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
+ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
   m_event_handler = &event_handler;
   m_edge = edge;
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
  * @brief Enable or disable callback operation
  *
  * @param enable True to enable callback operation
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t DIO::enableInterruption(bool enable)
+ErrorCode DIO::enableInterruption(bool enable)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = DioErrorCode::kSuccess;
   struct gpiod_line_request_config settings =
   {
     .consumer = "my_driver",
@@ -219,7 +219,7 @@ Status_t DIO::enableInterruption(bool enable)
   };
   int ret, val = 0;
 
-  if(m_line_handle == nullptr || m_chip_handle == nullptr) return STATUS_DRV_NULL_POINTER;
+  if(m_line_handle == nullptr || m_chip_handle == nullptr) return DioErrorCode::kNullPointer;
   settings.flags = m_flags;
 
   if(!enable)
@@ -234,7 +234,7 @@ Status_t DIO::enableInterruption(bool enable)
       m_sync.thread->join();
       delete m_sync.thread;
     }
-    return STATUS_DRV_SUCCESS;
+    return DioErrorCode::kSuccess;
   }
 
   switch (m_edge)
@@ -267,20 +267,20 @@ Status_t DIO::enableInterruption(bool enable)
         m_sync.condition.notify_one();
         m_sync.thread->join();
       }
-      return STATUS_DRV_SUCCESS;
+      return DioErrorCode::kSuccess;
       break;
     default:
-      return STATUS_DRV_ERR_PARAM;
+      return DioErrorCode::kInvalidParameter;
       break;
   }
 
-  if(ret < 0) { return STATUS_DRV_UNKNOWN_ERROR;}
+  if(ret < 0) { return DioErrorCode::kFailed;}
   if(m_sync.thread == nullptr)
   {
     m_sync.thread = new std::thread(&DIO::readAsyncThread, this);
   }
 
-  return STATUS_DRV_SUCCESS;
+  return DioErrorCode::kSuccess;
 }
 
 /**
@@ -291,7 +291,7 @@ void DIO::readAsyncThread(void)
   struct timespec ts = {0, 100000000};
   struct gpiod_line_event event;
   EventsList_t edge;
-  Status_t status;
+  ErrorCode status;
   uint8_t state[1];
   int ret;
 
@@ -308,17 +308,17 @@ void DIO::readAsyncThread(void)
       case GPIOD_LINE_EVENT_RISING_EDGE:
         edge = EVENT_EDGE_RISING;
         state[0] = true;
-        status = STATUS_DRV_SUCCESS;
+        status = DioErrorCode::kSuccess;
         break;
       case GPIOD_LINE_EVENT_FALLING_EDGE:
         edge = EVENT_EDGE_FALLING;
         state[0] = false;
-        status = STATUS_DRV_SUCCESS;
+        status = DioErrorCode::kSuccess;
         break;
       default:
         edge = EVENT_NONE;
         state[0] = false;
-        status = STATUS_DRV_UNKNOWN_ERROR;
+        status = DioErrorCode::kFailed;
         break;
     }
     m_event_handler->onEvent(status, edge, state);

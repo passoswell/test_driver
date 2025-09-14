@@ -38,11 +38,11 @@ public:
     return instance;
   }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   SpiBus(const SpiBus&) = delete;
@@ -52,7 +52,7 @@ public:
 
 private:
   Mutex m_mutex;
-  Task<SpiDataBundle_t, SPI_QUEUE_SIZE, Status_t, 0> m_thread_handle;
+  Task<SpiDataBundle_t, SPI_QUEUE_SIZE, ErrorCode, 0> m_thread_handle;
   int m_fd;
   bool m_is_async_mode_rx, m_is_async_mode_tx;
   bool m_is_configured;
@@ -62,11 +62,11 @@ private:
 
   ~SpiBus();
 
-  Status_t blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
+  ErrorCode blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
 
-  static Status_t asyncTransferThread(SpiDataBundle_t data_bundle, void *user_arg);
+  static ErrorCode asyncTransferThread(SpiDataBundle_t data_bundle, void *user_arg);
 
-  Status_t checkInputs(const DrvBuffer_t data, uint32_t timeout);
+  ErrorCode checkInputs(const DrvBuffer_t data, uint32_t timeout);
 };
 
 #include "spi_bus.tpp"

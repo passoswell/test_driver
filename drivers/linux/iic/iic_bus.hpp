@@ -40,11 +40,11 @@ public:
     return instance;
   }
 
-  Status_t configure(const SettingsList_t *list, uint8_t list_size) override;
+  ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override;
 
-  Status_t read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
-  Status_t write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
+  ErrorCode write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) override;
 
   // A singleton should not be cloneable nor assignable
   IicBus(const IicBus&) = delete;
@@ -54,7 +54,7 @@ public:
 
 private:
   Mutex m_mutex;
-  Task<IicDataBundle_t, IIC_QUEUE_SIZE, Status_t, 0> m_thread_handle;
+  Task<IicDataBundle_t, IIC_QUEUE_SIZE, ErrorCode, 0> m_thread_handle;
   int m_fd;
   bool m_is_async_mode_rx, m_is_async_mode_tx;
   bool m_is_configured;
@@ -63,13 +63,13 @@ private:
 
   ~IicBus();
 
-  Status_t blockingRead(DrvBuffer_t data, uint16_t address);
+  ErrorCode blockingRead(DrvBuffer_t data, uint16_t address);
 
-  Status_t blockingWrite(const DrvBuffer_t data, uint16_t address);
+  ErrorCode blockingWrite(const DrvBuffer_t data, uint16_t address);
 
-  static Status_t asyncTransferThread(IicDataBundle_t data_bundle, void *user_arg);
+  static ErrorCode asyncTransferThread(IicDataBundle_t data_bundle, void *user_arg);
 
-  Status_t checkInputs(const DrvBuffer_t data, uint32_t timeout);
+  ErrorCode checkInputs(const DrvBuffer_t data, uint32_t timeout);
 };
 
 #include "iic_bus.tpp"

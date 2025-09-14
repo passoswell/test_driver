@@ -46,12 +46,12 @@ SpiBus<PORT_NUMBER>::~SpiBus()
  * @brief Configure a list of parameters
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = SpiErrorCode::kSuccess;
   char mode = 0;
   char n_bits = 8;
   int max_baud = 1000000;
@@ -103,7 +103,8 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
     result = m_thread_handle.create(SpiBus::asyncTransferThread, this, 0);
     if(!result)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the spi task.\r\n");
+      status = SpiErrorCode::kFailed;
+      status.setMessage("Failed to launch the spi task");
       return status;
     }
   }else
@@ -114,39 +115,43 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
   n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/spi-%u", PORT_NUMBER);
   if(n_bytes < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to find the file name for uart driver.\r\n");
-    // mutex.unlock();
+    status = SpiErrorCode::kFailed;
+    status.setMessage("Failed to find the file name for uart driver");
     return status;
   }
   m_fd = open(port_name, O_RDWR);
   if (m_fd < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+    status = SpiErrorCode::kFailed;
+    status.setMessage("Failed to open the file");
     return status;
   }
 
   if (ioctl(m_fd, SPI_IOC_WR_MODE, &mode) < 0)
   {
     close(m_fd);
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to configure spi mode.");
+    status = SpiErrorCode::kFailed;
+    status.setMessage("Failed to configure spi mode");
     return status;
   }
 
   if (ioctl(m_fd, SPI_IOC_WR_BITS_PER_WORD, &n_bits) < 0)
   {
     close(m_fd);
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to configure spi bits per word.");
+    status = SpiErrorCode::kFailed;
+    status.setMessage("Failed to configure spi bits per word");
     return status;
   }
 
   if (ioctl(m_fd, SPI_IOC_WR_MAX_SPEED_HZ, &max_baud) < 0)
   {
     close(m_fd);
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to configure spi clock frequency (Hz).");
+    status = SpiErrorCode::kFailed;
+    status.setMessage("Failed to configure spi clock frequency (Hz)");
     return status;
   }
 
-  return STATUS_DRV_SUCCESS;
+  return status;
 }
 
 /**
@@ -154,16 +159,16 @@ Status_t SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
  * @param data Buffer to store the data
  * @param byte_count Number of bytes to read
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status;
   SpiDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status.success) { return status;}
+  if(!status) { return status;}
 
 
   if(m_is_async_mode_rx)
@@ -176,10 +181,10 @@ Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t 
     data_bundle.tx.run = false;
     if(m_thread_handle.setInputData(data_bundle, 0))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = SpiErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = SpiErrorCode::kBusy;
     }
   }else
   {
@@ -194,16 +199,16 @@ Status_t SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t 
  * @param data Buffer where data is stored
  * @param byte_count Number of bytes to write
  * @param timeout Time to wait in milliseconds before returning an error
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status;
   SpiDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status.success) { return status;}
+  if(!status) { return status;}
 
 
   if(m_is_async_mode_tx)
@@ -216,10 +221,10 @@ Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t
     data_bundle.rx.run = false;
     if(m_thread_handle.setInputData(data_bundle, 0))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = SpiErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = SpiErrorCode::kBusy;
     }
   }else
   {
@@ -235,16 +240,16 @@ Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t
 //  * @param tx_data Buffer where data to write is stored
 //  * @param byte_count Number of bytes to write and read
 //  * @param timeout Time to wait in milliseconds before returning an error
-//  * @return Status_t
+//  * @return ErrorCode
 //  */
 // template<SpiHandle_t PORT_NUMBER>
-// Status_t SpiBus<PORT_NUMBER>::transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, uint32_t timeout)
+// ErrorCode SpiBus<PORT_NUMBER>::transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, uint32_t timeout)
 // {
-//   Status_t status;
+//   ErrorCode status;
 //   SpiDataBundle_t data_bundle;
 
 //   status = checkInputs(rx_data, byte_count, timeout);
-//   if(!status.success) { return status;}
+//   if(!status) { return status;}
 //   if(m_read_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
 //   if(m_write_status.code == OPERATION_RUNNING) { return STATUS_DRV_ERR_BUSY;}
 
@@ -284,10 +289,10 @@ Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t
 //  * @param rx_data Buffer to store the data read
 //  * @param tx_data Buffer where data to write is stored
 //  * @param timeout Time to wait in milliseconds before returning an error
-//  * @return Status_t
+//  * @return ErrorCode
 //  */
 // template<SpiHandle_t PORT_NUMBER>
-// Status_t SpiBus<PORT_NUMBER>::transfer(Buffer_t rx_data, Buffer_t tx_data, uint32_t timeout)
+// ErrorCode SpiBus<PORT_NUMBER>::transfer(Buffer_t rx_data, Buffer_t tx_data, uint32_t timeout)
 // {
 //   return transfer(rx_data.data(), tx_data.data(), rx_data.size(), timeout);
 // }
@@ -297,12 +302,12 @@ Status_t SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t
  * @param txBuf Buffer where data to write is stored
  * @param rxBuf Buffer to store the data read
  * @param byte_count Number of bytes to write and read
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
+ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
 {
-  Status_t status;
+  ErrorCode status;
   struct spi_ioc_transfer spi;
 
    memset(&spi, 0, sizeof(spi));
@@ -329,16 +334,16 @@ Status_t SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, u
  * @brief Working thread that perform a data transaction on the bus
  * @param data_bundle Data needed to perform the operation
  * @param self_ptr A pointer to a SpiBus object
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, void *user_arg)
+ErrorCode SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, void *user_arg)
 {
-  Status_t status;
+  ErrorCode status;
   SpiBus *obj = static_cast<SpiBus *>(user_arg);
   if(obj == nullptr)
   {
-    return STATUS_DRV_NULL_POINTER;
+    return SpiErrorCode::kNullPointer;
   }
 
   if(data_bundle.rx.run && data_bundle.tx.run)
@@ -374,14 +379,14 @@ Status_t SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, v
  * @param size Number of bytes in the data buffer
  * @param timeout Operation timeout value
  * @param key Parameter
- * @return Status_t
+ * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-Status_t SpiBus<PORT_NUMBER>::checkInputs(const Buffer_t data, uint32_t timeout)
+ErrorCode SpiBus<PORT_NUMBER>::checkInputs(const Buffer_t data, uint32_t timeout)
 {
-  if(!m_is_configured) { return STATUS_DRV_NOT_CONFIGURED;}
-  if(data.data() == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  if(m_fd < 0) { return STATUS_DRV_BAD_HANDLE;}
-  if(data.size_bytes() == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
-  return STATUS_DRV_SUCCESS;
+  if(!m_is_configured) { return SpiErrorCode::kNotConfigured;}
+  if(data.data() == nullptr) { return SpiErrorCode::kNullPointer;}
+  if(m_fd < 0) { return SpiErrorCode::kBadHandle;}
+  if(data.size_bytes() == 0) { return SpiErrorCode::kInvalidParameter;}
+  return SpiErrorCode::kSuccess;
 }

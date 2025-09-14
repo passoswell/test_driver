@@ -22,13 +22,13 @@
  *
  * @param list List of parameter-value pairs
  * @param list_size Number of parameters on the list
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
+ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
   static Mutex mutex;
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = IicErrorCode::kSuccess;
   bool result;
   char port_name[100];
   int n_bytes;
@@ -37,7 +37,7 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
   if(m_is_configured)
   {
     mutex.unlock();
-    return STATUS_DRV_SUCCESS;
+    return IicErrorCode::kSuccess;
   }
 
 
@@ -64,7 +64,8 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
     result = m_thread_handle.create(IicBus::asyncTransferThread, this, 0);
     if(!result)
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to launch the IIC task.\r\n");
+      status = IicErrorCode::kFailed;
+      status.setMessage("Failed to launch the IIC task");
       mutex.unlock();
       return status;
     }
@@ -76,21 +77,23 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
   n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/i2c-%u", PORT_NUMBER);
   if(n_bytes < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to find the file name for uart driver.\r\n");
+    status = IicErrorCode::kFailed;
+    status.setMessage("Failed to find the file name for uart driver");
     mutex.unlock();
     return status;
   }
   m_fd = open(port_name, O_RDWR);
   if (m_fd < 0)
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to open the file.");
+    status = IicErrorCode::kFailed;
+    status.setMessage("Failed to open the file");
     mutex.unlock();
     return status;
   }
 
   m_is_configured = true;
   mutex.unlock();
-  return STATUS_DRV_SUCCESS;
+  return IicErrorCode::kSuccess;
 }
 
 /**
@@ -100,17 +103,17 @@ Status_t IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list
  * @param timeout Time to wait in milliseconds before returning an error
  * @param cb_function
  * @param cb_arg
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status = IicErrorCode::kSuccess;
   IicDataBundle_t data_bundle;
   (void) timeout;
 
   status = checkInputs(data, timeout);
-  if(!status.success) { return status;}
+  if(!status) { return status;}
 
 
   if(m_is_async_mode_rx)
@@ -124,10 +127,10 @@ Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t tim
     data_bundle.tx.event_handle = nullptr;
     if(m_thread_handle.setInputData(data_bundle, timeout))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = IicErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = IicErrorCode::kBusy;
     }
   }else
   {
@@ -137,7 +140,7 @@ Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t tim
       m_mutex.unlock();
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = IicErrorCode::kBusy;
     }
   }
 
@@ -151,17 +154,17 @@ Status_t IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t tim
  * @param timeout Time to wait in milliseconds before returning an error
  * @param cb_function
  * @param cb_arg
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
+ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  Status_t status;
+  ErrorCode status = IicErrorCode::kSuccess;
   IicDataBundle_t data_bundle;
   (void) timeout;
 
   status = checkInputs(data, timeout);
-  if(!status.success) { return status;}
+  if(!status) { return status;}
 
 
   if(m_is_async_mode_tx)
@@ -175,10 +178,10 @@ Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t ti
     data_bundle.rx.event_handle = nullptr;
     if(m_thread_handle.setInputData(data_bundle, timeout))
     {
-      status = STATUS_DRV_SUCCESS;
+      status = IicErrorCode::kSuccess;
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = IicErrorCode::kBusy;
     }
   }else
   {
@@ -188,7 +191,7 @@ Status_t IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t ti
       m_mutex.unlock();
     }else
     {
-      status = STATUS_DRV_ERR_BUSY;
+      status = IicErrorCode::kBusy;
     }
   }
 
@@ -227,12 +230,12 @@ IicBus<PORT_NUMBER>::~IicBus()
  *
  * @param buffer Buffer to store the data
  * @param address 7 or 10 bits address of the device
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
+ErrorCode IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = IicErrorCode::kSuccess;
   int byte_count;
 
   if (ioctl(m_fd, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
@@ -240,11 +243,13 @@ Status_t IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
     byte_count = readSyscall(m_fd, data.data(), data.size_bytes());
     if (byte_count != data.size_bytes())
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes transmitted through iic is smaller than the requested.");
+      status = IicErrorCode::kFailed;
+      status.setMessage("The number of bytes transmitted through iic is smaller than the requested");
     }
   }else
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+    status = IicErrorCode::kFailed;
+    status.setMessage("It was not possible to set the desired peripheral address");
   }
 
   return status;
@@ -255,12 +260,12 @@ Status_t IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
  *
  * @param buffer Buffer where data is stored
  * @param address 7 or 10 bits address of the device
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t address)
+ErrorCode IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t address)
 {
-  Status_t status = STATUS_DRV_SUCCESS;
+  ErrorCode status = IicErrorCode::kSuccess;
   int byte_count;
 
   if (ioctl(m_fd, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
@@ -268,12 +273,14 @@ Status_t IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t add
     byte_count = writeSyscall(m_fd, data.data(), data.size_bytes());
     if (byte_count != data.size_bytes())
     {
-      SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"The number of bytes received through iic is smaller than the requested.");
+      status = IicErrorCode::kFailed;
+      status.setMessage("The number of bytes received through iic is smaller than the requested");
     }
   }
   else
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"It was not possible to set the desired peripheral address.");
+    status = IicErrorCode::kFailed;
+    status.setMessage("It was not possible to set the desired peripheral address");
   }
 
   return status;
@@ -284,12 +291,12 @@ Status_t IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t add
  *
  * @param data_bundle
  * @param user_arg
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::asyncTransferThread(IicDataBundle_t data_bundle, void *user_arg)
+ErrorCode IicBus<PORT_NUMBER>::asyncTransferThread(IicDataBundle_t data_bundle, void *user_arg)
 {
-  Status_t status = STATUS_DRV_NULL_POINTER;
+  ErrorCode status = IicErrorCode::kSuccess;
   IicBus *obj = static_cast<IicBus *>(user_arg);
 
   if(obj != nullptr)
@@ -324,14 +331,14 @@ Status_t IicBus<PORT_NUMBER>::asyncTransferThread(IicDataBundle_t data_bundle, v
  * @param size Number of bytes in the data buffer
  * @param timeout Operation timeout value
  * @param key Parameter
- * @return Status_t
+ * @return ErrorCode
  */
 template<IicHandle_t PORT_NUMBER>
-Status_t IicBus<PORT_NUMBER>::checkInputs(const DrvBuffer_t data, uint32_t timeout)
+ErrorCode IicBus<PORT_NUMBER>::checkInputs(const DrvBuffer_t data, uint32_t timeout)
 {
-  if(!m_is_configured) { return STATUS_DRV_NOT_CONFIGURED;}
-  if(data.data() == nullptr) { return STATUS_DRV_NULL_POINTER;}
-  if(m_fd < 0) { return STATUS_DRV_BAD_HANDLE;}
-  if(data.size_bytes() == 0) { return STATUS_DRV_ERR_PARAM_SIZE;}
-  return STATUS_DRV_SUCCESS;
+  if(!m_is_configured) { return IicErrorCode::kNotConfigured;}
+  if(data.data() == nullptr) { return IicErrorCode::kNullPointer;}
+  if(m_fd < 0) { return IicErrorCode::kBadHandle;}
+  if(data.size_bytes() == 0) { return IicErrorCode::kInvalidParameter;}
+  return IicErrorCode::kSuccess;
 }

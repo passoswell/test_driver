@@ -11,14 +11,15 @@
 
 #include "linux/utils/linux_io.hpp"
 
+#include <thread>
+#include <chrono>
+#include <cstring>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
-#include <thread>
-#include <chrono>
 #include <poll.h>
 #include <sys/types.h>
-#include <string.h>
 
 
 
@@ -304,7 +305,7 @@ Status_t convertErrnoCode(int code)
       break;
     default:
       status.code = ERR_UNKNOWN_ERROR;
-      status.description = strerror(code);
+      status.description = std::strerror(code);
       status.source = SRC_HAL;
       status.success = false;
       break;
