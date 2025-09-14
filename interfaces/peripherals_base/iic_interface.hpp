@@ -26,7 +26,11 @@
 enum class IicErrorCode
 {
   kSuccess = 0,
+  kFailed,
   kInvalidParameter,
+  kNotConfigured,
+  kNullPointer,
+  kBadHandle,
   kTimedOut,                /*!< Operation took more time than expected */
   kAddressNotAcknowledged,  /*!< The address was not acknowledged */
   kBusy,                    /*!< Bus already in use by another controller */
@@ -50,6 +54,9 @@ public:
     {
       case IicErrorCode::kSuccess: return "Success";
       case IicErrorCode::kInvalidParameter: return "Invalid input parameter";
+      case IicErrorCode::kNotConfigured: return "Resource is not properly configured";
+      case IicErrorCode::kNullPointer: return "A null pointer was detected";
+      case IicErrorCode::kBadHandle: return "Invalid handle to the resource";
       case IicErrorCode::kTimedOut: return "Operation took more time than expected";
       case IicErrorCode::kAddressNotAcknowledged: return "The address was not acknowledged";
       case IicErrorCode::kBusy: return "Bus already in use by another controller";
@@ -68,10 +75,10 @@ public:
 };
 
 /**
- * @brief Function overload, convert enum class into an std::error_code
+ * @brief Function overload, convert enum class into an ErrorCode
  *
  * @param error_code A value from enum IicErrorCode
- * @return std::error_code
+ * @return ErrorCode
  */
 inline ErrorCode make_error_code(IicErrorCode error_code)
 {
@@ -122,11 +129,11 @@ public:
 
   virtual ~iIicBus() = default;
 
-  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
+  virtual ErrorCode configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
+  virtual ErrorCode read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 
-  virtual Status_t write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
+  virtual ErrorCode write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler) = 0;
 };
 
 /**
@@ -157,24 +164,24 @@ public:
 
   virtual ~bIIC() = default;
 
-  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) override
+  virtual ErrorCode configure(const SettingsList_t *list, uint8_t list_size) override
   {
     return m_bus.configure(list, list_size);
   }
 
-  virtual Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX) override
+  virtual ErrorCode read(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
     return m_bus.read(m_address, data, timeout, *m_cb_function_rx);
   }
 
-  virtual Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX) override
+  virtual ErrorCode write(Buffer_t data, uint32_t timeout = UINT32_MAX) override
   {
     return m_bus.write(m_address, data, timeout, *m_cb_function_tx);
   }
 
-  virtual Status_t setCallback(EventsList_t event, iCallback &event_handler) override
+  virtual ErrorCode setCallback(EventsList_t event, iCallback &event_handler) override
   {
-    Status_t status = STATUS_DRV_SUCCESS;
+    ErrorCode status = IicErrorCode::kSuccess;
     switch(event)
     {
     case EVENT_READ:
@@ -184,7 +191,7 @@ public:
       m_cb_function_tx = &event_handler;
       break;
     default:
-      status = STATUS_DRV_ERR_PARAM;
+      status = IicErrorCode::kInvalidParameter;
       break;
     }
     return status;

@@ -27,13 +27,13 @@ public:
 
   virtual ~iComm() = default;
 
-  virtual Status_t configure(const SettingsList_t *list, uint8_t list_size) = 0;
+  virtual ErrorCode configure(const SettingsList_t *list, uint8_t list_size) = 0;
 
-  virtual Status_t read(Buffer_t data, uint32_t timeout = UINT32_MAX) = 0;
+  virtual ErrorCode read(Buffer_t data, uint32_t timeout = UINT32_MAX) = 0;
 
-  virtual Status_t write(Buffer_t data, uint32_t timeout = UINT32_MAX) = 0;
+  virtual ErrorCode write(Buffer_t data, uint32_t timeout = UINT32_MAX) = 0;
 
-  virtual Status_t setCallback(EventsList_t event, iCallback &event_handler) = 0;
+  virtual ErrorCode setCallback(EventsList_t event, iCallback &event_handler) = 0;
 };
 
 #endif /* PERIPHERALS_BASE_COMMUNICATION_INTERFACE_HPP */

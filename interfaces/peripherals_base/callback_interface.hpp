@@ -34,10 +34,10 @@ public:
   virtual void onStart() = 0;
 
   // Called when an event occur if applicable
-  virtual void onEvent(Status_t status, EventsList_t event, const Buffer_t data) = 0;
+  virtual void onEvent(ErrorCode status, EventsList_t event, const Buffer_t data) = 0;
 
   // Called when an event occur if applicable
-  virtual void onEvent(Status_t status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) = 0;
+  virtual void onEvent(ErrorCode status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) = 0;
 };
 
 #endif /* PERIPHERALS_BASE_CALLBACK_INTERFACE_HPP */
