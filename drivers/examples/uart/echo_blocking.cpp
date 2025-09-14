@@ -68,23 +68,23 @@ static uint8_t MESSAGE_HELLO_WORLD[] = "\r\nHello world!!!\r\n";
  */
 AP_MAIN()
 {
-  Status_t status;
+  ErrorCode status;
   SPT timer;
   uint32_t bytes_read = 0, tx_bytes = 0;
 
   // COnfigure the driver
   status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (!status.success)
+  if (!status)
   {
-    printf("\r\nERROR from g_serial.configure: %s", status.description);
+    printf("\r\nERROR from g_serial.configure: %s", status.message().data());
     AP_EXIT();
   }
 
   // Write a hello message to the uart
   status = g_serial.write({MESSAGE_HELLO_WORLD, strlen((char *)MESSAGE_HELLO_WORLD)});
-  if (!status.success)
+  if (!status)
   {
-    printf("\r\nERROR from g_serial.write: %s", status.description);
+    printf("\r\nERROR from g_serial.write: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -94,9 +94,9 @@ AP_MAIN()
     {
       // Read data from uart by polling
       status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-      if (!status.success && status.code != ERR_TIMEOUT)
+      if (!status && status.value() != static_cast<int>(UartErrorCode::kTimedOut))
       {
-        printf("\r\nERROR from g_serial.read: %s", status.description);
+        printf("\r\nERROR from g_serial.read: %s", status.message().data());
         AP_EXIT();
       }
       bytes_read = g_serial.getBytesRead();
@@ -106,17 +106,17 @@ AP_MAIN()
     tx_bytes = snprintf((char *)g_tx_buffer, sizeof(g_tx_buffer) - 1, "\r\n\r\nRead %u bytes\r\n", bytes_read);
 
     status = g_serial.write({g_tx_buffer, tx_bytes});
-    if (!status.success)
+    if (!status)
     {
-      printf("\r\nERROR from g_serial.write: %s", status.description);
+      printf("\r\nERROR from g_serial.write: %s", status.message().data());
       AP_EXIT();
     }
 
     // Write to the uart what was previously received
     status = g_serial.write({g_rx_buffer, bytes_read});
-    if(!status.success)
+    if(!status)
     {
-      printf("\r\nERROR from g_serial.write: %s", status.description);
+      printf("\r\nERROR from g_serial.write: %s", status.message().data());
       AP_EXIT();
     }
   }

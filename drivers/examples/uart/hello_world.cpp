@@ -66,7 +66,7 @@ AP_MAIN()
   SPT my_timer(SOFTWARE_TIMER_SECONDS);
   uint8_t message[] = "Hello world!!!";
   uint8_t buffer[100];
-  Status_t status;
+  ErrorCode status;
   int result;
   uint32_t counter = 0;
 
@@ -74,9 +74,9 @@ AP_MAIN()
 
   // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (!status.success)
+  if (!status)
   {
-    printf("\r\nERROR from my_serial.configure: %s", status.description);
+    printf("\r\nERROR from my_serial.configure: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -90,9 +90,9 @@ AP_MAIN()
       AP_EXIT();
     }
     status = my_serial.write({buffer, (uint32_t)result});
-    if(!status.success)
+    if(!status)
     {
-      printf("\r\nERROR from my_serial.write: %s", status.description);
+      printf("\r\nERROR from my_serial.write: %s", status.message().data());
       AP_EXIT();
     }
     my_timer.delay(1); // One second delay

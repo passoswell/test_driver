@@ -54,13 +54,13 @@ uint8_t g_dio_output_list_size = sizeof(g_dio_output_list)/sizeof(g_dio_output_l
  */
 AP_MAIN()
 {
-  Status_t code;
+  ErrorCode code;
   SPT my_timer;
   bool input_value, output_value = false;
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
-  if(!code.success)
+  if(!code)
   {
     printf("Failed to configure the UART port\r\n");
     AP_EXIT();

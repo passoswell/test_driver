@@ -80,15 +80,15 @@ public:
   ~DioInputCallback() = default;
 
   // Returns a short string identifying the callback owner
-  std::string name(){ return "Input callback test";}
+  std::string name() override { return "Input callback test";}
 
   // Called when the asynchronous operation is about to start
-  void onStart(){}
+  void onStart() override {}
 
   // Called when an event occur if applicable
-  void onEvent(Status_t status, EventsList_t event, const Buffer_t data)
+  void onEvent(ErrorCode status, EventsList_t event, const Buffer_t data) override
   {
-    if(status.success)
+    if(status)
     {
       if(event == EVENT_EDGE_RISING)
       {
@@ -103,8 +103,10 @@ public:
     }
   }
 
-  // Called when an event occur if applicable
-  void onEvent(Status_t status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data){};
+  void onEvent(ErrorCode status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) override
+  {
+    ;
+  }
 
 private:
   uint32_t m_port, m_pin;
@@ -115,7 +117,7 @@ private:
  */
 AP_MAIN()
 {
-  Status_t code;
+  ErrorCode code;
   SPT my_timer;
   bool input_value, output_value = false;
   DIO input(DIO_INPUT_LINE_NUMBER, DIO_INPUT_CHIP_NUMBER);
@@ -123,13 +125,13 @@ AP_MAIN()
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
   code = input.configure(g_dio_input_list, g_dio_input_list_size);
-  if(!code.success)
+  if(!code)
   {
     printf("Failed to configure the digital input\r\n");
     AP_EXIT();
   }
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
-  if(!code.success)
+  if(!code)
   {
     printf("Failed to configure the digital output\r\n");
     AP_EXIT();
@@ -137,7 +139,7 @@ AP_MAIN()
 
   (void) input.setEventCallback(EVENT_EDGE_BOTH, dio_input_event_handler);
   code = input.enableInterruption(true);
-  if(!code.success)
+  if(!code)
   {
     printf("Failed to enable interruption for the digital input\r\n");
     AP_EXIT();

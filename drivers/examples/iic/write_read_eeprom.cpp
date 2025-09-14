@@ -62,9 +62,9 @@ static uint8_t g_add_value = 1;
 
 
 // Read data from the EEPROM memory
-static Status_t mem_read(uint16_t address, uint8_t *data, uint16_t size);
+static ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size);
 // Write data to EEPROM memory
-static Status_t mem_write(uint16_t address, uint8_t *data, uint16_t size);
+static ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size);
 static void printBytes(uint16_t start_address, uint8_t *data, uint16_t size);
 
 
@@ -73,7 +73,7 @@ static void printBytes(uint16_t start_address, uint8_t *data, uint16_t size);
  */
 AP_MAIN()
 {
-  Status_t status;
+  ErrorCode status;
   SPT timer;
 
   timer.delay(2000);
@@ -83,9 +83,9 @@ AP_MAIN()
   memset(g_addr_table, 0, sizeof(g_addr_table));
 
   status = g_iic.configure(g_iic_config_list, g_iic_config_list_size);
-  if(!status.success)
+  if(!status)
   {
-    printf("\r\nERROR failed to configure: %s\r\n", status.description);
+    printf("\r\nERROR failed to configure: %s\r\n", status.message().data());
     AP_EXIT();
   }
 
@@ -103,9 +103,9 @@ AP_MAIN()
   // Reading from the memory
   printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
   status = mem_read(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
-  if(!status.success)
+  if(!status)
   {
-    printf("\r\nERROR from mem_read: %s\r\n", status.description);
+    printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
     AP_EXIT();
   }
   printf("Read from the memory:\t[Address] Value\r\n");
@@ -116,9 +116,9 @@ AP_MAIN()
   // Writing to the memory
   printf("Writing %u bytes to memory\r\n", BYTES_TO_WRITE);
   status = mem_write(START_ADDRESS, g_tx_buffer, BYTES_TO_WRITE);
-  if(!status.success)
+  if(!status)
   {
-    printf("\r\nERROR from mem_write: %s\r\n", status.description);
+    printf("\r\nERROR from mem_write: %s\r\n", status.message().data());
     AP_EXIT();
   }
   printf("Wrote to the memory:\t[Address] Value\r\n");
@@ -129,9 +129,9 @@ AP_MAIN()
   // Reading from the memory
   printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
   status = mem_read(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
-  if(!status.success)
+  if(!status)
   {
-    printf("\r\nERROR from mem_read: %s\r\n", status.description);
+    printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
     AP_EXIT();
   }
   printf("Read from the memory:\t[Address] Value\r\n");
@@ -152,11 +152,11 @@ AP_MAIN()
  * @param address First memory address
  * @param data Data buffer
  * @param size Number of bytes to read
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t mem_read(uint16_t address, uint8_t *data, uint16_t size)
+ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size)
 {
-  Status_t status;
+  ErrorCode status;
   uint8_t reg_addr_buffer[2];
 
   // Reading from the memory
@@ -164,22 +164,22 @@ Status_t mem_read(uint16_t address, uint8_t *data, uint16_t size)
   reg_addr_buffer[1] = address & 0xFF;
 
   status = g_iic.write(reg_addr_buffer, 100);
-  if(!status.success)
+  if(!status)
   {
-    printf("\r\nERROR from my_serial.write: %s\r\n", status.description);
+    printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
     return status;
   }
   // while(!g_iic.getWriteStatus().success);
 
   status = g_iic.read({data, size}, 100);
-  if(!status.success)
+  if(!status)
   {
-    printf("\r\nERROR from my_serial.read: %s\r\n", status.description);
+    printf("\r\nERROR from my_serial.read: %s\r\n", status.message().data());
     return status;
   }
   // while(!g_iic.getReadStatus().success);
 
-  return STATUS_DRV_SUCCESS;
+  return IicErrorCode::kSuccess;
 
 }
 
@@ -189,12 +189,12 @@ Status_t mem_read(uint16_t address, uint8_t *data, uint16_t size)
  * @param address First memory address
  * @param data Data buffer
  * @param size Number of bytes to write
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t mem_write(uint16_t address, uint8_t *data, uint16_t size)
+ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size)
 {
   SPT timer;
-  Status_t status;
+  ErrorCode status;
   uint8_t buffer[34];
   const uint8_t divisor = 32;
   uint8_t loop_count = size / divisor;
@@ -208,9 +208,9 @@ Status_t mem_write(uint16_t address, uint8_t *data, uint16_t size)
     memcpy(&buffer[2], data, divisor);
 
     status = g_iic.write({buffer, divisor + 2}, 100);
-    if(!status.success)
+    if(!status)
     {
-      printf("\r\nERROR from my_serial.write: %s\r\n", status.description);
+      printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
       return status;
     }
     // while(!g_iic.getWriteStatus().success);
@@ -227,16 +227,16 @@ Status_t mem_write(uint16_t address, uint8_t *data, uint16_t size)
     memcpy(&buffer[2], data, bytes_last_loop);
 
     status = g_iic.write({buffer, bytes_last_loop + 2u}, 100);
-    if(!status.success)
+    if(!status)
     {
-      printf("\r\nERROR from my_serial.write: %s\r\n", status.description);
+      printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
       return status;
     }
     // while(!g_iic.getWriteStatus().success);
     timer.delay(25);
   }
 
-  return STATUS_DRV_SUCCESS;
+  return IicErrorCode::kSuccess;
 }
 
 /**

@@ -57,9 +57,9 @@ constexpr void *handle = nullptr;
 #endif
 
 
-static Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg);
+static ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg);
 
-static Status_t txCallback(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg);
+static ErrorCode txCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg);
 
 // static UartBase &g_serial = UART<handle>::getInstance();
 static UART<handle> g_serial;
@@ -79,13 +79,12 @@ public:
   ~UartEventHandler() = default;
 
   // Returns a short string identifying the callback owner
-  std::string name() { return "Uart callback test"; }
+  std::string name() override { return "Uart callback test";}
 
   // Called when the asynchronous operation is about to start
-  void onStart() {}
+  void onStart() override {}
 
-  // Called when an event occur if applicable
-  void onEvent(Status_t status, EventsList_t event, const Buffer_t data)
+  void onEvent(ErrorCode status, EventsList_t event, const Buffer_t data) override
   {
     switch (event)
     {
@@ -101,7 +100,7 @@ public:
   }
 
   // Called when an event occur if applicable
-  void onEvent(Status_t status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) {};
+  void onEvent(ErrorCode status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) override {}
 
 private:
   uint32_t m_port, m_pin;
@@ -112,7 +111,7 @@ private:
  */
 AP_MAIN()
 {
-  Status_t status;
+  ErrorCode status;
   SPT timer;
   uint32_t bytes_read = 0, tx_bytes = 0;
   UartEventHandler uart_event_handler;
@@ -121,9 +120,9 @@ AP_MAIN()
 
   // Configure the driver
   status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (!status.success)
+  if (!status)
   {
-    printf("\r\nERROR from g_serial.configure: %s", status.description);
+    printf("\r\nERROR from g_serial.configure: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -133,17 +132,17 @@ AP_MAIN()
 
   // Write a hello message in async mode
   status = g_serial.write(MESSAGE_HELLO_WORLD, strlen((char *)MESSAGE_HELLO_WORLD));
-  if (!status.success)
+  if (!status)
   {
-    printf("\r\nERROR from g_serial.write: %s", status.description);
+    printf("\r\nERROR from g_serial.write: %s", status.message().data());
     AP_EXIT();
   }
 
   // Start the async read operation
   status = g_serial.read(g_rx_buffer, 20);
-  if (!status.success && status.code != ERR_TIMEOUT)
+  if (!status && status.value() != static_cast<int>(UartErrorCode::kTimedOut))
   {
-    printf("\r\nERROR from g_serial.read: %s", status.description);
+    printf("\r\nERROR from g_serial.read: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -167,13 +166,13 @@ AP_MAIN()
  * @param event The event that generated the call
  * @param data The data used during the call (buffer ans size)
  * @param user_arg User supplied argument, not used
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg)
+ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg)
 {
   SPT timer;
   static uint32_t counter = 0;
-  if(status.success)
+  if(status)
   {
     printf("\r\n\r\n[%03u] From reception callback: %lu bytes received\r\n", counter, data.size_bytes());
 
@@ -182,26 +181,26 @@ Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, vo
     do
     {
       status = g_serial.write({g_rx_buffer, data.size_bytes()});
-      if(!status.success && status.code != ERR_BUSY)
+      if(!status && status.value() != static_cast<int>(UartErrorCode::kBusy))
       {
-        printf("\r\nERROR from g_serial.write: %s", status.description);
+        printf("\r\nERROR from g_serial.write: %s", status.message().data());
         g_error_flag = true;
         break;
       }
-    } while( status.code == ERR_BUSY );
+    } while( status.value() == static_cast<int>(UartErrorCode::kBusy) );
 
 
     // Start a new async read operation
     status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-    if (!status.success)
+    if (!status)
     {
-      printf("\r\nERROR from g_serial.read: %s", status.description);
+      printf("\r\nERROR from g_serial.read: %s", status.message().data());
       g_error_flag = true;
     }
 
   }else
   {
-    printf("\r\n\r\n[%03u] From reception callback: ended in failure: %s\r\n", counter, status.description);
+    printf("\r\n\r\n[%03u] From reception callback: ended in failure: %s\r\n", counter, status.message().data());
   }
   counter++;
   return status;
@@ -214,17 +213,17 @@ Status_t rxCallback(Status_t status, EventsList_t event, const Buffer_t data, vo
  * @param event The event that generated the call
  * @param data The data used during the call (buffer ans size)
  * @param user_arg User supplied argument, not used
- * @return Status_t
+ * @return ErrorCode
  */
-Status_t txCallback(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg)
+ErrorCode txCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg)
 {
   static uint32_t counter = 0;
-  if(status.success)
+  if(status)
   {
     printf("\r\n\r\n[%03u] From transmission callback:  %lu bytes transmitted\r\n", counter, data.size_bytes());
   }else
   {
-    printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, status.description);
+    printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, status.message().data());
   }
   counter++;
   return status;
