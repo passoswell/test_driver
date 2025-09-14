@@ -86,10 +86,16 @@ public:
     m_custom_message = message.data();
   }
 
+  // Set category
+  void setCategory(const ErrorCategory &category)
+  {
+    m_category = &category;
+  }
+
 private:
   int m_value;
-  const ErrorCategory* m_category;
-  const char* m_custom_message;
+  const ErrorCategory *m_category;
+  const char *m_custom_message;
 };
 
 #endif /* COMMONS_COM_ERROR_CODE_HPP */
