@@ -11,13 +11,14 @@
 
 #include "linux/spi/spi_bus.hpp"
 
+#include <cstring>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <linux/spi/spidev.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
-#include <string.h>
 
 #include "linux/utils/linux_io.hpp"
 
@@ -310,7 +311,7 @@ ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, 
   ErrorCode status;
   struct spi_ioc_transfer spi;
 
-   memset(&spi, 0, sizeof(spi));
+  std::memset(&spi, 0, sizeof(spi));
 
   spi.tx_buf        = (uintptr_t)txBuf;
   spi.rx_buf        = (uintptr_t)rxBuf;
@@ -322,10 +323,11 @@ ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, 
 
   if (ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi) >= 0)
   {
-    status = STATUS_DRV_SUCCESS;
+    status = SpiErrorCode::kSuccess;
   }else
   {
-    SET_STATUS(status, false, SRC_DRIVER, ERR_FAILED, (char *)"Failed to transfer data over spi.");
+    status = SpiErrorCode::kFailed;
+    status.setMessage("Failed to transfer data over spi");
   }
   return status;
 }

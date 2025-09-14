@@ -17,7 +17,7 @@
 #include <span>
 #include <functional>
 
-#include "com_status.hpp"
+#include "com_error_code.hpp"
 
 /**
  * @brief List of possible dio directions
@@ -150,7 +150,7 @@ using Size_t = int32_t;
 
 using SimpleCallback_t = std::function<void(uint8_t event, const Buffer_t data, void *user_arg)>;
 
-using Callback_t = std::function<void(Status_t status, EventsList_t event, const Buffer_t data, void *user_arg)>;
+using Callback_t = std::function<void(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg)>;
 
 typedef struct
 {
@@ -167,7 +167,7 @@ typedef struct
 
 using DrvBuffer_t = std::span<uint8_t>;
 
-using DriverCallback_t = std::function<Status_t(Status_t status, EventsList_t event, const DrvBuffer_t data, void *user_arg)>;
+using DriverCallback_t = std::function<ErrorCode(ErrorCode status, EventsList_t event, const DrvBuffer_t data, void *user_arg)>;
 
 
 typedef struct
