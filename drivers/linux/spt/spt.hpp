@@ -12,8 +12,8 @@
 #ifndef DRIVERS_LINUX_SPT_SPT_HPP
 #define DRIVERS_LINUX_SPT_SPT_HPP
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 #include "peripherals_base/spt_base.hpp"
 

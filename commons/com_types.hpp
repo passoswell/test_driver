@@ -12,8 +12,8 @@
 #ifndef COM_TYPES_HPP
 #define COM_TYPES_HPP
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdbool>
+#include <cstdint>
 #include <span>
 #include <functional>
 

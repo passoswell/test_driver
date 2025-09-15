@@ -16,7 +16,7 @@
  * a mutex.
  */
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "drivers.hpp"
 
@@ -35,14 +35,14 @@ static uint16_t callbackMutex(uint16_t data, void *user_arg);
 uint16_t callbackMutex(uint16_t data, void *user_arg)
 {
   (void) user_arg;
-  printf("Task %u is running\r\n", data);
+  std::printf("Task %u is running\r\n", data);
   for(uint32_t i = 0; i < 1000000; i++)
   {
     g_mutex.lock();
     g_counter = g_counter + 1;
     g_mutex.unlock();
   }
-  printf("Task %u finished executing\r\n", data);
+  std::printf("Task %u finished executing\r\n", data);
   return data;
 }
 
@@ -61,7 +61,7 @@ uint16_t callbackNoMutex(uint16_t data, void *user_arg)
   {
     g_counter = g_counter + 1;
   }
-  printf("Task %u finished executing\r\n", data);
+  std::printf("Task %u finished executing\r\n", data);
   return data;
 }
 
@@ -72,7 +72,7 @@ AP_MAIN()
 {
   Task<uint16_t, 1, uint16_t, 1> my_task[2];
 
-  printf("\r\nTesting without mutex\r\n");
+  std::printf("\r\nTesting without mutex\r\n");
   g_counter = 0;
 
   for(uint8_t i = 0; i < sizeof(my_task)/sizeof(Task<uint16_t, 1, uint16_t, 1>); i++)
@@ -85,12 +85,12 @@ AP_MAIN()
   {
     uint16_t data;
     my_task[i].getOutputData(data);
-    printf("Task %u returned data\r\n", i);
+    std::printf("Task %u returned data\r\n", i);
   }
 
-  printf("Counter value: %u\r\n", g_counter);
+  std::printf("Counter value: %u\r\n", g_counter);
 
-  printf("\r\nTesting with mutex\r\n");
+  std::printf("\r\nTesting with mutex\r\n");
   g_counter = 0;
 
   for(uint8_t i = 0; i < sizeof(my_task)/sizeof(Task<uint16_t, 1, uint16_t, 1>); i++)
@@ -104,10 +104,10 @@ AP_MAIN()
   {
     uint16_t data;
     my_task[i].getOutputData(data);
-    printf("Task %u returned data\r\n", i);
+    std::printf("Task %u returned data\r\n", i);
   }
 
-  printf("Counter value: %u\r\n", g_counter);
+  std::printf("Counter value: %u\r\n", g_counter);
 
   AP_EXIT();
 }

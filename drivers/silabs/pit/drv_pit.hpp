@@ -15,8 +15,8 @@
 #define DRV_PIT_HPP_
 
 
-#include <stdbool.h>
-#include <stdint.h>
+#include <cstdbool>
+#include <cstdint>
 
 
 /**

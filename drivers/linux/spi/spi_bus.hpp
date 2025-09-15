@@ -13,8 +13,8 @@
 #define SPI_SPI_BUS_HPP
 
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdbool>
 
 #include "peripherals_base/spi_interface.hpp"
 #include "linux/utils/linux_types.hpp"

@@ -17,7 +17,7 @@
 
 uint16_t taskFunction(uint16_t data, void *user_arg)
 {
-  printf("Task function received %u\r\n", data);
+  std::printf("Task function received %u\r\n", data);
   return data;
 }
 
@@ -29,11 +29,11 @@ AP_MAIN()
 
   if (my_task.create(taskFunction, nullptr, 5))
   {
-    printf("\r\nTask created successfully, running example \r\n");
+    std::printf("\r\nTask created successfully, running example \r\n");
   }
   else
   {
-    printf("\r\nTask creation failed, aborting example \r\n");
+    std::printf("\r\nTask creation failed, aborting example \r\n");
     AP_EXIT();
   }
 
@@ -43,9 +43,9 @@ AP_MAIN()
     my_task.getOutputData(item, 1000);
     if (item != 10 * i)
     {
-      printf("Found an error, sent %u to the task and received %u \r\n", 10 * i, item);
+      std::printf("Found an error, sent %u to the task and received %u \r\n", 10 * i, item);
     }
   }
-  printf("\r\nEnd of the example \r\n");
+  std::printf("\r\nEnd of the example \r\n");
   AP_EXIT();
 }

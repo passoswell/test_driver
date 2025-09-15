@@ -13,7 +13,7 @@
  *
  */
 
-#include <string.h>
+#include <cstring>
 
 #include "drivers.hpp"
 
@@ -122,7 +122,7 @@ AP_MAIN()
   status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status)
   {
-    printf("\r\nERROR from g_serial.configure: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.configure: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -131,10 +131,10 @@ AP_MAIN()
   status = g_serial.setCallback(EVENT_WRITE, uart_event_handler);
 
   // Write a hello message in async mode
-  status = g_serial.write(MESSAGE_HELLO_WORLD, strlen((char *)MESSAGE_HELLO_WORLD));
+  status = g_serial.write(MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD));
   if (!status)
   {
-    printf("\r\nERROR from g_serial.write: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -142,7 +142,7 @@ AP_MAIN()
   status = g_serial.read(g_rx_buffer, 20);
   if (!status && status.value() != static_cast<int>(UartErrorCode::kTimedOut))
   {
-    printf("\r\nERROR from g_serial.read: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
     AP_EXIT();
   }
 
@@ -174,7 +174,7 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
   static uint32_t counter = 0;
   if(status)
   {
-    printf("\r\n\r\n[%03u] From reception callback: %lu bytes received\r\n", counter, data.size_bytes());
+    std::printf("\r\n\r\n[%03u] From reception callback: %lu bytes received\r\n", counter, data.size_bytes());
 
     // Wait any ongoing transmission to finish
     // Write to the uart the data received
@@ -183,7 +183,7 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
       status = g_serial.write({g_rx_buffer, data.size_bytes()});
       if(!status && status.value() != static_cast<int>(UartErrorCode::kBusy))
       {
-        printf("\r\nERROR from g_serial.write: %s", status.message().data());
+        std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
         g_error_flag = true;
         break;
       }
@@ -194,13 +194,13 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
     status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
     if (!status)
     {
-      printf("\r\nERROR from g_serial.read: %s", status.message().data());
+      std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
       g_error_flag = true;
     }
 
   }else
   {
-    printf("\r\n\r\n[%03u] From reception callback: ended in failure: %s\r\n", counter, status.message().data());
+    std::printf("\r\n\r\n[%03u] From reception callback: ended in failure: %s\r\n", counter, status.message().data());
   }
   counter++;
   return status;
@@ -220,10 +220,10 @@ ErrorCode txCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
   static uint32_t counter = 0;
   if(status)
   {
-    printf("\r\n\r\n[%03u] From transmission callback:  %lu bytes transmitted\r\n", counter, data.size_bytes());
+    std::printf("\r\n\r\n[%03u] From transmission callback:  %lu bytes transmitted\r\n", counter, data.size_bytes());
   }else
   {
-    printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, status.message().data());
+    std::printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, status.message().data());
   }
   counter++;
   return status;

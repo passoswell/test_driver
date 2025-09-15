@@ -74,7 +74,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     (void) m_thread_handle.terminate();
   }
 
-  n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/i2c-%u", PORT_NUMBER);
+  n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/i2c-%u", PORT_NUMBER);
   if(n_bytes < 0)
   {
     status = IicErrorCode::kFailed;

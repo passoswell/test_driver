@@ -13,8 +13,8 @@
 #ifndef DRIVERS_LINUX_UTILS_LINUX_IO_HPP
 #define DRIVERS_LINUX_UTILS_LINUX_IO_HPP
 
-#include <stdlib.h>
-#include <stdint.h>
+#include <cstdlib>
+#include <cstdint>
 
 #include "com_status.hpp"
 

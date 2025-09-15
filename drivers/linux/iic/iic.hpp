@@ -13,8 +13,8 @@
 #define DRIVERS_LINUX_IIC_IIC_HPP
 
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdbool>
 
 #include "linux/iic/iic_bus.hpp"
 

@@ -12,8 +12,8 @@
 #ifndef SOFTWARE_TIMER_INTERFACE_HPP
 #define SOFTWARE_TIMER_INTERFACE_HPP
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 typedef uint64_t sft_time_us_t;
 

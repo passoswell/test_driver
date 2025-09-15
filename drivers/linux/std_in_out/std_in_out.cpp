@@ -11,7 +11,7 @@
 
 #include "linux/std_in_out/std_in_out.hpp"
 
-#include <string.h>
+#include <cstring>
 #include <termios.h>
 #include <unistd.h>
 #include <termios.h>

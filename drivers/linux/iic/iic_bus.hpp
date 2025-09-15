@@ -13,8 +13,8 @@
 #define IIC_IIC_BUS_HPP
 
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdbool>
 
 // #include "peripherals_base/iic_base.hpp"
 #include "peripherals_base/iic_interface.hpp"

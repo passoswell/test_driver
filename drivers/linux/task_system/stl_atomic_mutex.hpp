@@ -16,7 +16,7 @@
 #include <chrono>
 #include <atomic>
 #include <thread>
-#include <stdint.h>
+#include <cstdint>
 
 #include "task_interface/mutex_interface.hpp"
 

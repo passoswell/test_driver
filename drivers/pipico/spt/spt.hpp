@@ -12,8 +12,8 @@
 #ifndef SPT_SPT_HPP
 #define SPT_SPT_HPP
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 #include "peripherals_base/spt_base.hpp"
 

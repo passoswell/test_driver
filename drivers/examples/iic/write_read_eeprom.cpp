@@ -16,7 +16,7 @@
  *
  */
 
-#include <string.h>
+#include <cstring>
 
 #include "drivers.hpp"
 
@@ -78,14 +78,14 @@ AP_MAIN()
 
   timer.delay(2000);
 
-  printf("\r\n\r\nTest program started\r\n");
+  std::printf("\r\n\r\nTest program started\r\n");
 
-  memset(g_addr_table, 0, sizeof(g_addr_table));
+  std::memset(g_addr_table, 0, sizeof(g_addr_table));
 
   status = g_iic.configure(g_iic_config_list, g_iic_config_list_size);
   if(!status)
   {
-    printf("\r\nERROR failed to configure: %s\r\n", status.message().data());
+    std::printf("\r\nERROR failed to configure: %s\r\n", status.message().data());
     AP_EXIT();
   }
 
@@ -101,43 +101,43 @@ AP_MAIN()
 
 
   // Reading from the memory
-  printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
+  std::printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
   status = mem_read(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
   if(!status)
   {
-    printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
+    std::printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
     AP_EXIT();
   }
-  printf("Read from the memory:\t[Address] Value\r\n");
+  std::printf("Read from the memory:\t[Address] Value\r\n");
   printBytes(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
 
 
 
   // Writing to the memory
-  printf("Writing %u bytes to memory\r\n", BYTES_TO_WRITE);
+  std::printf("Writing %u bytes to memory\r\n", BYTES_TO_WRITE);
   status = mem_write(START_ADDRESS, g_tx_buffer, BYTES_TO_WRITE);
   if(!status)
   {
-    printf("\r\nERROR from mem_write: %s\r\n", status.message().data());
+    std::printf("\r\nERROR from mem_write: %s\r\n", status.message().data());
     AP_EXIT();
   }
-  printf("Wrote to the memory:\t[Address] Value\r\n");
+  std::printf("Wrote to the memory:\t[Address] Value\r\n");
   printBytes(START_ADDRESS, g_tx_buffer, BYTES_TO_WRITE);
 
 
 
   // Reading from the memory
-  printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
+  std::printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
   status = mem_read(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
   if(!status)
   {
-    printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
+    std::printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
     AP_EXIT();
   }
-  printf("Read from the memory:\t[Address] Value\r\n");
+  std::printf("Read from the memory:\t[Address] Value\r\n");
   printBytes(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
 
-  printf("This is the end of the test\r\n");
+  std::printf("This is the end of the test\r\n");
 
 
 
@@ -166,7 +166,7 @@ ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size)
   status = g_iic.write(reg_addr_buffer, 100);
   if(!status)
   {
-    printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
+    std::printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
     return status;
   }
   // while(!g_iic.getWriteStatus().success);
@@ -174,7 +174,7 @@ ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size)
   status = g_iic.read({data, size}, 100);
   if(!status)
   {
-    printf("\r\nERROR from my_serial.read: %s\r\n", status.message().data());
+    std::printf("\r\nERROR from my_serial.read: %s\r\n", status.message().data());
     return status;
   }
   // while(!g_iic.getReadStatus().success);
@@ -205,12 +205,12 @@ ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size)
     buffer[0] = (address >> 8) & 0x0F;
     buffer[1] = address & 0xFF;
 
-    memcpy(&buffer[2], data, divisor);
+    std::memcpy(&buffer[2], data, divisor);
 
     status = g_iic.write({buffer, divisor + 2}, 100);
     if(!status)
     {
-      printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
+      std::printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
       return status;
     }
     // while(!g_iic.getWriteStatus().success);
@@ -224,12 +224,12 @@ ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size)
     buffer[0] = (address >> 8) & 0x0F;
     buffer[1] = address & 0xFF;
 
-    memcpy(&buffer[2], data, bytes_last_loop);
+    std::memcpy(&buffer[2], data, bytes_last_loop);
 
     status = g_iic.write({buffer, bytes_last_loop + 2u}, 100);
     if(!status)
     {
-      printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
+      std::printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
       return status;
     }
     // while(!g_iic.getWriteStatus().success);
@@ -252,9 +252,9 @@ void printBytes(uint16_t start_address, uint8_t *data, uint16_t size)
   {
     if(((i&15) == 0) && i != 0)
     {
-      printf("\r\n");
+      std::printf("\r\n");
     }
-    printf("[%03X] %3u   ", i, data[i]);
+    std::printf("[%03X] %3u   ", i, data[i]);
   }
-  printf("\r\n\r\n");
+  std::printf("\r\n\r\n");
 }

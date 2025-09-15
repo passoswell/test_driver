@@ -13,8 +13,8 @@
 #define DRIVERS_LINUX_STD_IN_OUT_STD_IN_OUT_HPP
 
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdbool>
 
 #include "linux/utils/linux_serial_file.hpp"
 

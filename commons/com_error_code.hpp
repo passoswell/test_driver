@@ -12,7 +12,8 @@
 #ifndef COMMONS_COM_ERROR_CODE_HPP
 #define COMMONS_COM_ERROR_CODE_HPP
 
-#include <stdint.h>
+#include <cstdint>
+#include <cstdbool>
 #include <string_view>
 
 /**

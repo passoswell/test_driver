@@ -12,7 +12,7 @@
  *
  */
 
-#include <string.h>
+#include <cstring>
 
 #include "drivers.hpp"
 
@@ -70,29 +70,29 @@ AP_MAIN()
   int result;
   uint32_t counter = 0;
 
-  printf("\r\nCode is running\r\n");
+  std::printf("\r\nCode is running\r\n");
 
   // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
   if (!status)
   {
-    printf("\r\nERROR from my_serial.configure: %s", status.message().data());
+    std::printf("\r\nERROR from my_serial.configure: %s", status.message().data());
     AP_EXIT();
   }
 
   while(true)
   {
     // Write a hello world message to the uart port
-    result = snprintf((char *)buffer, sizeof(buffer)-1, "[%03u] %s\r\n", counter, message);
+    result = std::snprintf((char *)buffer, sizeof(buffer)-1, "[%03u] %s\r\n", counter, message);
     if(result < 0)
     {
-      printf("\r\nERROR generating hello world message\r\n");
+      std::printf("\r\nERROR generating hello world message\r\n");
       AP_EXIT();
     }
     status = my_serial.write({buffer, (uint32_t)result});
     if(!status)
     {
-      printf("\r\nERROR from my_serial.write: %s", status.message().data());
+      std::printf("\r\nERROR from my_serial.write: %s", status.message().data());
       AP_EXIT();
     }
     my_timer.delay(1); // One second delay

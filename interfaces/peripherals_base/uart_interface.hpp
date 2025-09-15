@@ -13,8 +13,8 @@
 #define PERIPHERALS_BASE_UART_INTERFACE_HPP
 
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 #include "commons.hpp"
 #include "dio_interface.hpp"

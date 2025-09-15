@@ -12,8 +12,8 @@
 #define DRIVERS_LINUX_UART_UART_HPP
 
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdbool>
 
 #include "linux/uart/uart_bus.hpp"
 

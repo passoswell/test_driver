@@ -132,7 +132,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
 
   // For more information on how to configure serial ports:
   // https://blog.mbedded.ninja/programming/operating-systems/linux/linux-serial-ports-using-c-cpp/
-  n_bytes = snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", PORT_NUMBER);
+  n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", PORT_NUMBER);
   if(n_bytes < 0)
   {
     status = UartErrorCode::kFailed;

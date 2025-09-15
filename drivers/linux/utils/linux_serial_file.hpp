@@ -12,8 +12,8 @@
 #ifndef DRIVERS_LINUX_UTILS_LINUX_SERIAL_FILE_HPP
 #define DRIVERS_LINUX_UTILS_LINUX_SERIAL_FILE_HPP
 
-#include <stdio.h>
-#include <stdbool.h>
+#include <cstdio>
+#include <cstdbool>
 
 #include "peripherals_base/communication_interface.hpp"
 #include "linux/utils/linux_types.hpp"

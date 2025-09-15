@@ -13,8 +13,8 @@
 #define TASK_INTERFACE_HPP
 
 #include <functional>
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 #include "queue_interface.hpp"
 

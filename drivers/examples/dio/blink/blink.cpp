@@ -13,7 +13,7 @@
  *
  */
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "drivers.hpp"
 
@@ -62,7 +62,7 @@ AP_MAIN()
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
   if(!code)
   {
-    printf("Failed to configure the UART port\r\n");
+    std::printf("Failed to configure the UART port\r\n");
     AP_EXIT();
   }
 
@@ -72,10 +72,10 @@ AP_MAIN()
     (void) output.write(output_value);
     if(output_value)
     {
-      printf("LED pin is set to HIGH\r\n");
+      std::printf("LED pin is set to HIGH\r\n");
     }else
     {
-      printf("LED pin is set to LOW\r\n");
+      std::printf("LED pin is set to LOW\r\n");
     }
     my_timer.delay(500);
   }

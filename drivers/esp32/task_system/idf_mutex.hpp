@@ -12,7 +12,7 @@
 #ifndef TASK_SYSTEM_IDF_MUTEX_HPP
 #define TASK_SYSTEM_IDF_MUTEX_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "task_interface/mutex_interface.hpp"
 #include "freertos/FreeRTOS.h"

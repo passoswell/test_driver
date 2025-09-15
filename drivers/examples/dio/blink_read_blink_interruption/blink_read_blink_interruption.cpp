@@ -10,9 +10,9 @@
  * @note Connect a digital input and a digital output together and run the code.
  * The output can be configure changing the value of "DIO_OUTPUT_LINE_NUMBER",
  * and "DIO_OUTPUT_CHIP_NUMBER", while the input is configured through
- * "DIO_INPUT_LINE_NUMBER" and "DIO_INPUT_CHIP_NUMBER". If printf is available,
+ * "DIO_INPUT_LINE_NUMBER" and "DIO_INPUT_CHIP_NUMBER". If std::printf is available,
  * the state of both input and output is printed through the default serial
- * port / terminal interface. Else, comment out the calls to printf and
+ * port / terminal interface. Else, comment out the calls to std::printf and
  * use a debugger and break points.
  *
  */
@@ -92,14 +92,14 @@ public:
     {
       if(event == EVENT_EDGE_RISING)
       {
-        printf("Detected rising edge on line #%u\r\n", m_pin);
+        std::printf("Detected rising edge on line #%u\r\n", m_pin);
       }else
       {
-        printf("Detected falling edge on line #%u\r\n", m_pin);
+        std::printf("Detected falling edge on line #%u\r\n", m_pin);
       }
     }else
     {
-      printf("Error reading event on line #%u\r\n", m_pin);
+      std::printf("Error reading event on line #%u\r\n", m_pin);
     }
   }
 
@@ -127,13 +127,13 @@ AP_MAIN()
   code = input.configure(g_dio_input_list, g_dio_input_list_size);
   if(!code)
   {
-    printf("Failed to configure the digital input\r\n");
+    std::printf("Failed to configure the digital input\r\n");
     AP_EXIT();
   }
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
   if(!code)
   {
-    printf("Failed to configure the digital output\r\n");
+    std::printf("Failed to configure the digital output\r\n");
     AP_EXIT();
   }
 
@@ -141,16 +141,16 @@ AP_MAIN()
   code = input.enableInterruption(true);
   if(!code)
   {
-    printf("Failed to enable interruption for the digital input\r\n");
+    std::printf("Failed to enable interruption for the digital input\r\n");
     AP_EXIT();
   }else
   {
-    printf("Enabled 'EVENT_EDGE_BOTH' interruption for the digital input\r\n");
+    std::printf("Enabled 'EVENT_EDGE_BOTH' interruption for the digital input\r\n");
   }
 
   while(true)
   {
-    printf("Writing %u on line #%u\r\n", output_value, DIO_OUTPUT_LINE_NUMBER);
+    std::printf("Writing %u on line #%u\r\n", output_value, DIO_OUTPUT_LINE_NUMBER);
     (void) output.write(output_value);
     output_value = !output_value;
     my_timer.delay(2000);

@@ -14,7 +14,7 @@
 
 #include <mutex>
 #include <chrono>
-#include <stdint.h>
+#include <cstdint>
 
 #include "task_interface/mutex_interface.hpp"
 

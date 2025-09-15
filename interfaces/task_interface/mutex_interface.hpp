@@ -12,7 +12,7 @@
 #ifndef TASK_INTERFACE_MUTEX_INTERFACE_HPP
 #define TASK_INTERFACE_MUTEX_INTERFACE_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 /**
  * @brief Interface class for mutexes

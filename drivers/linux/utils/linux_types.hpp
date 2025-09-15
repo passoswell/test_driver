@@ -13,8 +13,8 @@
 #ifndef DRIVERS_LINUX_UTILS_LINUX_TYPES_HPP
 #define DRIVERS_LINUX_UTILS_LINUX_TYPES_HPP
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 #include <thread>
 #include <mutex>
 #include <condition_variable>

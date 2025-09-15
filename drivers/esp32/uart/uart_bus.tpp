@@ -9,8 +9,6 @@
  *
  */
 
-#include <string.h>
-
 #include "uart_bus.hpp"
 #include "esp32/utils/esp32_io.hpp"
 #include "freertos/FreeRTOS.h"

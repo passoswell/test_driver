@@ -13,8 +13,8 @@
 #define PERIPHERALS_BASE_CALLBACK_INTERFACE_HPP
 
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 #include <string>
 
 #include "commons.hpp"

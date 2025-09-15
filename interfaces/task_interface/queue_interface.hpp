@@ -12,8 +12,8 @@
 #ifndef TASK_INTERFACE_QUEUE_INTERFACE_HPP
 #define TASK_INTERFACE_QUEUE_INTERFACE_HPP
 
-#include <stdint.h>
-#include <stdbool.h>
+#include <cstdint>
+#include <cstdbool>
 
 /**
  * @brief Interface class for queues

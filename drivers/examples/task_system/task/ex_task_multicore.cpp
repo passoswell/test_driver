@@ -19,7 +19,7 @@
 uint16_t taskFunction(uint16_t data, void *user_arg)
 {
   uint8_t core_number = *static_cast<uint8_t *>(user_arg);
-  printf("Task function from core %u received %u\r\n", core_number, data);
+  std::printf("Task function from core %u received %u\r\n", core_number, data);
   return data;
 }
 
@@ -31,7 +31,7 @@ AP_MAIN()
   TaskProfile_t parameters;
   uint8_t core_task0 = 0, core_task1 = 1;
 
-  printf("\r\nThe platform running this test has %u cores available\r\n", my_task_core0.getCoreCount());
+  std::printf("\r\nThe platform running this test has %u cores available\r\n", my_task_core0.getCoreCount());
 
   parameters.name = "Task 0";
   parameters.type = TASK_WORKER;
@@ -41,11 +41,11 @@ AP_MAIN()
   if (my_task_core0.create(taskFunction, &core_task0, parameters))
   {
     core_task0 = my_task_core0.getPinnedCore();
-    printf("\r\nTask created successfully on core %u, running example \r\n", core_task0);
+    std::printf("\r\nTask created successfully on core %u, running example \r\n", core_task0);
   }
   else
   {
-    printf("\r\nTask creation failed, aborting example \r\n");
+    std::printf("\r\nTask creation failed, aborting example \r\n");
     AP_EXIT();
   }
 
@@ -53,11 +53,11 @@ AP_MAIN()
   if (my_task_core1.create(taskFunction, &core_task1, parameters))
   {
     core_task1 = my_task_core1.getPinnedCore();
-    printf("\r\nTask created successfully on core %u, running example \r\n", core_task1);
+    std::printf("\r\nTask created successfully on core %u, running example \r\n", core_task1);
   }
   else
   {
-    printf("\r\nTask creation failed, aborting example \r\n");
+    std::printf("\r\nTask creation failed, aborting example \r\n");
     AP_EXIT();
   }
 
@@ -68,7 +68,7 @@ AP_MAIN()
     core_task0 = my_task_core0.getPinnedCore();
     if (item != 10 * i)
     {
-      printf("Found an error, sent %u to the task and received %u to task on core 0\r\n", 10 * i, item);
+      std::printf("Found an error, sent %u to the task and received %u to task on core 0\r\n", 10 * i, item);
     }
 
     my_task_core1.setInputData(10 * i, 1000);
@@ -76,9 +76,9 @@ AP_MAIN()
     core_task1 = my_task_core1.getPinnedCore();
     if (item != 10 * i)
     {
-      printf("Found an error, sent %u to the task and received %u to task on core 1\r\n", 10 * i, item);
+      std::printf("Found an error, sent %u to the task and received %u to task on core 1\r\n", 10 * i, item);
     }
   }
-  printf("\r\nEnd of the example \r\n");
+  std::printf("\r\nEnd of the example \r\n");
   AP_EXIT();
 }
