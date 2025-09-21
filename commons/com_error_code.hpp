@@ -352,6 +352,13 @@ public:
     }
   }
 
+  // Overload the '=' operator
+  ErrorChain operator=(const ErrorCode &error_code)
+  {
+    this->push(error_code);
+    return *this;
+  }
+
 private:
   std::array<ErrorCode, kMaxCHainQty> m_chain;
   int m_size;
