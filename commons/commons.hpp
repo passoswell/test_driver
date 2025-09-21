@@ -12,7 +12,6 @@
 #define COMMONS_HPP_
 
 #include "com_error_code.hpp"
-#include "com_status.hpp"
 #include "com_types.hpp"
 
 

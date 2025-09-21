@@ -16,8 +16,6 @@
 #include <cstdlib>
 #include <cstdint>
 
-#include "com_status.hpp"
-
 int readSyscall(int fd, uint8_t *buffer, size_t cnt);
 
 int readOnTimeoutSyscall(int fd, uint8_t *buffer, size_t cnt, uint32_t timeout_ms);

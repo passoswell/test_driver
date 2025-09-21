@@ -12,8 +12,9 @@
 #ifndef COMMONS_COM_ERROR_CODE_HPP
 #define COMMONS_COM_ERROR_CODE_HPP
 
-#include <cstdint>
+#include <array>
 #include <cstdbool>
+#include <cstdint>
 #include <string_view>
 
 /**
@@ -185,6 +186,7 @@ enum class GenericErrorCode
 
 };
 
+
 /**
  * @brief Custom error category for GenericErrorCode
  */
@@ -277,7 +279,7 @@ inline constexpr GenericErrorCategory generic_category{};
  * @param category A custom error category, default is generic_category
  * @return ErrorCode
  */
-constexpr ErrorCode makeErrorCode(GenericErrorCode error_code, const ErrorCategory& category = GenericErrorCategory::getCategory())
+constexpr ErrorCode makeErrorCode(GenericErrorCode error_code, const ErrorCategory& category = GenericErrorCategory::getCategory(), const char *custom_message = nullptr)
 {
   return ErrorCode(static_cast<int>(error_code), category);
 }
@@ -287,6 +289,73 @@ constexpr ErrorCode makeErrorCode(GenericErrorCode error_code, const ErrorCatego
  */
 template <>
 struct is_error_enum<GenericErrorCode> : std::true_type {};
+
+
+
+/**
+ * @brief Wraps ErrorCode holding multiple layers of error context
+ */
+class ErrorChain
+{
+public:
+  static constexpr int kMaxCHainQty = 4; // configurable
+
+  // Default constructor
+  ErrorChain() : m_size(0) {}
+
+  // Constructor initializes the first error code
+  ErrorChain(const ErrorCode &error_code) : m_size(0)
+  {
+    push(error_code);
+  }
+
+  // Constructor initializes the first error code
+  template <typename Enum, typename = std::enable_if_t<is_error_enum<Enum>::value>>
+  constexpr ErrorChain(Enum error_enum_item, const ErrorCategory &category, const char *custom_message = nullptr) : m_size(0)
+  {
+    push(error_enum_item, category, custom_message);
+  }
+
+  // Add an error code to the chain
+  void push(const ErrorCode &error_code)
+  {
+    if (m_size < kMaxCHainQty)
+    {
+      m_chain[m_size] = error_code;
+      m_size++;
+    }
+  }
+
+  // Add an error code to the chain
+  template <typename Enum, typename = std::enable_if_t<is_error_enum<Enum>::value>>
+  void push(Enum error_enum_item, const ErrorCategory &category, const char *custom_message = nullptr)
+  {
+    if (m_size < kMaxCHainQty)
+    {
+      m_chain[m_size] = makeErrorCode(error_enum_item, category, custom_message);
+      m_size++;
+    }
+  }
+
+  // Get the number of error codes chained
+  int size() const { return m_size;}
+
+  // Get the error code saved on the chain index
+  const ErrorCode &errorCode(int index) const
+  {
+    if(index < size())
+    {
+      return m_chain[index];
+    }else
+    {
+      return m_chain[0];
+    }
+  }
+
+private:
+  std::array<ErrorCode, kMaxCHainQty> m_chain;
+  int m_size;
+};
 
 
 
