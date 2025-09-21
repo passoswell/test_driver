@@ -69,10 +69,10 @@ public:
   }
 
   // Get an instance of the error category
-  static inline const ErrorCategory& getCategory()
+  static inline const ErrorCategory &getCategory()
   {
-  static IicErrorCategory instance;
-  return instance;
+    static IicErrorCategory instance;
+    return instance;
   }
 };
 

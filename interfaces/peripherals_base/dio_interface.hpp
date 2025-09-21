@@ -59,10 +59,10 @@ public:
   }
 
   // Get an instance of the error category
-  static inline const ErrorCategory& getCategory()
+  static inline const ErrorCategory &getCategory()
   {
-  static DioErrorCategory instance;
-  return instance;
+    static DioErrorCategory instance;
+    return instance;
   }
 };
 
@@ -72,13 +72,13 @@ public:
  * @param error_code A value from enum DioErrorCode
  * @return ErrorCode
  */
-inline ErrorCode make_error_code(DioErrorCode error_code)
+inline ErrorCode makeErrorCode(DioErrorCode error_code)
 {
   return {static_cast<int>(error_code), DioErrorCategory::getCategory()};
 }
 
 /**
- * @brief Specializing ErrorCode to use the specialized make_error_code's definition above
+ * @brief Specializing ErrorCode to use the specialized makeErrorCode's definition above
  */
 template <>
 struct is_error_enum<DioErrorCode> : std::true_type {};

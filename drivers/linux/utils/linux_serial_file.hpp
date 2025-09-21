@@ -74,13 +74,13 @@ public:
  * @param error_code A value from enum SerialFileErrorCode
  * @return ErrorCode
  */
-inline ErrorCode make_error_code(SerialFileErrorCode error_code)
+inline ErrorCode makeErrorCode(SerialFileErrorCode error_code)
 {
   return {static_cast<int>(error_code), SerialFileErrorCategory::getCategory()};
 }
 
 /**
- * @brief Specializing ErrorCode to use the specialized make_error_code's definition above
+ * @brief Specializing ErrorCode to use the specialized makeErrorCode's definition above
  */
 template <>
 struct is_error_enum<SerialFileErrorCode> : std::true_type {};

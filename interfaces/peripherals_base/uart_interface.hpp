@@ -70,10 +70,10 @@ public:
   }
 
   // Get an instance of the error category
-  static inline const ErrorCategory& getCategory()
+  static inline const ErrorCategory &getCategory()
   {
-  static UartErrorCategory instance;
-  return instance;
+    static UartErrorCategory instance;
+    return instance;
   }
 };
 
@@ -83,13 +83,13 @@ public:
  * @param error_code A value from enum UartErrorCode
  * @return ErrorCode
  */
-inline ErrorCode make_error_code(UartErrorCode error_code)
+inline ErrorCode makeErrorCode(UartErrorCode error_code)
 {
   return {static_cast<int>(error_code), UartErrorCategory::getCategory()};
 }
 
 /**
- * @brief Specializing ErrorCode to use the specialized make_error_code's definition above
+ * @brief Specializing ErrorCode to use the specialized makeErrorCode's definition above
  */
 template <>
 struct is_error_enum<UartErrorCode> : std::true_type {};
