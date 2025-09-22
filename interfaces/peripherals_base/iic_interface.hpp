@@ -21,25 +21,6 @@
 
 
 /**
- * @brief Error codes for IIC peripherals
- */
-enum class IicErrorCode
-{
-  kSuccess = 0,
-  kFailed,
-  kNotImplemented,
-  kInvalidParameter,
-  kNotConfigured,
-  kNullPointer,
-  kBadHandle,
-  kTimedOut,                /*!< Operation took more time than expected */
-  kAddressNotAcknowledged,  /*!< The address was not acknowledged */
-  kBusy,                    /*!< Bus already in use by another controller */
-  kBusError,                /*!< Some device needs fault recovery */
-  kArbitrationLost,         /*!< Multi-master arbitration lost */
-};
-
-/**
  * @brief IIC error codes category
  */
 class IicErrorCategory : public ErrorCategory
@@ -51,20 +32,21 @@ public:
   // Get the error's helper message
   constexpr std::string_view message(int error_value) const noexcept override
   {
-    switch (static_cast<IicErrorCode>(error_value))
+    switch (static_cast<GenericErrorCode>(error_value))
     {
-      case IicErrorCode::kSuccess: return "Success";
-      case IicErrorCode::kNotImplemented: return "Feature not implemented";
-      case IicErrorCode::kInvalidParameter: return "Invalid input parameter";
-      case IicErrorCode::kNotConfigured: return "Resource is not properly configured";
-      case IicErrorCode::kNullPointer: return "A null pointer was detected";
-      case IicErrorCode::kBadHandle: return "Invalid handle to the resource";
-      case IicErrorCode::kTimedOut: return "Operation took more time than expected";
-      case IicErrorCode::kAddressNotAcknowledged: return "The address was not acknowledged";
-      case IicErrorCode::kBusy: return "Bus already in use by another controller";
-      case IicErrorCode::kBusError: return "Some device or the peripheral needs fault recovery";
-      case IicErrorCode::kArbitrationLost: return "Multi-master arbitration lost";
-      default: return "Unknown IIC error";
+      case GenericErrorCode::kSuccess: return "Success";
+      case GenericErrorCode::kNotImplemented: return "IIC feature not implemented";
+      case GenericErrorCode::kInvalidParameter: return "Invalid IIC input parameter";
+      case GenericErrorCode::kNotConfigured: return "IIC resource is not properly configured";
+      case GenericErrorCode::kNullPointer: return "A null pointer was detected by IIC";
+      case GenericErrorCode::kBadHandle: return "Invalid handle to the IIC resource";
+      case GenericErrorCode::kTimedOut: return "IIC operation took more time than expected";
+      case GenericErrorCode::kAddressNotAcknowledged: return "The IIC address was not acknowledged";
+      case GenericErrorCode::kBusy: return "IIC bus already in use by another controller";
+      case GenericErrorCode::kBusError: return "Some IIC device or the IIC peripheral needs fault recovery";
+      case GenericErrorCode::kArbitrationLost: return "Multi-master IIC arbitration lost";
+      case GenericErrorCode::kFailed: return "Unknown IIC error";
+      default: return generic_category.message(error_value); // Using GenericErrorCode with generic error messages
     }
   }
 
@@ -75,24 +57,6 @@ public:
     return instance;
   }
 };
-
-/**
- * @brief Function overload, convert enum class into an ErrorCode
- *
- * @param error_code A value from enum IicErrorCode
- * @return ErrorCode
- */
-inline ErrorCode make_error_code(IicErrorCode error_code)
-{
-  return {static_cast<int>(error_code), IicErrorCategory::getCategory()};
-}
-
-/**
- * @brief Specializing ErrorCode to use the specialized make_error_code's definition above
- */
-template <>
-struct is_error_enum<IicErrorCode> : std::true_type {};
-
 
 /**
  * @brief Type definition for IIC port number
@@ -183,7 +147,7 @@ public:
 
   virtual ErrorCode setCallback(EventsList_t event, iCallback &event_handler) override
   {
-    ErrorCode status = IicErrorCode::kSuccess;
+    ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
     switch(event)
     {
     case EVENT_READ:
@@ -193,7 +157,8 @@ public:
       m_cb_function_tx = &event_handler;
       break;
     default:
-      status = IicErrorCode::kInvalidParameter;
+      status.setValue(GenericErrorCode::kInvalidParameter);
+      status.setMessage("Invalid callback event for IIC");
       break;
     }
     return status;

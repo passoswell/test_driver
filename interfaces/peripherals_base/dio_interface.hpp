@@ -21,20 +21,6 @@
 
 
 /**
- * @brief Error codes for SPI peripherals
- */
-enum class DioErrorCode
-{
-  kSuccess = 0,
-  kFailed,
-  kInvalidParameter,
-  kNotConfigured,
-  kNullPointer,
-  kBadHandle,
-  kTimedOut,
-};
-
-/**
  * @brief DIO error codes category
  */
 class DioErrorCategory : public ErrorCategory
@@ -46,15 +32,16 @@ public:
   // Get the error's helper message
   constexpr std::string_view message(int error_value) const noexcept override
   {
-    switch (static_cast<DioErrorCode>(error_value))
+    switch (static_cast<GenericErrorCode>(error_value))
     {
-      case DioErrorCode::kSuccess: return "Success";
-      case DioErrorCode::kInvalidParameter: return "Invalid input parameter";
-      case DioErrorCode::kNotConfigured: return "Resource is not properly configured";
-      case DioErrorCode::kNullPointer: return "A null pointer was detected";
-      case DioErrorCode::kBadHandle: return "Invalid handle to the resource";
-      case DioErrorCode::kTimedOut: return "Operation took more time than expected";
-      default: return "Unknown DIO error";
+      case GenericErrorCode::kSuccess: return "Success";
+      case GenericErrorCode::kInvalidParameter: return "Invalid DIO input parameter";
+      case GenericErrorCode::kNotConfigured: return "DIO is not properly configured";
+      case GenericErrorCode::kNullPointer: return "A null pointer was detected on DIO";
+      case GenericErrorCode::kBadHandle: return "Invalid handle to the DIO";
+      case GenericErrorCode::kTimedOut: return "DIO operation took more time than expected";
+      case GenericErrorCode::kFailed: return "Unknown DIO error";
+      default: return generic_category.message(error_value); // Using GenericErrorCode with generic error messages
     }
   }
 
@@ -65,23 +52,6 @@ public:
     return instance;
   }
 };
-
-/**
- * @brief Function overload, convert enum class into an ErrorCode
- *
- * @param error_code A value from enum DioErrorCode
- * @return ErrorCode
- */
-inline ErrorCode makeErrorCode(DioErrorCode error_code)
-{
-  return {static_cast<int>(error_code), DioErrorCategory::getCategory()};
-}
-
-/**
- * @brief Specializing ErrorCode to use the specialized makeErrorCode's definition above
- */
-template <>
-struct is_error_enum<DioErrorCode> : std::true_type {};
 
 
 /**

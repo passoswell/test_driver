@@ -77,7 +77,7 @@ DIO::~DIO()
  */
 ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  ErrorCode result;
+  ErrorCode result(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   struct gpiod_line_request_config settings =
   {
     .consumer = "my_driver",
@@ -127,20 +127,20 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
       ret = gpiod_line_request((struct gpiod_line *)m_line_handle, &settings, m_value);
       if (ret >= 0)
       {
-        return DioErrorCode::kSuccess;
+        return result;
       }else
       {
-        result = DioErrorCode::kFailed;
+        result.setValue(GenericErrorCode::kFailed);
         gpiod_line_release((struct gpiod_line *)m_line_handle);
       }
     }else
     {
-      result = DioErrorCode::kFailed;
+      result.setValue(GenericErrorCode::kFailed);
     }
     gpiod_chip_close((struct gpiod_chip *)m_chip_handle);
   }else
   {
-    result = DioErrorCode::kFailed;
+    result.setValue(GenericErrorCode::kFailed);
   }
 
   return result;
@@ -153,13 +153,21 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
  */
 ErrorCode DIO::read(bool &state)
 {
+  ErrorCode result(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   int val;
-  if(m_line_handle == nullptr) return DioErrorCode::kNullPointer;
+  if(m_line_handle == nullptr)
+  {
+    result.setValue(GenericErrorCode::kNullPointer);
+    return result;
+  }
   val = gpiod_line_get_value((struct gpiod_line *)m_line_handle);
-  if(val < 0) {return DioErrorCode::kFailed;}
   if(val == 0){state = false;}
-  else {state = true;}
-  return DioErrorCode::kSuccess;
+  else if(val == 1) {state = true;}
+  else
+  {
+    result.setValue(GenericErrorCode::kFailed);
+  }
+  return result;
 }
 
 /**
@@ -169,12 +177,22 @@ ErrorCode DIO::read(bool &state)
  */
 ErrorCode DIO::write(bool value)
 {
+  ErrorCode result(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   int ret;
-  if(m_line_handle == nullptr) return DioErrorCode::kNullPointer;
+  if(m_line_handle == nullptr)
+  {
+    result.setValue(GenericErrorCode::kNullPointer);
+    return result;
+  }
   ret = gpiod_line_set_value((struct gpiod_line *)m_line_handle, (int) value);
-  if(ret < 0) {return DioErrorCode::kFailed;}
-  m_value = (bool) value;
-  return DioErrorCode::kSuccess;
+  if(ret == 0)
+  {
+    m_value = (bool) value;
+  }else
+  {
+    result.setValue(GenericErrorCode::kFailed);
+  }
+  return result;
 }
 
 /**
@@ -183,8 +201,7 @@ ErrorCode DIO::write(bool value)
  */
 ErrorCode DIO::toggle()
 {
-  m_value = !m_value;
-  return write(m_value);
+  return write(!m_value);
 }
 
 /**
@@ -198,7 +215,7 @@ ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
   m_event_handler = &event_handler;
   m_edge = edge;
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -210,7 +227,7 @@ ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 ErrorCode DIO::enableInterruption(bool enable)
 {
   std::unique_lock<std::mutex> locker1(m_sync.mutex,  std::defer_lock);
-  ErrorCode status = DioErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   struct gpiod_line_request_config settings =
   {
     .consumer = "my_driver",
@@ -219,7 +236,11 @@ ErrorCode DIO::enableInterruption(bool enable)
   };
   int ret, val = 0;
 
-  if(m_line_handle == nullptr || m_chip_handle == nullptr) return DioErrorCode::kNullPointer;
+  if(m_line_handle == nullptr || m_chip_handle == nullptr)
+  {
+    status.setValue(GenericErrorCode::kNullPointer);
+    return status;
+  }
   settings.flags = m_flags;
 
   if(!enable)
@@ -234,7 +255,7 @@ ErrorCode DIO::enableInterruption(bool enable)
       m_sync.thread->join();
       delete m_sync.thread;
     }
-    return DioErrorCode::kSuccess;
+    return status;
   }
 
   switch (m_edge)
@@ -267,20 +288,25 @@ ErrorCode DIO::enableInterruption(bool enable)
         m_sync.condition.notify_one();
         m_sync.thread->join();
       }
-      return DioErrorCode::kSuccess;
+      return status;
       break;
     default:
-      return DioErrorCode::kInvalidParameter;
+      status.setValue(GenericErrorCode::kInvalidParameter);
+      return status;
       break;
   }
 
-  if(ret < 0) { return DioErrorCode::kFailed;}
+  if(ret < 0)
+  {
+    status.setValue(GenericErrorCode::kFailed);
+    return status;
+  }
   if(m_sync.thread == nullptr)
   {
     m_sync.thread = new std::thread(&DIO::readAsyncThread, this);
   }
 
-  return DioErrorCode::kSuccess;
+  return status;
 }
 
 /**
@@ -291,7 +317,7 @@ void DIO::readAsyncThread(void)
   struct timespec ts = {0, 100000000};
   struct gpiod_line_event event;
   EventsList_t edge;
-  ErrorCode status;
+  ErrorCode status(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   uint8_t state[1];
   int ret;
 
@@ -308,17 +334,17 @@ void DIO::readAsyncThread(void)
       case GPIOD_LINE_EVENT_RISING_EDGE:
         edge = EVENT_EDGE_RISING;
         state[0] = true;
-        status = DioErrorCode::kSuccess;
+        status.setValue(GenericErrorCode::kSuccess);
         break;
       case GPIOD_LINE_EVENT_FALLING_EDGE:
         edge = EVENT_EDGE_FALLING;
         state[0] = false;
-        status = DioErrorCode::kSuccess;
+        status.setValue(GenericErrorCode::kSuccess);
         break;
       default:
         edge = EVENT_NONE;
         state[0] = false;
-        status = DioErrorCode::kFailed;
+        status.setValue(GenericErrorCode::kFailed);
         break;
     }
     m_event_handler->onEvent(status, edge, state);

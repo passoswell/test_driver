@@ -28,7 +28,7 @@ template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
   static Mutex mutex;
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   bool result;
   char port_name[100];
   int n_bytes;
@@ -37,7 +37,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   if(m_is_configured)
   {
     mutex.unlock();
-    return IicErrorCode::kSuccess;
+    return status;
   }
 
 
@@ -64,7 +64,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     result = m_thread_handle.create(IicBus::asyncTransferThread, this, 0);
     if(!result)
     {
-      status = IicErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage("Failed to launch the IIC task");
       mutex.unlock();
       return status;
@@ -77,7 +77,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/i2c-%u", PORT_NUMBER);
   if(n_bytes < 0)
   {
-    status = IicErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to find the file name for uart driver");
     mutex.unlock();
     return status;
@@ -85,7 +85,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   m_fd = open(port_name, O_RDWR);
   if (m_fd < 0)
   {
-    status = IicErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to open the file");
     mutex.unlock();
     return status;
@@ -93,7 +93,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
 
   m_is_configured = true;
   mutex.unlock();
-  return IicErrorCode::kSuccess;
+  return status;
 }
 
 /**
@@ -108,7 +108,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   IicDataBundle_t data_bundle;
   (void) timeout;
 
@@ -127,10 +127,10 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
     data_bundle.tx.event_handle = nullptr;
     if(m_thread_handle.setInputData(data_bundle, timeout))
     {
-      status = IicErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = IicErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }else
   {
@@ -140,7 +140,7 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
       m_mutex.unlock();
     }else
     {
-      status = IicErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }
 
@@ -159,7 +159,7 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   IicDataBundle_t data_bundle;
   (void) timeout;
 
@@ -178,10 +178,10 @@ ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t t
     data_bundle.rx.event_handle = nullptr;
     if(m_thread_handle.setInputData(data_bundle, timeout))
     {
-      status = IicErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = IicErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }else
   {
@@ -191,7 +191,7 @@ ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t t
       m_mutex.unlock();
     }else
     {
-      status = IicErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }
 
@@ -235,7 +235,7 @@ IicBus<PORT_NUMBER>::~IicBus()
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   int byte_count;
 
   if (ioctl(m_fd, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
@@ -243,12 +243,12 @@ ErrorCode IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
     byte_count = readSyscall(m_fd, data.data(), data.size_bytes());
     if (byte_count != data.size_bytes())
     {
-      status = IicErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage("The number of bytes transmitted through iic is smaller than the requested");
     }
   }else
   {
-    status = IicErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("It was not possible to set the desired peripheral address");
   }
 
@@ -265,7 +265,7 @@ ErrorCode IicBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint16_t address)
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t address)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   int byte_count;
 
   if (ioctl(m_fd, I2C_PERIPHERAL_7BITS_ADDRESS, address) >= 0)
@@ -273,13 +273,13 @@ ErrorCode IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t ad
     byte_count = writeSyscall(m_fd, data.data(), data.size_bytes());
     if (byte_count != data.size_bytes())
     {
-      status = IicErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage("The number of bytes received through iic is smaller than the requested");
     }
   }
   else
   {
-    status = IicErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("It was not possible to set the desired peripheral address");
   }
 
@@ -296,7 +296,7 @@ ErrorCode IicBus<PORT_NUMBER>::blockingWrite(const DrvBuffer_t data, uint16_t ad
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::asyncTransferThread(IicDataBundle_t data_bundle, void *user_arg)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   IicBus *obj = static_cast<IicBus *>(user_arg);
 
   if(obj != nullptr)
@@ -336,9 +336,10 @@ ErrorCode IicBus<PORT_NUMBER>::asyncTransferThread(IicDataBundle_t data_bundle, 
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::checkInputs(const DrvBuffer_t data, uint32_t timeout)
 {
-  if(!m_is_configured) { return IicErrorCode::kNotConfigured;}
-  if(data.data() == nullptr) { return IicErrorCode::kNullPointer;}
-  if(m_fd < 0) { return IicErrorCode::kBadHandle;}
-  if(data.size_bytes() == 0) { return IicErrorCode::kInvalidParameter;}
-  return IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
+  if(!m_is_configured) { status.setValue(GenericErrorCode::kNotConfigured);}
+  if(data.data() == nullptr) { status.setValue(GenericErrorCode::kNullPointer);}
+  if(m_fd < 0) { status.setValue(GenericErrorCode::kBadHandle);}
+  if(data.size_bytes() == 0) { status.setValue(GenericErrorCode::kInvalidParameter);}
+  return status;
 }

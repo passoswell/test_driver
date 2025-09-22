@@ -22,13 +22,13 @@
 template<IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   esp_err_t esp_error = ESP_OK;
   i2c_config_t i2c_config;
 
   if(m_is_configured)
   {
-    return IicErrorCode::kSuccess;
+    return status;
   }
 
   i2c_config.mode = I2C_MODE_MASTER;
@@ -81,7 +81,7 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   esp_error = i2c_param_config((i2c_port_t)PORT_NUMBER, &i2c_config);
   if(esp_error != ESP_OK)
   {
-    status = IicErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage(getErrorMessage(esp_error));
     return status;
   }
@@ -89,19 +89,19 @@ ErrorCode IicBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   esp_error = i2c_driver_install((i2c_port_t)PORT_NUMBER, i2c_config.mode, 0, 0, 0);
   if(esp_error != ESP_OK)
   {
-    status = IicErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage(getErrorMessage(esp_error));
     return status;
   }
 
   m_is_configured = true;
-  return IicErrorCode::kSuccess;
+  return status;
 }
 
 template <IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   esp_err_t esp_error = ESP_OK;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
   if(!status)
@@ -111,16 +111,16 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
 
   if(m_is_async_mode_rx)
   {
-    status = IicErrorCode::kNotImplemented;
+    status.setValue(GenericErrorCode::kNotImplemented);
   }else
   {
     esp_error = i2c_master_read_from_device((i2c_port_t)PORT_NUMBER, address, data.data(), data.size_bytes(), timeout / portTICK_PERIOD_MS);
     if(esp_error == ESP_OK)
     {
-      status = IicErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = IicErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage(getErrorMessage(esp_error));
     }
   }
@@ -131,7 +131,7 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
 template <IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status = IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   esp_err_t esp_error = ESP_OK;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
   if(!status)
@@ -141,16 +141,16 @@ ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t t
 
   if(m_is_async_mode_tx)
   {
-    status = IicErrorCode::kNotImplemented;
+    status.setValue(GenericErrorCode::kNotImplemented);
   }else
   {
     esp_error = i2c_master_write_to_device((i2c_port_t)PORT_NUMBER, address, data.data(), data.size_bytes(), timeout / portTICK_PERIOD_MS);
     if(esp_error == ESP_OK)
     {
-      status = IicErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = IicErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage(getErrorMessage(esp_error));
     }
   }
@@ -168,7 +168,8 @@ ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t t
 template <IicHandle_t PORT_NUMBER>
 ErrorCode IicBus<PORT_NUMBER>::checkInputs(const uint8_t *buffer, uint32_t size, uint32_t timeout)
 {
-  if(buffer == nullptr) { return IicErrorCode::kNullPointer;}
-  if(size == 0) { return IicErrorCode::kInvalidParameter;}
-  return IicErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
+  if(buffer == nullptr) { status.setValue(GenericErrorCode::kNullPointer);}
+  if(size == 0) { status.setValue(GenericErrorCode::kInvalidParameter);}
+  return status;
 }

@@ -179,7 +179,7 @@ ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size)
   }
   // while(!g_iic.getReadStatus().success);
 
-  return IicErrorCode::kSuccess;
+  return status;
 
 }
 
@@ -236,7 +236,7 @@ ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size)
     timer.delay(25);
   }
 
-  return IicErrorCode::kSuccess;
+  return status;
 }
 
 /**

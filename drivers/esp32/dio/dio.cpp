@@ -45,7 +45,7 @@ DIO::~DIO()
  */
 ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  ErrorCode success;
+  ErrorCode success(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   gpio_config_t settings =
   {
     .pin_bit_mask = 0,
@@ -120,10 +120,10 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
   esp_err |= gpio_config(&settings);
   if(esp_err == ESP_OK)
   {
-    success = DioErrorCode::kSuccess;
+    success.setValue(GenericErrorCode::kSuccess);
   }else
   {
-    success = DioErrorCode::kInvalidParameter;
+    success.setValue(GenericErrorCode::kInvalidParameter);
   }
 
   return success;
@@ -137,7 +137,7 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 ErrorCode DIO::read(bool &state)
 {
   state = gpio_get_level((gpio_num_t) m_line_number);
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -152,10 +152,10 @@ ErrorCode DIO::write(bool value)
   if(esp_err == ESP_OK)
   {
     m_value = (bool) value;
-    return DioErrorCode::kSuccess;
+    return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   }else
   {
-    return DioErrorCode::kInvalidParameter;
+    return makeErrorCode(GenericErrorCode::kInvalidParameter, DioErrorCategory::getCategory());
   }
 }
 
@@ -165,8 +165,7 @@ ErrorCode DIO::write(bool value)
  */
 ErrorCode DIO::toggle()
 {
-  m_value = !m_value;
-  return write(m_value);
+  return write(!m_value);
 }
 
 /**
@@ -180,7 +179,7 @@ ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
   m_event_handler = &event_handler;
   m_edge = edge;
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -200,7 +199,7 @@ ErrorCode DIO::enableInterruption(bool enable)
     gpio_set_intr_type((gpio_num_t)m_line_number, GPIO_INTR_DISABLE);
     gpio_isr_handler_remove((gpio_num_t)m_line_number);
     terminateDioEventHandlerTask();
-    return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   }
 
   // install dio isr service
@@ -218,7 +217,7 @@ ErrorCode DIO::enableInterruption(bool enable)
       interruption_type = GPIO_INTR_ANYEDGE;
       break;
     default:
-      return DioErrorCode::kInvalidParameter;
+      return makeErrorCode(GenericErrorCode::kInvalidParameter, DioErrorCategory::getCategory());
       break;
   }
 
@@ -240,7 +239,7 @@ ErrorCode DIO::enableInterruption(bool enable)
     if(freertos_return != pdTRUE)
     {
       m_dio_event_task_handle = nullptr;
-      ErrorCode status = DioErrorCode::kFailed;
+      ErrorCode status(GenericErrorCode::kFailed, DioErrorCategory::getCategory());
       status.setMessage("Failed to create dioEventHandlerTask");
       return status;
     }else
@@ -251,7 +250,7 @@ ErrorCode DIO::enableInterruption(bool enable)
     gpio_isr_handler_add((gpio_num_t)m_line_number, callback, this);
   }
 
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -284,6 +283,7 @@ void DIO::dioEventHandlerTask(void)
 {
   EventsList_t edge = EVENT_EDGE_FALLING;
   uint8_t state[1] = {false};
+  ErrorCode status(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 
   while(true)
   {
@@ -302,7 +302,7 @@ void DIO::dioEventHandlerTask(void)
       {
         edge = EVENT_EDGE_FALLING;
       }
-      m_event_handler->onEvent(DioErrorCode::kSuccess, edge, state);
+      m_event_handler->onEvent(status, edge, state);
     }
   }
 

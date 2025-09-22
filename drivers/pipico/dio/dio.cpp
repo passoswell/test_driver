@@ -44,7 +44,7 @@ DIO::~DIO()
  */
 ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  ErrorCode success;
+  ErrorCode success(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   DioDirection_t line_direction = DIO_DIRECTION_INPUT;
   DioDrive_t line_drive = DIO_DRIVE_PUSH_PULL;
   DioBias_t line_bias = DIO_BIAS_DISABLED;
@@ -62,7 +62,11 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
           break;
         case DIO_LINE_DRIVE:
           if(list[i].value == DIO_DRIVE_PUSH_PULL){ line_drive = DIO_DRIVE_PUSH_PULL;}
-          if(list[i].value == DIO_DRIVE_OPEN_DRAIN){ return DioErrorCode::kInvalidParameter;}
+          if(list[i].value == DIO_DRIVE_OPEN_DRAIN)
+          {
+            success.setValue(GenericErrorCode::kInvalidParameter);
+            return success;
+          }
           break;
         case DIO_LINE_BIAS:
           if(list[i].value == DIO_BIAS_DISABLED) { line_bias = DIO_BIAS_DISABLED;}
@@ -97,7 +101,7 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
   }
 
   m_line_bias = line_bias;
-  return DioErrorCode::kSuccess;
+  return success;
 }
 
 /**
@@ -108,7 +112,7 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
 ErrorCode DIO::read(bool &state)
 {
   state = gpio_get(m_line_number);
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -119,7 +123,7 @@ ErrorCode DIO::read(bool &state)
 ErrorCode DIO::write(bool value)
 {
   gpio_put(m_line_number, value);
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -129,7 +133,7 @@ ErrorCode DIO::write(bool value)
 ErrorCode DIO::toggle()
 {
   gpio_xor_mask(1 << m_line_number);
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -143,7 +147,7 @@ ErrorCode DIO::setEventCallback(EventsList_t edge, iCallback &event_handler)
 {
   m_event_handler = &event_handler;
   m_edge = edge;
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -172,7 +176,7 @@ ErrorCode DIO::enableInterruption(bool enable)
         break;
       }
     }
-    return DioErrorCode::kSuccess;
+    return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   }
 
   switch(m_edge)
@@ -187,7 +191,7 @@ ErrorCode DIO::enableInterruption(bool enable)
       interruption_type = GPIO_IRQ_EDGE_RISE | GPIO_IRQ_EDGE_FALL;
       break;
     default:
-      return DioErrorCode::kInvalidParameter;
+      return makeErrorCode(GenericErrorCode::kInvalidParameter, DioErrorCategory::getCategory());
       break;
   }
 
@@ -203,7 +207,7 @@ ErrorCode DIO::enableInterruption(bool enable)
     gpio_pull_down(m_line_number);
   }
 
-  return DioErrorCode::kSuccess;
+  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 }
 
 /**
@@ -216,6 +220,7 @@ void drvDioCallback(unsigned int dio, uint32_t events)
 {
   EventsList_t edge = EVENT_EDGE_FALLING;
   uint8_t state[1] = {false};
+  ErrorCode success(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
 
   for (auto iterator = DIO::m_dio_ptr.begin(); iterator != DIO::m_dio_ptr.end(); iterator++)
   {
@@ -232,7 +237,7 @@ void drvDioCallback(unsigned int dio, uint32_t events)
           edge = EVENT_EDGE_RISING;
           state[0] = true;
         }
-        obj->m_event_handler->onEvent(DioErrorCode::kSuccess, edge, state);
+        obj->m_event_handler->onEvent(success, edge, state);
       }
       break;
     }
