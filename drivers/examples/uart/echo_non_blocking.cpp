@@ -140,7 +140,7 @@ AP_MAIN()
 
   // Start the async read operation
   status = g_serial.read(g_rx_buffer, 20);
-  if (!status && status.value() != static_cast<int>(UartErrorCode::kTimedOut))
+  if (!status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
   {
     std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
     AP_EXIT();
@@ -181,13 +181,13 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
     do
     {
       status = g_serial.write({g_rx_buffer, data.size_bytes()});
-      if(!status && status.value() != static_cast<int>(UartErrorCode::kBusy))
+      if(!status && status.value() != static_cast<int>(GenericErrorCode::kBusy))
       {
         std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
         g_error_flag = true;
         break;
       }
-    } while( status.value() == static_cast<int>(UartErrorCode::kBusy) );
+    } while( status.value() == static_cast<int>(GenericErrorCode::kBusy) );
 
 
     // Start a new async read operation

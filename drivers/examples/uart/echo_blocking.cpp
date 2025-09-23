@@ -94,7 +94,7 @@ AP_MAIN()
     {
       // Read data from uart by polling
       status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-      if (!status && status.value() != static_cast<int>(UartErrorCode::kTimedOut))
+      if (!status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
       {
         std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
         AP_EXIT();

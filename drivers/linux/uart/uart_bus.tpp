@@ -33,8 +33,8 @@ static speed_t convertSpeed(uint32_t speed);
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   static Mutex mutex;
-  ErrorCode status = UartErrorCode::kSuccess;
   struct termios termios_structure;
   speed_t speed = B1152000;
   uint32_t stop_bits_count = 1;
@@ -47,7 +47,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
   if(m_is_configured)
   {
     mutex.unlock();
-    return UartErrorCode::kSuccess;
+    return status;
   }
 
 
@@ -105,7 +105,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
     result = m_rx_thread_handle.create(UartBus::asyncReadThread, this, 0);
     if(!result)
     {
-      status = UartErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage("Failed to launch UartBus task for reception");
       mutex.unlock();
       return status;
@@ -120,7 +120,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
     result = m_tx_thread_handle.create(UartBus::asyncWriteThread, this, 0);
     if(!result)
     {
-      status = UartErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage("Failed to launch UartBus task for transmission");
       mutex.unlock();
       return status;
@@ -135,7 +135,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
   n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/serial%03u", PORT_NUMBER);
   if(n_bytes < 0)
   {
-    status = UartErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to find the file name for UartBus driver");
     mutex.unlock();
     return status;
@@ -143,7 +143,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
   m_fd = open(port_name, O_RDWR | O_NOCTTY);
   if (m_fd < 0)
   {
-    status = UartErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to open file for UartBus driver");
     mutex.unlock();
     return status;
@@ -201,7 +201,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
   tcsetattr(m_fd, TCSANOW, &termios_structure);
 
   mutex.unlock();
-  return UartErrorCode::kSuccess;
+  return status;
 }
 
 /**
@@ -217,7 +217,7 @@ ErrorCode UartBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t li
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status = UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   int bytes_read = 0;
   UartDataBundle_t data_bundle;
 
@@ -234,10 +234,10 @@ ErrorCode UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t ti
     data_bundle.rx.event_handler = &event_handler;
     if(m_rx_thread_handle.setInputData(data_bundle, timeout))
     {
-      status = UartErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = UartErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }else
   {
@@ -247,7 +247,7 @@ ErrorCode UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t ti
       m_rx_mutex.unlock();
     }else
     {
-      status = UartErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }
 
@@ -267,7 +267,7 @@ ErrorCode UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t ti
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status = UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   int bytes_written, drain_status;
   UartDataBundle_t data_bundle;
 
@@ -284,10 +284,10 @@ ErrorCode UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t t
     data_bundle.tx.event_handler = &event_handler;
     if(m_tx_thread_handle.setInputData(data_bundle, 0))
     {
-      status = UartErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = UartErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }else
   {
@@ -297,7 +297,7 @@ ErrorCode UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t t
       m_tx_mutex.unlock();
     }else
     {
-      status = UartErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }
 
@@ -363,7 +363,7 @@ UartBus<PORT_NUMBER>::~UartBus()
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout, bool use_idle_line_detection)
 {
-  ErrorCode status = UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   int bytes_read = 0;
 
   if(use_idle_line_detection)
@@ -386,7 +386,7 @@ ErrorCode UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout,
   if(bytes_read < 0)
   {
     m_bytes_read = 0;
-    status = UartErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage(std::strerror(errno));
     return status;
   }else
@@ -394,7 +394,7 @@ ErrorCode UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout,
     m_bytes_read = bytes_read;
     if (bytes_read == 0)
     {
-      status = UartErrorCode::kTimedOut;
+      status.setValue(GenericErrorCode::kTimedOut);
     }
   }
 
@@ -411,7 +411,7 @@ ErrorCode UartBus<PORT_NUMBER>::blockingRead(DrvBuffer_t data, uint32_t timeout,
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::asyncReadThread(UartDataBundle_t data_bundle, void *user_arg)
 {
-  ErrorCode status = UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   UartBus *obj = static_cast<UartBus *>(user_arg);
 
   if(obj != nullptr)
@@ -436,12 +436,12 @@ ErrorCode UartBus<PORT_NUMBER>::asyncReadThread(UartDataBundle_t data_bundle, vo
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::blockingWrite(DrvBuffer_t data, uint32_t timeout, bool wait_end_of_transmission)
 {
-  ErrorCode status = UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   int bytes_written, drain_status;
   bytes_written = writeSyscall(m_fd, data.data(), data.size_bytes());
   if(bytes_written != data.size_bytes())
   {
-    status = UartErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage(std::strerror(errno));
     return status;
   }
@@ -449,7 +449,7 @@ ErrorCode UartBus<PORT_NUMBER>::blockingWrite(DrvBuffer_t data, uint32_t timeout
   {
     drain_status = tcdrain(m_fd); // Wait until all data is written to the port
   }
-  status = UartErrorCode::kFailed;
+  status.setValue(GenericErrorCode::kFailed);
   status.setMessage(std::strerror(errno));
   return status;
 }
@@ -464,7 +464,7 @@ ErrorCode UartBus<PORT_NUMBER>::blockingWrite(DrvBuffer_t data, uint32_t timeout
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::asyncWriteThread(UartDataBundle_t data_bundle, void *user_arg)
 {
-  ErrorCode status = UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
   UartBus *obj = static_cast<UartBus *>(user_arg);
 
   if(obj != nullptr)
@@ -490,11 +490,12 @@ ErrorCode UartBus<PORT_NUMBER>::asyncWriteThread(UartDataBundle_t data_bundle, v
 template<UartHandle_t PORT_NUMBER>
 ErrorCode UartBus<PORT_NUMBER>::checkInputs(const DrvBuffer_t data, uint32_t timeout)
 {
-  if(!m_is_configured) { return UartErrorCode::kNotConfigured;}
-  if(data.data() == nullptr) { return UartErrorCode::kNullPointer;}
-  if(m_fd < 0) { return UartErrorCode::kBadHandle;}
-  if(data.size_bytes() == 0) { return UartErrorCode::kInvalidParameter;}
-  return UartErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, UartErrorCategory::getCategory());
+  if(!m_is_configured) { status.setValue(GenericErrorCode::kNotConfigured);}
+  if(data.data() == nullptr) { status.setValue(GenericErrorCode::kNullPointer);}
+  if(m_fd < 0) { status.setValue(GenericErrorCode::kBadHandle);}
+  if(data.size_bytes() == 0) { status.setValue(GenericErrorCode::kInvalidParameter);}
+  return status;
 }
 
 /**

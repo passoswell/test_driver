@@ -22,25 +22,6 @@
 
 
 /**
- * @brief Error codes for SPI peripherals
- */
-enum class SpiErrorCode
-{
-  kSuccess = 0,
-  kFailed,
-  kNotImplemented,
-  kInvalidParameter,
-  kNotConfigured,
-  kNullPointer,
-  kBadHandle,
-  kTimedOut,                /*!< Operation took more time than expected */
-  kBusy,                    /*!< Bus already in use by another controller */
-  kOverrun,                 /*!< Overrun */
-  kUnderrun,                /*!< Underrun */
-  kCRC,
-};
-
-/**
  * @brief SPI error codes category
  */
 class SpiErrorCategory : public ErrorCategory
@@ -52,19 +33,19 @@ public:
   // Get the error's helper message
   constexpr std::string_view message(int error_value) const noexcept override
   {
-    switch (static_cast<SpiErrorCode>(error_value))
+    switch (static_cast<GenericErrorCode>(error_value))
     {
-      case SpiErrorCode::kSuccess: return "Success";
-      case SpiErrorCode::kNotImplemented: return "Feature not implemented";
-      case SpiErrorCode::kInvalidParameter: return "Invalid input parameter";
-      case SpiErrorCode::kNotConfigured: return "Resource is not properly configured";
-      case SpiErrorCode::kNullPointer: return "A null pointer was detected";
-      case SpiErrorCode::kBadHandle: return "Invalid handle to the resource";
-      case SpiErrorCode::kTimedOut: return "Operation took more time than expected";
-      case SpiErrorCode::kBusy: return "Bus already in use by another controller";
-      case SpiErrorCode::kOverrun: return "New data arrived before old data was read from the hardware";
-      case SpiErrorCode::kUnderrun: return "Hardware is ready for new data, but no data is available for transmission";
-      case SpiErrorCode::kCRC: return "CRC check failed";
+      case GenericErrorCode::kSuccess: return "Success";
+      case GenericErrorCode::kNotImplemented: return "SPI feature not implemented";
+      case GenericErrorCode::kInvalidParameter: return "Invalid SPI input parameter";
+      case GenericErrorCode::kNotConfigured: return "SPI resource is not properly configured";
+      case GenericErrorCode::kNullPointer: return "A null pointer was detected on SPI";
+      case GenericErrorCode::kBadHandle: return "Invalid handle to the SPI resource";
+      case GenericErrorCode::kTimedOut: return "SPI operation took more time than expected";
+      case GenericErrorCode::kBusy: return "SPI bus already in use by another controller";
+      case GenericErrorCode::kOverrun: return "New data arrived on SPI before old data was read from the hardware";
+      case GenericErrorCode::kUnderrun: return "SPI hardware is ready for new data, but no data is available for transmission";
+      case GenericErrorCode::kCrc: return "CRC check failed";
       default: return "Unknown SPI error";
     }
   }
@@ -76,23 +57,6 @@ public:
     return instance;
   }
 };
-
-/**
- * @brief Function overload, convert enum class into an ErrorCode
- *
- * @param error_code A value from enum SpiErrorCode
- * @return ErrorCode
- */
-inline ErrorCode makeErrorCode(SpiErrorCode error_code)
-{
-  return {static_cast<int>(error_code), SpiErrorCategory::getCategory()};
-}
-
-/**
- * @brief Specializing ErrorCode to use the specialized makeErrorCode's definition above
- */
-template <>
-struct is_error_enum<SpiErrorCode> : std::true_type {};
 
 
 typedef uint16_t SpiHandle_t;
@@ -177,7 +141,7 @@ public:
 
   virtual ErrorCode setCallback(EventsList_t event, iCallback &event_handler) override
   {
-    ErrorCode status = SpiErrorCode::kSuccess;
+    ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
     switch(event)
     {
     case EVENT_READ:
@@ -187,7 +151,8 @@ public:
       m_cb_function_tx = &event_handler;
       break;
     default:
-      status = SpiErrorCode::kInvalidParameter;
+      status.setValue(GenericErrorCode::kInvalidParameter);
+      status.setMessage("Invalid callback event for SPI");
       break;
     }
     return status;

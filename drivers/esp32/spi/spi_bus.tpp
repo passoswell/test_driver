@@ -22,7 +22,7 @@
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  ErrorCode status = SpiErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   esp_err_t esp_error;
   spi_bus_config_t bus_parameters;
   spi_device_interface_config_t device_parameters;
@@ -84,14 +84,15 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     }
   }else
   {
-    return SpiErrorCode::kInvalidParameter;
+    status.m_value(GenericErrorCode::kInvalidParameter);
+    return status;
   }
 
   //Initialize the SPI bus
   esp_error = spi_bus_initialize((spi_host_device_t)PORT_NUMBER, &bus_parameters, SPI_DMA_CH_AUTO);
   if (esp_error != ESP_OK && esp_error != ESP_ERR_INVALID_STATE)
   {
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage( getErrorMessage(esp_error));
     return status;
   }
@@ -123,12 +124,12 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
       spi_bus_remove_device(m_esp_handle);
       m_esp_handle = NULL;
     }
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage( getErrorMessage(esp_error));
     return status;
   }
 
-  return SpiErrorCode::kSuccess;
+  return status;
 }
 
 /**
@@ -144,7 +145,7 @@ ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t
 {
   if(m_is_async_mode_rx)
   {
-    return SpiErrorCode::kNotImplemented;
+    return makeErrorCode(GenericErrorCode::kNotImplemented, SpiErrorCategory::getCategory());
   }else
   {
     m_cs_active_state = cs_active_state;
@@ -165,7 +166,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
 {
   if(m_is_async_mode_tx)
   {
-    return SpiErrorCode::kNotImplemented;
+    return makeErrorCode(GenericErrorCode::kNotImplemented, SpiErrorCategory::getCategory());
   }else
   {
     m_cs_active_state = cs_active_state;
@@ -184,7 +185,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
 {
-  ErrorCode status = SpiErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   esp_err_t esp_error = ESP_OK;
   spi_transaction_t trans_desc;
   trans_desc.flags = 0;
@@ -196,10 +197,10 @@ ErrorCode SpiBus<PORT_NUMBER>::xSpiXfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t
   esp_error = spi_device_polling_transmit(m_esp_handle, &trans_desc);
   if(esp_error == ESP_OK)
   {
-    status = SpiErrorCode::kSuccess;
+    status.setValue(GenericErrorCode::kSuccess);
   }else
   {
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage(getErrorMessage(esp_error));
   }
   return status;

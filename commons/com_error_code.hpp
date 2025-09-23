@@ -173,6 +173,9 @@ enum class GenericErrorCode
   kAddressNotAcknowledged        , /*!< The address was not acknowledged      */
   kBusError                      , /*!< A dev on the bus needs fault recovery */
   kArbitrationLost               , /*!< Multi-master arbitration lost         */
+  kOverrun                       , /*!< Data exceeds buffer storage capacity  */
+  kUnderrun                      , /*!< Buffer empties before data arrival    */
+  kFrame                         , /*!< Frame error                           */
 
   kInvalidParameter              , /*!< Invalid parameter                     */
 
@@ -248,6 +251,9 @@ public:
       case GenericErrorCode::kAddressNotAcknowledged: return "The address was not acknowledged";
       case GenericErrorCode::kBusError:           return "Some device on the bus or the peripheral needs fault recovery";
       case GenericErrorCode::kArbitrationLost:    return "Multi-master arbitration lost";
+      case GenericErrorCode::kOverrun:            return "New data arrived before old data was read from the hardware";
+      case GenericErrorCode::kUnderrun:           return "Hardware is ready for new data, but no data is available for transmission";
+      case GenericErrorCode::kFrame:              return "Frame error";
 
       case GenericErrorCode::kInvalidParameter:   return "Invalid parameter";
       case GenericErrorCode::kInvalidId:          return "Invalid ID";

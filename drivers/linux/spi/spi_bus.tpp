@@ -52,7 +52,7 @@ SpiBus<PORT_NUMBER>::~SpiBus()
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t list_size)
 {
-  ErrorCode status = SpiErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   char mode = 0;
   char n_bits = 8;
   int max_baud = 1000000;
@@ -104,7 +104,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     result = m_thread_handle.create(SpiBus::asyncTransferThread, this, 0);
     if(!result)
     {
-      status = SpiErrorCode::kFailed;
+      status.setValue(GenericErrorCode::kFailed);
       status.setMessage("Failed to launch the spi task");
       return status;
     }
@@ -116,14 +116,14 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/spi-%u", PORT_NUMBER);
   if(n_bytes < 0)
   {
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to find the file name for uart driver");
     return status;
   }
   m_fd = open(port_name, O_RDWR);
   if (m_fd < 0)
   {
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to open the file");
     return status;
   }
@@ -131,7 +131,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   if (ioctl(m_fd, SPI_IOC_WR_MODE, &mode) < 0)
   {
     close(m_fd);
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to configure spi mode");
     return status;
   }
@@ -139,7 +139,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   if (ioctl(m_fd, SPI_IOC_WR_BITS_PER_WORD, &n_bits) < 0)
   {
     close(m_fd);
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to configure spi bits per word");
     return status;
   }
@@ -147,7 +147,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   if (ioctl(m_fd, SPI_IOC_WR_MAX_SPEED_HZ, &max_baud) < 0)
   {
     close(m_fd);
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to configure spi clock frequency (Hz)");
     return status;
   }
@@ -165,7 +165,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   SpiDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
@@ -182,10 +182,10 @@ ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t
     data_bundle.tx.run = false;
     if(m_thread_handle.setInputData(data_bundle, 0))
     {
-      status = SpiErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = SpiErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }else
   {
@@ -205,7 +205,7 @@ ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_t data, uint32_t timeout, iCallback &event_handler)
 {
-  ErrorCode status;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   SpiDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
@@ -222,10 +222,10 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
     data_bundle.rx.run = false;
     if(m_thread_handle.setInputData(data_bundle, 0))
     {
-      status = SpiErrorCode::kSuccess;
+      status.setValue(GenericErrorCode::kSuccess);
     }else
     {
-      status = SpiErrorCode::kBusy;
+      status.setValue(GenericErrorCode::kBusy);
     }
   }else
   {
@@ -246,7 +246,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
 // template<SpiHandle_t PORT_NUMBER>
 // ErrorCode SpiBus<PORT_NUMBER>::transfer(uint8_t *rx_data, uint8_t *tx_data, Size_t byte_count, uint32_t timeout)
 // {
-//   ErrorCode status;
+//   ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory())
 //   SpiDataBundle_t data_bundle;
 
 //   status = checkInputs(rx_data, byte_count, timeout);
@@ -308,7 +308,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
 {
-  ErrorCode status;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   struct spi_ioc_transfer spi;
 
   std::memset(&spi, 0, sizeof(spi));
@@ -323,10 +323,10 @@ ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, 
 
   if (ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi) >= 0)
   {
-    status = SpiErrorCode::kSuccess;
+    status.setValue(GenericErrorCode::kSuccess);
   }else
   {
-    status = SpiErrorCode::kFailed;
+    status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to transfer data over spi");
   }
   return status;
@@ -341,11 +341,12 @@ ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, 
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, void *user_arg)
 {
-  ErrorCode status;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   SpiBus *obj = static_cast<SpiBus *>(user_arg);
   if(obj == nullptr)
   {
-    return SpiErrorCode::kNullPointer;
+    status.setValue(GenericErrorCode::kNullPointer);
+    return status;
   }
 
   if(data_bundle.rx.run && data_bundle.tx.run)
@@ -386,9 +387,10 @@ ErrorCode SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, 
 template<SpiHandle_t PORT_NUMBER>
 ErrorCode SpiBus<PORT_NUMBER>::checkInputs(const Buffer_t data, uint32_t timeout)
 {
-  if(!m_is_configured) { return SpiErrorCode::kNotConfigured;}
-  if(data.data() == nullptr) { return SpiErrorCode::kNullPointer;}
-  if(m_fd < 0) { return SpiErrorCode::kBadHandle;}
-  if(data.size_bytes() == 0) { return SpiErrorCode::kInvalidParameter;}
-  return SpiErrorCode::kSuccess;
+  ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
+  if(!m_is_configured) { status.setValue(GenericErrorCode::kNotConfigured);}
+  if(data.data() == nullptr) { status.setValue(GenericErrorCode::kNullPointer);}
+  if(m_fd < 0) { status.setValue(GenericErrorCode::kBadHandle);}
+  if(data.size_bytes() == 0) { status.setValue(GenericErrorCode::kInvalidParameter);}
+  return status;
 }

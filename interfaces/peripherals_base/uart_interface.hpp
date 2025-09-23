@@ -22,25 +22,6 @@
 
 
 /**
- * @brief Error codes for SPI peripherals
- */
-enum class UartErrorCode
-{
-  kSuccess = 0,
-  kFailed,
-  kInvalidParameter,
-  kNotConfigured,
-  kNullPointer,
-  kBadHandle,
-  kTimedOut,                /*!< Operation took more time than expected */
-  kBusy,                    /*!< Bus already in use by another controller */
-  kParity,                  /*!< Parity error */
-  kFrame,                   /*!< Frame error */
-  kOverrun,                 /*!< Overrun */
-  kUnderrun,                /*!< Underrun */
-};
-
-/**
  * @brief UART error codes category
  */
 class UartErrorCategory : public ErrorCategory
@@ -52,19 +33,19 @@ public:
   // Get the error's helper message
   constexpr std::string_view message(int error_value) const noexcept override
   {
-    switch (static_cast<UartErrorCode>(error_value))
+    switch (static_cast<GenericErrorCode>(error_value))
     {
-      case UartErrorCode::kSuccess: return "Success";
-      case UartErrorCode::kInvalidParameter: return "Invalid input parameter";
-      case UartErrorCode::kNotConfigured: return "Resource is not properly configured";
-      case UartErrorCode::kNullPointer: return "A null pointer was detected";
-      case UartErrorCode::kBadHandle: return "Invalid handle to the resource";
-      case UartErrorCode::kTimedOut: return "Operation took more time than expected";
-      case UartErrorCode::kBusy: return "Bus already in use by another controller";
-      case UartErrorCode::kParity: return "Parity check failed";
-      case UartErrorCode::kFrame: return "Frame error";
-      case UartErrorCode::kOverrun: return "New data arrived before old data was read from the hardware";
-      case UartErrorCode::kUnderrun: return "Hardware is ready for new data, but no data is available for transmission";
+      case GenericErrorCode::kSuccess: return "Success";
+      case GenericErrorCode::kInvalidParameter: return "Invalid UART input parameter";
+      case GenericErrorCode::kNotConfigured: return "UART resource is not properly configured";
+      case GenericErrorCode::kNullPointer: return "A null pointer was detected on UART";
+      case GenericErrorCode::kBadHandle: return "Invalid UART handle to the resource";
+      case GenericErrorCode::kTimedOut: return "UART operation took more time than expected";
+      case GenericErrorCode::kBusy: return "UART bus already in use by another controller";
+      case GenericErrorCode::kParity: return "UART parity check failed";
+      case GenericErrorCode::kFrame: return "UART frame error";
+      case GenericErrorCode::kOverrun: return "New UART data arrived before old data was read from the hardware";
+      case GenericErrorCode::kUnderrun: return "UART hardware is ready for new data, but no data is available for transmission";
       default: return "Unknown UART error";
     }
   }
@@ -76,23 +57,6 @@ public:
     return instance;
   }
 };
-
-/**
- * @brief Function overload, convert enum class into an ErrorCode
- *
- * @param error_code A value from enum UartErrorCode
- * @return ErrorCode
- */
-inline ErrorCode makeErrorCode(UartErrorCode error_code)
-{
-  return {static_cast<int>(error_code), UartErrorCategory::getCategory()};
-}
-
-/**
- * @brief Specializing ErrorCode to use the specialized makeErrorCode's definition above
- */
-template <>
-struct is_error_enum<UartErrorCode> : std::true_type {};
 
 
 typedef uint16_t UartHandle_t;
@@ -187,7 +151,7 @@ public:
 
   virtual ErrorCode setCallback(EventsList_t event, iCallback &event_handler) override
   {
-    ErrorCode status = UartErrorCode::kSuccess;
+    ErrorCode status = GenericErrorCode::kSuccess;
     switch(event)
     {
     case EVENT_READ:
@@ -197,7 +161,8 @@ public:
       m_cb_function_tx = &event_handler;
       break;
     default:
-      status = UartErrorCode::kInvalidParameter;
+      status = GenericErrorCode::kInvalidParameter;
+      status.setMessage("Invalid callback event for UART");
       break;
     }
     return status;
