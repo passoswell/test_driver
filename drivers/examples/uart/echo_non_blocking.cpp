@@ -120,7 +120,7 @@ AP_MAIN()
 
   // Configure the driver
   status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (!status)
+  if (status)
   {
     std::printf("\r\nERROR from g_serial.configure: %s", status.message().data());
     AP_EXIT();
@@ -132,7 +132,7 @@ AP_MAIN()
 
   // Write a hello message in async mode
   status = g_serial.write(MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD));
-  if (!status)
+  if (status)
   {
     std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
     AP_EXIT();
@@ -140,7 +140,7 @@ AP_MAIN()
 
   // Start the async read operation
   status = g_serial.read(g_rx_buffer, 20);
-  if (!status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
+  if (status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
   {
     std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
     AP_EXIT();
@@ -172,7 +172,7 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
 {
   SPT timer;
   static uint32_t counter = 0;
-  if(status)
+  if(!status)
   {
     std::printf("\r\n\r\n[%03u] From reception callback: %lu bytes received\r\n", counter, data.size_bytes());
 
@@ -181,7 +181,7 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
     do
     {
       status = g_serial.write({g_rx_buffer, data.size_bytes()});
-      if(!status && status.value() != static_cast<int>(GenericErrorCode::kBusy))
+      if(status && status.value() != static_cast<int>(GenericErrorCode::kBusy))
       {
         std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
         g_error_flag = true;
@@ -192,7 +192,7 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
 
     // Start a new async read operation
     status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-    if (!status)
+    if (status)
     {
       std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
       g_error_flag = true;
@@ -218,7 +218,7 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
 ErrorCode txCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg)
 {
   static uint32_t counter = 0;
-  if(status)
+  if(!status)
   {
     std::printf("\r\n\r\n[%03u] From transmission callback:  %lu bytes transmitted\r\n", counter, data.size_bytes());
   }else

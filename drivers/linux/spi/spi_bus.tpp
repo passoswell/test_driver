@@ -169,7 +169,7 @@ ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t
   SpiDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
 
   if(m_is_async_mode_rx)
@@ -209,7 +209,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
   SpiDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
 
   if(m_is_async_mode_tx)

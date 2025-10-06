@@ -69,7 +69,7 @@ public:
     return *m_category;
   }
 
-  // True if success (value == 0), false if there is an error
+  // True if there is an error (value != 0), false if success
   constexpr explicit operator bool() const noexcept
   {
     return m_value != 0;

@@ -104,7 +104,7 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
   ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   esp_err_t esp_error = ESP_OK;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
-  if(!status)
+  if(status)
   {
     return status;
   }
@@ -134,7 +134,7 @@ ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t t
   ErrorCode status(GenericErrorCode::kSuccess, IicErrorCategory::getCategory());
   esp_err_t esp_error = ESP_OK;
   status = checkInputs(data.data(), data.size_bytes(), timeout);
-  if(!status)
+  if(status)
   {
     return status;
   }

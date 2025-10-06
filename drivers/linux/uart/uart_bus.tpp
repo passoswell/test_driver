@@ -222,7 +222,7 @@ ErrorCode UartBus<PORT_NUMBER>::read(iDIO &rs485_pin, Buffer_t data, uint32_t ti
   UartDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
 
   if(m_is_async_mode_rx)
@@ -272,7 +272,7 @@ ErrorCode UartBus<PORT_NUMBER>::write(iDIO &rs485_pin, Buffer_t data, uint32_t t
   UartDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
 
   if(m_is_async_mode_tx)

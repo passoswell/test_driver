@@ -199,7 +199,7 @@ ErrorCode DIO::enableInterruption(bool enable)
     gpio_set_intr_type((gpio_num_t)m_line_number, GPIO_INTR_DISABLE);
     gpio_isr_handler_remove((gpio_num_t)m_line_number);
     terminateDioEventHandlerTask();
-  return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
+    return makeErrorCode(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   }
 
   // install dio isr service

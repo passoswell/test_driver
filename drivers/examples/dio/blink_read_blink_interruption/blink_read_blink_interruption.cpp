@@ -88,7 +88,7 @@ public:
   // Called when an event occur if applicable
   void onEvent(ErrorCode status, EventsList_t event, const Buffer_t data) override
   {
-    if(status)
+    if(!status)
     {
       if(event == EVENT_EDGE_RISING)
       {
@@ -125,13 +125,13 @@ AP_MAIN()
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
   code = input.configure(g_dio_input_list, g_dio_input_list_size);
-  if(!code)
+  if(code)
   {
     std::printf("Failed to configure the digital input\r\n");
     AP_EXIT();
   }
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
-  if(!code)
+  if(code)
   {
     std::printf("Failed to configure the digital output\r\n");
     AP_EXIT();
@@ -139,7 +139,7 @@ AP_MAIN()
 
   (void) input.setEventCallback(EVENT_EDGE_BOTH, dio_input_event_handler);
   code = input.enableInterruption(true);
-  if(!code)
+  if(code)
   {
     std::printf("Failed to enable interruption for the digital input\r\n");
     AP_EXIT();

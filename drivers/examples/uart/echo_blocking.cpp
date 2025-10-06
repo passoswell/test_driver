@@ -74,7 +74,7 @@ AP_MAIN()
 
   // COnfigure the driver
   status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (!status)
+  if (status)
   {
     std::printf("\r\nERROR from g_serial.configure: %s", status.message().data());
     AP_EXIT();
@@ -82,7 +82,7 @@ AP_MAIN()
 
   // Write a hello message to the uart
   status = g_serial.write({MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD)});
-  if (!status)
+  if (status)
   {
     std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
     AP_EXIT();
@@ -94,7 +94,7 @@ AP_MAIN()
     {
       // Read data from uart by polling
       status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-      if (!status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
+      if (status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
       {
         std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
         AP_EXIT();
@@ -106,7 +106,7 @@ AP_MAIN()
     tx_bytes = std::snprintf((char *)g_tx_buffer, sizeof(g_tx_buffer) - 1, "\r\n\r\nRead %u bytes\r\n", bytes_read);
 
     status = g_serial.write({g_tx_buffer, tx_bytes});
-    if (!status)
+    if (status)
     {
       std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
       AP_EXIT();
@@ -114,7 +114,7 @@ AP_MAIN()
 
     // Write to the uart what was previously received
     status = g_serial.write({g_rx_buffer, bytes_read});
-    if(!status)
+    if(status)
     {
       std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
       AP_EXIT();

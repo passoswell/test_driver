@@ -83,7 +83,7 @@ AP_MAIN()
   std::memset(g_addr_table, 0, sizeof(g_addr_table));
 
   status = g_iic.configure(g_iic_config_list, g_iic_config_list_size);
-  if(!status)
+  if(status)
   {
     std::printf("\r\nERROR failed to configure: %s\r\n", status.message().data());
     AP_EXIT();
@@ -103,7 +103,7 @@ AP_MAIN()
   // Reading from the memory
   std::printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
   status = mem_read(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
-  if(!status)
+  if(status)
   {
     std::printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
     AP_EXIT();
@@ -116,7 +116,7 @@ AP_MAIN()
   // Writing to the memory
   std::printf("Writing %u bytes to memory\r\n", BYTES_TO_WRITE);
   status = mem_write(START_ADDRESS, g_tx_buffer, BYTES_TO_WRITE);
-  if(!status)
+  if(status)
   {
     std::printf("\r\nERROR from mem_write: %s\r\n", status.message().data());
     AP_EXIT();
@@ -129,7 +129,7 @@ AP_MAIN()
   // Reading from the memory
   std::printf("\r\nReading %u bytes from memory\r\n", BYTES_TO_WRITE);
   status = mem_read(START_ADDRESS, g_rx_buffer, BYTES_TO_WRITE);
-  if(!status)
+  if(status)
   {
     std::printf("\r\nERROR from mem_read: %s\r\n", status.message().data());
     AP_EXIT();
@@ -164,7 +164,7 @@ ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size)
   reg_addr_buffer[1] = address & 0xFF;
 
   status = g_iic.write(reg_addr_buffer, 100);
-  if(!status)
+  if(status)
   {
     std::printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
     return status;
@@ -172,7 +172,7 @@ ErrorCode mem_read(uint16_t address, uint8_t *data, uint16_t size)
   // while(!g_iic.getWriteStatus().success);
 
   status = g_iic.read({data, size}, 100);
-  if(!status)
+  if(status)
   {
     std::printf("\r\nERROR from my_serial.read: %s\r\n", status.message().data());
     return status;
@@ -208,7 +208,7 @@ ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size)
     std::memcpy(&buffer[2], data, divisor);
 
     status = g_iic.write({buffer, divisor + 2}, 100);
-    if(!status)
+    if(status)
     {
       std::printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
       return status;
@@ -227,7 +227,7 @@ ErrorCode mem_write(uint16_t address, uint8_t *data, uint16_t size)
     std::memcpy(&buffer[2], data, bytes_last_loop);
 
     status = g_iic.write({buffer, bytes_last_loop + 2u}, 100);
-    if(!status)
+    if(status)
     {
       std::printf("\r\nERROR from my_serial.write: %s\r\n", status.message().data());
       return status;

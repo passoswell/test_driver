@@ -74,7 +74,7 @@ AP_MAIN()
 
   // Configure the driver
   status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (!status)
+  if (status)
   {
     std::printf("\r\nERROR from my_serial.configure: %s", status.message().data());
     AP_EXIT();
@@ -90,7 +90,7 @@ AP_MAIN()
       AP_EXIT();
     }
     status = my_serial.write({buffer, (uint32_t)result});
-    if(!status)
+    if(status)
     {
       std::printf("\r\nERROR from my_serial.write: %s", status.message().data());
       AP_EXIT();

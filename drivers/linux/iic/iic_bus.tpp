@@ -113,7 +113,7 @@ ErrorCode IicBus<PORT_NUMBER>::read(uint16_t address, Buffer_t data, uint32_t ti
   (void) timeout;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
 
   if(m_is_async_mode_rx)
@@ -164,7 +164,7 @@ ErrorCode IicBus<PORT_NUMBER>::write(uint16_t address, Buffer_t data, uint32_t t
   (void) timeout;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
 
   if(m_is_async_mode_tx)

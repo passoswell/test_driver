@@ -142,7 +142,7 @@ ErrorCode LinuxSerialFile::read(DrvBuffer_t data, uint32_t timeout)
   DrvDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
   m_bytes_read = 0;
 
@@ -179,7 +179,7 @@ ErrorCode LinuxSerialFile::write(DrvBuffer_t data, uint32_t timeout)
   DrvDataBundle_t data_bundle;
 
   status = checkInputs(data, timeout);
-  if(!status) { return status;}
+  if(status) { return status;}
 
   if(m_is_async_mode_tx)
   {

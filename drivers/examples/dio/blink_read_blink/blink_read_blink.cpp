@@ -80,13 +80,13 @@ AP_MAIN()
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
   code = input.configure(g_dio_input_list, g_dio_input_list_size);
-  if(!code)
+  if(code)
   {
     std::printf("Failed to configure the digital input\r\n");
     AP_EXIT();
   }
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
-  if(!code)
+  if(code)
   {
     std::printf("Failed to configure the digital output\r\n");
     AP_EXIT();
