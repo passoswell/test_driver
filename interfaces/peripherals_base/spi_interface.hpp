@@ -67,6 +67,7 @@ typedef struct
   DrvBuffer_t data;
   uint32_t timeout;
   iDIO *cs_pin;
+  bool cs_active_state;
   iCallback *event_handler;
   void *cb_arg;
 } SpiDataBundle2_t;

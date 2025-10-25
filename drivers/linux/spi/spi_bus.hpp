@@ -62,7 +62,7 @@ private:
 
   ~SpiBus();
 
-  ErrorCode blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
+  ErrorCode blockingTransfer(iDIO &cs_pin, bool cs_active_state, uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count);
 
   static ErrorCode asyncTransferThread(SpiDataBundle_t data_bundle, void *user_arg);
 

@@ -11,9 +11,10 @@
 
 #include "linux/dio/dio.hpp"
 
-#include <errno.h>
 #include <gpiod.h>
 #include <unistd.h>
+#include <cerrno>  // For errno
+#include <cstring> // For strerror
 
 /**
  * @brief Constructor
@@ -141,6 +142,7 @@ ErrorCode DIO::configure(const SettingsList_t *list, uint8_t list_size)
   }else
   {
     result.setValue(GenericErrorCode::kFailed);
+    result.setMessage(strerror(errno));
   }
 
   return result;

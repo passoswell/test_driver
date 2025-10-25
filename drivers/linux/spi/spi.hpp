@@ -19,7 +19,7 @@ class SPI final: public bSPI
 {
 public:
 
-  SPI(iDIO &cs_pin, bool cs_active_state) : bSPI(IicBus<PORT_NUMBER>::getInstance(), cs_pin, cs_active_state)
+  SPI(iDIO &cs_pin, bool cs_active_state) : bSPI(SpiBus<PORT_NUMBER>::getInstance(), cs_pin, cs_active_state)
   {
     ;
   }

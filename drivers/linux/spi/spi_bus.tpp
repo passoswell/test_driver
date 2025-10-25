@@ -19,6 +19,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <cerrno>
+#include <cstring>
 
 #include "linux/utils/linux_io.hpp"
 
@@ -59,6 +61,8 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   bool result;
   char port_name[100];
   int n_bytes;
+
+  m_speed = max_baud;
 
   if(list != nullptr && list_size != 0)
   {
@@ -113,7 +117,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     (void) m_thread_handle.terminate();
   }
 
-  n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/spi-%u", PORT_NUMBER);
+  n_bytes = std::snprintf(port_name, sizeof(port_name) - 1, "/dev/spidev%u.0", PORT_NUMBER);
   if(n_bytes < 0)
   {
     status.setValue(GenericErrorCode::kFailed);
@@ -125,6 +129,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   {
     status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to open the file");
+    status.setMessage(strerror(errno));
     return status;
   }
 
@@ -152,6 +157,7 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
     return status;
   }
 
+  m_is_configured = true;
   return status;
 }
 
@@ -177,6 +183,7 @@ ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t
     data_bundle.rx.run = true;
     data_bundle.rx.data = data;
     data_bundle.rx.cs_pin = &cs_pin;
+    data_bundle.rx.cs_active_state = cs_active_state;
     data_bundle.rx.event_handler = &event_handler;
     data_bundle.rx.timeout = timeout;
     data_bundle.tx.run = false;
@@ -189,7 +196,7 @@ ErrorCode SpiBus<PORT_NUMBER>::read(iDIO &cs_pin, bool cs_active_state, Buffer_t
     }
   }else
   {
-    status = blockingTransfer(nullptr, data.data(), data.size_bytes());
+    status = blockingTransfer(cs_pin, cs_active_state, nullptr, data.data(), data.size_bytes());
   }
 
   return status;
@@ -217,6 +224,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
     data_bundle.tx.run = true;
     data_bundle.tx.data = data;
     data_bundle.tx.cs_pin = &cs_pin;
+    data_bundle.tx.cs_active_state = cs_active_state;
     data_bundle.tx.event_handler = &event_handler;
     data_bundle.tx.timeout = timeout;
     data_bundle.rx.run = false;
@@ -229,7 +237,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
     }
   }else
   {
-    status = blockingTransfer(data.data(), nullptr, data.size_bytes());
+    status = blockingTransfer(cs_pin, cs_active_state, data.data(), nullptr, data.size_bytes());
   }
 
   return status;
@@ -306,7 +314,7 @@ ErrorCode SpiBus<PORT_NUMBER>::write(iDIO &cs_pin, bool cs_active_state, Buffer_
  * @return ErrorCode
  */
 template<SpiHandle_t PORT_NUMBER>
-ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
+ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(iDIO &cs_pin, bool cs_active_state, uint8_t *txBuf, uint8_t *rxBuf, uint32_t byte_count)
 {
   ErrorCode status(GenericErrorCode::kSuccess, SpiErrorCategory::getCategory());
   struct spi_ioc_transfer spi;
@@ -321,6 +329,8 @@ ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, 
   spi.bits_per_word = 8;
   spi.cs_change     = 0;
 
+  cs_pin.write(cs_active_state);
+
   if (ioctl(m_fd, SPI_IOC_MESSAGE(1), &spi) >= 0)
   {
     status.setValue(GenericErrorCode::kSuccess);
@@ -329,6 +339,9 @@ ErrorCode SpiBus<PORT_NUMBER>::blockingTransfer(uint8_t *txBuf, uint8_t *rxBuf, 
     status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to transfer data over spi");
   }
+
+  cs_pin.write(!cs_active_state);
+
   return status;
 }
 
@@ -356,7 +369,7 @@ ErrorCode SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, 
   {
     if (data_bundle.rx.run)
     {
-      status = obj->blockingTransfer(nullptr, data_bundle.rx.data.data(), data_bundle.rx.data.size_bytes());
+      status = obj->blockingTransfer(*data_bundle.rx.cs_pin, data_bundle.rx.cs_active_state, nullptr, data_bundle.rx.data.data(), data_bundle.rx.data.size_bytes());
       if (data_bundle.rx.event_handler != nullptr)
       {
         data_bundle.rx.event_handler->onEvent(status, EVENT_READ, data_bundle.rx.data);
@@ -364,7 +377,7 @@ ErrorCode SpiBus<PORT_NUMBER>::asyncTransferThread(SpiDataBundle_t data_bundle, 
     }
     if (data_bundle.tx.run)
     {
-      status = obj->blockingTransfer(data_bundle.tx.data.data(), nullptr, data_bundle.tx.data.size_bytes());
+      status = obj->blockingTransfer(*data_bundle.tx.cs_pin, data_bundle.tx.cs_active_state, data_bundle.tx.data.data(), nullptr, data_bundle.tx.data.size_bytes());
       if (data_bundle.tx.event_handler != nullptr)
       {
         data_bundle.tx.event_handler->onEvent(status, EVENT_READ, data_bundle.tx.data);

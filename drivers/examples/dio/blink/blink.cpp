@@ -62,7 +62,7 @@ AP_MAIN()
   code = output.configure(g_dio_output_list, g_dio_output_list_size);
   if(code)
   {
-    std::printf("Failed to configure the UART port\r\n");
+    std::printf("%s (%d): %s\r\n", code.category().name().data(), code.value(), code.message().data());
     AP_EXIT();
   }
 
