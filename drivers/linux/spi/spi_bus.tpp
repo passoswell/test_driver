@@ -129,7 +129,6 @@ ErrorCode SpiBus<PORT_NUMBER>::configure(const SettingsList_t *list, uint8_t lis
   {
     status.setValue(GenericErrorCode::kFailed);
     status.setMessage("Failed to open the file");
-    status.setMessage(strerror(errno));
     return status;
   }
 

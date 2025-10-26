@@ -22,8 +22,8 @@
  */
 #if defined(USE_LINUX)
 
-constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 6;
-constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 0;
+constexpr uint32_t DIO_OUTPUT_LINE_NUMBER = 4;
+constexpr uint32_t DIO_OUTPUT_CHIP_NUMBER = 1;
 
 #elif defined(USE_ESP32)
 
