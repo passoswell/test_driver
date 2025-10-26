@@ -7,7 +7,7 @@
  *
  * @copyright Copyright (c) 2024
  *
- * @note Connect a digital input and a digital output together and run the code.
+ * @note Connect a digital input and a digital output together and run the error.
  * The output can be configure changing the value of "DIO_OUTPUT_LINE_NUMBER",
  * and "DIO_OUTPUT_CHIP_NUMBER", while the input is configured through
  * "DIO_INPUT_LINE_NUMBER" and "DIO_INPUT_CHIP_NUMBER". If std::printf is available,
@@ -73,20 +73,20 @@ uint8_t g_dio_output_list_size = sizeof(g_dio_output_list)/sizeof(g_dio_output_l
  */
 AP_MAIN()
 {
-  ErrorCode code;
+  ErrorCode error;
   SPT my_timer;
   bool input_value, output_value = false;
   DIO input(DIO_INPUT_LINE_NUMBER, DIO_INPUT_CHIP_NUMBER);
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
-  code = input.configure(g_dio_input_list, g_dio_input_list_size);
-  if(code)
+  error = input.configure(g_dio_input_list, g_dio_input_list_size);
+  if(error)
   {
     std::printf("Failed to configure the digital input\r\n");
     AP_EXIT();
   }
-  code = output.configure(g_dio_output_list, g_dio_output_list_size);
-  if(code)
+  error = output.configure(g_dio_output_list, g_dio_output_list_size);
+  if(error)
   {
     std::printf("Failed to configure the digital output\r\n");
     AP_EXIT();

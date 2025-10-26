@@ -68,23 +68,23 @@ static uint8_t MESSAGE_HELLO_WORLD[] = "\r\nHello world!!!\r\n";
  */
 AP_MAIN()
 {
-  ErrorCode status;
+  ErrorCode error;
   SPT timer;
   uint32_t bytes_read = 0, tx_bytes = 0;
 
   // COnfigure the driver
-  status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (status)
+  error = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
+  if (error)
   {
-    std::printf("\r\nERROR from g_serial.configure: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.configure: %s", error.message().data());
     AP_EXIT();
   }
 
   // Write a hello message to the uart
-  status = g_serial.write({MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD)});
-  if (status)
+  error = g_serial.write({MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD)});
+  if (error)
   {
-    std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.write: %s", error.message().data());
     AP_EXIT();
   }
 
@@ -93,10 +93,10 @@ AP_MAIN()
     do
     {
       // Read data from uart by polling
-      status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-      if (status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
+      error = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
+      if (error && error.value() != static_cast<int>(GenericErrorCode::kTimedOut))
       {
-        std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
+        std::printf("\r\nERROR from g_serial.read: %s", error.message().data());
         AP_EXIT();
       }
       bytes_read = g_serial.getBytesRead();
@@ -105,18 +105,18 @@ AP_MAIN()
     // Write to the uart the number of bytes received
     tx_bytes = std::snprintf((char *)g_tx_buffer, sizeof(g_tx_buffer) - 1, "\r\n\r\nRead %u bytes\r\n", bytes_read);
 
-    status = g_serial.write({g_tx_buffer, tx_bytes});
-    if (status)
+    error = g_serial.write({g_tx_buffer, tx_bytes});
+    if (error)
     {
-      std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
+      std::printf("\r\nERROR from g_serial.write: %s", error.message().data());
       AP_EXIT();
     }
 
     // Write to the uart what was previously received
-    status = g_serial.write({g_rx_buffer, bytes_read});
-    if(status)
+    error = g_serial.write({g_rx_buffer, bytes_read});
+    if(error)
     {
-      std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
+      std::printf("\r\nERROR from g_serial.write: %s", error.message().data());
       AP_EXIT();
     }
   }

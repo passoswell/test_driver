@@ -54,15 +54,15 @@ uint8_t g_dio_output_list_size = sizeof(g_dio_output_list)/sizeof(g_dio_output_l
  */
 AP_MAIN()
 {
-  ErrorCode code;
+  ErrorCode error;
   SPT my_timer;
   bool input_value, output_value = false;
   DIO output(DIO_OUTPUT_LINE_NUMBER, DIO_OUTPUT_CHIP_NUMBER);
 
-  code = output.configure(g_dio_output_list, g_dio_output_list_size);
-  if(code)
+  error = output.configure(g_dio_output_list, g_dio_output_list_size);
+  if(error)
   {
-    std::printf("%s (%d): %s\r\n", code.category().name().data(), code.value(), code.message().data());
+    std::printf("%s (%d): %s\r\n", error.category().name().data(), error.value(), error.message().data());
     AP_EXIT();
   }
 

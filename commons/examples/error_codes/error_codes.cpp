@@ -22,43 +22,43 @@ ErrorChain testFunction()
 AP_MAIN()
 {
   // Creating a DIO error variable with a success code
-  ErrorCode ec1(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
+  ErrorCode error1(GenericErrorCode::kSuccess, DioErrorCategory::getCategory());
   // Creating a DIO error variable with a timeout error code
-  ErrorCode ec2(GenericErrorCode::kTimedOut, DioErrorCategory::getCategory());
+  ErrorCode error2(GenericErrorCode::kTimedOut, DioErrorCategory::getCategory());
   // Creating a IIC error variable with a timeout error code
-  ErrorCode ec3(GenericErrorCode::kTimedOut, IicErrorCategory::getCategory());
+  ErrorCode error3(GenericErrorCode::kTimedOut, IicErrorCategory::getCategory());
 
   // Modifying the error code on IIC error variable to not implemented
-  ec3.setValue(GenericErrorCode::kNotImplemented);
+  error3.setValue(GenericErrorCode::kNotImplemented);
   // Modifying the error message on the IIC error variable
-  ec3.setMessage("This message was modified on the example code");
+  error3.setMessage("This message was modified on the example code");
 
   // Printing error information to the standard output
-  std::printf("%s (%d): %s\r\n", ec1.category().name(), ec1.value(), ec1.message());
-  std::printf("%s (%d): %s\r\n", ec2.category().name(), ec2.value(), ec2.message());
-  std::printf("%s (%d): %s\r\n", ec3.category().name(), ec3.value(), ec3.message());
+  std::printf("%s (%d): %s\r\n", error1.category().name(), error1.value(), error1.message());
+  std::printf("%s (%d): %s\r\n", error2.category().name(), error2.value(), error2.message());
+  std::printf("%s (%d): %s\r\n", error3.category().name(), error3.value(), error3.message());
 
   // Creating an error chain variable and attributing the return value of a function to it
-  ErrorChain ech2 = testFunction();
+  ErrorChain error_chain1 = testFunction();
   // Printing the error information in the first position of the error chain
-  std::printf("\r\n%s (%d): %s\r\n", ech2.errorCode(0).category().name(), ech2.errorCode(0).value(), ech2.errorCode(0).message());
+  std::printf("\r\n%s (%d): %s\r\n", error_chain1.errorCode(0).category().name(), error_chain1.errorCode(0).value(), error_chain1.errorCode(0).message());
 
   // Creating an error chain with its first position initialized as a IIC error variable
-  ErrorChain ech(GenericErrorCode::kBufferSize, IicErrorCategory::getCategory());
+  ErrorChain error_chain2(GenericErrorCode::kBufferSize, IicErrorCategory::getCategory());
   // Adding a DIO error variable to the error chain
-  ech.push(ec1);
+  error_chain2.push(error1);
   // Adding another DIO error variable to the error chain
-  ech.push(ec2);
+  error_chain2.push(error2);
   // Adding another IIC error variable to the error chain
-  ech = ec3;
+  error_chain2 = error3;
 
 
   // Printing all error information stored in the error chain
-  for(uint8_t index = 0; index < ech.size(); index++)
+  for(uint8_t index = 0; index < error_chain2.size(); index++)
   {
-    std::printf("\r\n%s (%d): %s\r\n", ech.errorCode(index).category().name(), ech.errorCode(index).value(), ech.errorCode(index).message());
+    std::printf("\r\n%s (%d): %s\r\n", error_chain2.errorCode(index).category().name(), error_chain2.errorCode(index).value(), error_chain2.errorCode(index).message());
     // Evaluating if the error variable contains an error or not through its bool operator
-    if(!ech.errorCode(index))
+    if(!error_chain2.errorCode(index))
     {
       std::printf(" Is success\r\n");
     }else

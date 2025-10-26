@@ -66,17 +66,17 @@ AP_MAIN()
   SPT my_timer(SOFTWARE_TIMER_SECONDS);
   uint8_t message[] = "Hello world!!!";
   uint8_t buffer[100];
-  ErrorCode status;
+  ErrorCode error;
   int result;
   uint32_t counter = 0;
 
   std::printf("\r\nCode is running\r\n");
 
   // Configure the driver
-  status = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (status)
+  error = my_serial.configure(g_uart_config_list, g_uart_config_list_size);
+  if (error)
   {
-    std::printf("\r\nERROR from my_serial.configure: %s", status.message().data());
+    std::printf("\r\nERROR from my_serial.configure: %s", error.message().data());
     AP_EXIT();
   }
 
@@ -89,10 +89,10 @@ AP_MAIN()
       std::printf("\r\nERROR generating hello world message\r\n");
       AP_EXIT();
     }
-    status = my_serial.write({buffer, (uint32_t)result});
-    if(status)
+    error = my_serial.write({buffer, (uint32_t)result});
+    if(error)
     {
-      std::printf("\r\nERROR from my_serial.write: %s", status.message().data());
+      std::printf("\r\nERROR from my_serial.write: %s", error.message().data());
       AP_EXIT();
     }
     my_timer.delay(1); // One second delay

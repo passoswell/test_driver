@@ -57,9 +57,9 @@ constexpr void *handle = nullptr;
 #endif
 
 
-static ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg);
+static ErrorCode rxCallback(ErrorCode error, EventsList_t event, const Buffer_t data, void *user_arg);
 
-static ErrorCode txCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg);
+static ErrorCode txCallback(ErrorCode error, EventsList_t event, const Buffer_t data, void *user_arg);
 
 // static UartBase &g_serial = UART<handle>::getInstance();
 static UART<handle> g_serial;
@@ -84,15 +84,15 @@ public:
   // Called when the asynchronous operation is about to start
   void onStart() override {}
 
-  void onEvent(ErrorCode status, EventsList_t event, const Buffer_t data) override
+  void onEvent(ErrorCode error, EventsList_t event, const Buffer_t data) override
   {
     switch (event)
     {
     case EVENT_READ:
-      (void) rxCallback(status, event, data, nullptr);
+      (void) rxCallback(error, event, data, nullptr);
       break;
     case EVENT_WRITE:
-      (void) txCallback(status, event, data, nullptr);
+      (void) txCallback(error, event, data, nullptr);
       break;
     default:
       break;
@@ -100,7 +100,7 @@ public:
   }
 
   // Called when an event occur if applicable
-  void onEvent(ErrorCode status, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) override {}
+  void onEvent(ErrorCode error, EventsList_t event, const Buffer_t rx_data, const Buffer_t tx_data) override {}
 
 private:
   uint32_t m_port, m_pin;
@@ -111,7 +111,7 @@ private:
  */
 AP_MAIN()
 {
-  ErrorCode status;
+  ErrorCode error;
   SPT timer;
   uint32_t bytes_read = 0, tx_bytes = 0;
   UartEventHandler uart_event_handler;
@@ -119,30 +119,30 @@ AP_MAIN()
   timer.delay(1000);
 
   // Configure the driver
-  status = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
-  if (status)
+  error = g_serial.configure(g_uart_config_list, g_uart_config_list_size);
+  if (error)
   {
-    std::printf("\r\nERROR from g_serial.configure: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.configure: %s", error.message().data());
     AP_EXIT();
   }
 
   // Install callback functions for uart events
-  status = g_serial.setCallback(EVENT_READ, uart_event_handler);
-  status = g_serial.setCallback(EVENT_WRITE, uart_event_handler);
+  error = g_serial.setCallback(EVENT_READ, uart_event_handler);
+  error = g_serial.setCallback(EVENT_WRITE, uart_event_handler);
 
   // Write a hello message in async mode
-  status = g_serial.write(MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD));
-  if (status)
+  error = g_serial.write(MESSAGE_HELLO_WORLD, std::strlen((char *)MESSAGE_HELLO_WORLD));
+  if (error)
   {
-    std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.write: %s", error.message().data());
     AP_EXIT();
   }
 
   // Start the async read operation
-  status = g_serial.read(g_rx_buffer, 20);
-  if (status && status.value() != static_cast<int>(GenericErrorCode::kTimedOut))
+  error = g_serial.read(g_rx_buffer, 20);
+  if (error && error.value() != static_cast<int>(GenericErrorCode::kTimedOut))
   {
-    std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
+    std::printf("\r\nERROR from g_serial.read: %s", error.message().data());
     AP_EXIT();
   }
 
@@ -162,17 +162,17 @@ AP_MAIN()
 /**
  * @brief Callback on end of transmission
  *
- * @param status Status of end of operation
+ * @param error Status of end of operation
  * @param event The event that generated the call
  * @param data The data used during the call (buffer ans size)
  * @param user_arg User supplied argument, not used
  * @return ErrorCode
  */
-ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg)
+ErrorCode rxCallback(ErrorCode error, EventsList_t event, const Buffer_t data, void *user_arg)
 {
   SPT timer;
   static uint32_t counter = 0;
-  if(!status)
+  if(!error)
   {
     std::printf("\r\n\r\n[%03u] From reception callback: %lu bytes received\r\n", counter, data.size_bytes());
 
@@ -180,51 +180,51 @@ ErrorCode rxCallback(ErrorCode status, EventsList_t event, const Buffer_t data, 
     // Write to the uart the data received
     do
     {
-      status = g_serial.write({g_rx_buffer, data.size_bytes()});
-      if(status && status.value() != static_cast<int>(GenericErrorCode::kBusy))
+      error = g_serial.write({g_rx_buffer, data.size_bytes()});
+      if(error && error.value() != static_cast<int>(GenericErrorCode::kBusy))
       {
-        std::printf("\r\nERROR from g_serial.write: %s", status.message().data());
+        std::printf("\r\nERROR from g_serial.write: %s", error.message().data());
         g_error_flag = true;
         break;
       }
-    } while( status.value() == static_cast<int>(GenericErrorCode::kBusy) );
+    } while( error.value() == static_cast<int>(GenericErrorCode::kBusy) );
 
 
     // Start a new async read operation
-    status = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
-    if (status)
+    error = g_serial.read({g_rx_buffer, sizeof(g_rx_buffer)}, 20);
+    if (error)
     {
-      std::printf("\r\nERROR from g_serial.read: %s", status.message().data());
+      std::printf("\r\nERROR from g_serial.read: %s", error.message().data());
       g_error_flag = true;
     }
 
   }else
   {
-    std::printf("\r\n\r\n[%03u] From reception callback: ended in failure: %s\r\n", counter, status.message().data());
+    std::printf("\r\n\r\n[%03u] From reception callback: ended in failure: %s\r\n", counter, error.message().data());
   }
   counter++;
-  return status;
+  return error;
 }
 
 /**
  * @brief Callback on end of transmission
  *
- * @param status Status of end of operation
+ * @param error Status of end of operation
  * @param event The event that generated the call
  * @param data The data used during the call (buffer ans size)
  * @param user_arg User supplied argument, not used
  * @return ErrorCode
  */
-ErrorCode txCallback(ErrorCode status, EventsList_t event, const Buffer_t data, void *user_arg)
+ErrorCode txCallback(ErrorCode error, EventsList_t event, const Buffer_t data, void *user_arg)
 {
   static uint32_t counter = 0;
-  if(!status)
+  if(!error)
   {
     std::printf("\r\n\r\n[%03u] From transmission callback:  %lu bytes transmitted\r\n", counter, data.size_bytes());
   }else
   {
-    std::printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, status.message().data());
+    std::printf("\r\n\r\n[%03u] From transmission callback: ended in failure: %s\r\n", counter, error.message().data());
   }
   counter++;
-  return status;
+  return error;
 }
