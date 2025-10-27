@@ -12,7 +12,7 @@
 #ifndef PERIPHERALS_BASE_EVENT_INTERFACE_HPP
 #define PERIPHERALS_BASE_EVENT_INTERFACE_HPP
 
-#include <string>
+#include <cstring>
 #include <system_error>
 
 /**

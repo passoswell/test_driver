@@ -15,7 +15,7 @@
 
 #include <cstdint>
 #include <cstdbool>
-#include <string>
+#include <cstring>
 
 #include "commons.hpp"
 
